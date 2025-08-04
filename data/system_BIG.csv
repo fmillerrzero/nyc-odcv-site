@@ -1,0 +1,586 @@
+bbl,Submission Date,Heating System Type,Cooling System Type,Has Building Automation,Heating Automation,Cooling Automation
+1000090014,2020,District Steam,DX Cooling,yes,yes,yes
+1000090029,2019,District Steam,Plant,yes,yes,yes
+1000100014,2020,District Steam,DX Cooling,yes,yes,yes
+1000100023,2020,District Steam,Plant,yes,yes,yes
+1000130001,2023,Boiler (Fuel Oil),DX Cooling,yes,yes,no
+1000130005,2023,District Steam,Plant,yes,no,yes
+1000130027,2023,District Steam,Plant,yes,yes,yes
+1000200004,2022,District Steam,DX Cooling,yes,yes,yes
+1000200009,2022,District Steam,DX Cooling,yes,yes,yes
+1000200016,2022,District Steam,DX Cooling,yes,yes,yes
+1000210001,2023,District Steam,DX Cooling,yes,yes,no
+1000210004,2022,District Steam,Plant,yes,yes,yes
+1000220013,2024,Boiler (Fuel Oil),Plant,yes,yes,yes
+1000220017,2024,Boiler (Gas),DX Cooling,no,no,no
+1000220020,2024,Boiler (Gas),DX Cooling,yes,yes,no
+1000220024,2022,Boiler (Elec),DX Cooling,yes,yes,yes
+1000220028,2022,Boiler (Gas),DX Cooling,yes,yes,yes
+1000240001,2024,District Steam,Plant,yes,yes,yes
+1000240029,2019,District Steam,DX Cooling,yes,yes,yes
+1000250001,2015,District Steam,Plant,yes,yes,yes
+1000290036,2020,Boiler (Elec),Plant,yes,yes,yes
+1000290070,2021,District Steam,Plant,yes,yes,yes
+1000330001,2023,District Steam,Plant,yes,yes,no
+1000390012,2019,District Steam,Plant,yes,yes,yes
+1000400014,2020,District Steam,Plant,yes,yes,yes
+1000420031,2024,District Steam,Plant,yes,no,no
+1000430001,2024,District Steam,DX Cooling,yes,yes,yes
+1000460001,2016,District Steam,DX Cooling,yes,yes,yes
+1000460009,2017,District Steam,Plant,yes,yes,yes
+1000490002,2019,District Steam,Plant,yes,yes,yes
+1000500001,2021,District Steam,DX Cooling,yes,yes,yes
+1000640015,2024,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1000650007,2015,District Steam,DX Cooling,yes,yes,no
+1000660001,2016,District Steam,Plant,yes,yes,yes
+1000670001,2017,District Steam,DX Cooling,yes,yes,yes
+1000750030,2016,District Steam,Plant,yes,yes,yes
+1000880001,2018,District Steam,Plant,yes,yes,yes
+1000880018,2018,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1000920024,2023,Boiler (Gas),Plant,yes,yes,no
+1001210001,2021,District Steam,Plant,yes,yes,yes
+1001220001,2019,District Steam,Plant,yes,yes,yes
+1001240004,2024,Boiler (Fuel Oil),DX Cooling,no,no,no
+1001270018,2017,District Steam,DX Cooling,yes,yes,yes
+1001480010,2018,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1001530024,2023,District Steam,DX Cooling,yes,yes,yes
+1001550001,2015,Boiler (Gas),Plant,yes,yes,yes
+1001550003,2015,Boiler (Gas),Plant,no,no,no
+1001680032,2018,District Steam,DX Cooling,yes,yes,yes
+1001960005,2016,Boiler (Gas),Plant,yes,yes,yes
+1002210030,2021,Boiler (Elec),DX Cooling,yes,yes,yes
+1002310035,2021,Boiler (Elec),DX Cooling,no,no,no
+1002320001,2023,Boiler (Fuel Oil),DX Cooling,no,no,no
+1004730001,2023,Boiler (Fuel Oil),DX Cooling,no,no,no
+1004740030,2024,Boiler (Elec),Plant,yes,yes,no
+1004820016,2022,Boiler (Fuel Oil),DX Cooling,no,no,no
+1004860011,2016,Boiler (Fuel Oil),DX Cooling,no,no,no
+1004960036,2016,Boiler (Gas),Plant,yes,yes,yes
+1004960040,2016,Boiler (Gas),Plant,yes,yes,yes
+1004970001,2017,Boiler (Elec),Plant,yes,yes,yes
+1004980011,2018,Boiler (Elec),Plant,yes,yes,yes
+1004990007,2019,Boiler (Gas),DX Cooling,yes,yes,yes
+1005000011,2021,Boiler (Gas),DX Cooling,no,no,no
+1005010015,2021,Boiler (Gas),DX Cooling,no,no,no
+1005100001,2022,Boiler (Elec),Plant,yes,yes,yes
+1005100038,2020,Boiler (Gas),DX Cooling,yes,yes,yes
+1005110001,2023,Boiler (Gas),Plant,yes,yes,yes
+1005110006,2023,Boiler (Fuel Oil),Plant,yes,yes,no
+1005110008,2023,Boiler (Fuel Oil),Plant,yes,yes,no
+1005110012,2022,Boiler (Elec),Plant,no,no,no
+1005120015,2023,Boiler (Fuel Oil),Plant,yes,yes,no
+1005220001,2022,Boiler (Elec),DX Cooling,yes,yes,yes
+1005230046,2023,Boiler (Gas),Plant,no,no,no
+1005300001,2021,Boiler (Gas),Plant,no,no,no
+1005320015,2023,Boiler (Gas),Plant,no,no,no
+1005440008,2024,Boiler (Elec),DX Cooling,no,no,no
+1005450015,2015,Boiler (Gas),DX Cooling,yes,yes,yes
+1005460021,2016,Boiler (Elec),Plant,no,no,no
+1005460026,2016,Boiler (Elec),Plant,yes,yes,yes
+1005480009,2018,Boiler (Elec),Plant,yes,yes,yes
+1005540001,2024,District Steam,Plant,yes,yes,yes
+1005630001,2023,Boiler (Gas),DX Cooling,yes,no,no
+1005630031,2023,Boiler (Gas),Plant,no,no,no
+1005630046,2023,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1005640007,2024,Boiler (Elec),DX Cooling,yes,no,no
+1005650015,2015,Boiler (Gas),DX Cooling,yes,yes,yes
+1005810063,2021,Boiler (Gas),DX Cooling,yes,yes,yes
+1005970001,2017,Boiler (Gas),DX Cooling,yes,yes,no
+1005970055,2017,Boiler (Gas),DX Cooling,yes,no,no
+1005970062,2017,Boiler (Gas),DX Cooling,yes,yes,yes
+1005990064,2022,District Steam,DX Cooling,yes,yes,yes
+1006010047,2021,Boiler (Gas),Plant,no,no,no
+1006020068,2023,Boiler (Gas),Plant,yes,yes,yes
+1006090007,2021,Boiler (Elec),DX Cooling,yes,yes,yes
+1006450029,2015,Boiler (Gas),DX Cooling,yes,yes,yes
+1006460027,2017,Boiler (Elec),DX Cooling,yes,yes,yes
+1006720001,2022,Boiler (Gas),Plant,yes,yes,yes
+1006980001,2018,Boiler (Fuel Oil),DX Cooling,no,no,no
+1007120029,2023,Boiler (Elec),Plant,yes,yes,yes
+1007130001,2023,Boiler (Gas),DX Cooling,yes,yes,yes
+1007280060,2018,Boiler (Gas),Plant,yes,yes,yes
+1007310001,2021,Boiler (Gas),Plant,yes,yes,yes
+1007390001,2021,District Steam,Plant,yes,yes,yes
+1007570054,2017,Boiler (Gas),DX Cooling,yes,yes,yes
+1007590031,2019,Boiler (Elec),Plant,yes,no,no
+1007590045,2019,Boiler (Gas),DX Cooling,yes,yes,yes
+1007600012,2020,Boiler (Gas),DX Cooling,no,no,no
+1007600032,2022,Boiler (Gas),Plant,yes,yes,yes
+1007600055,2023,Boiler (Elec),DX Cooling,no,no,no
+1007610033,2023,Boiler (Fuel Oil),DX Cooling,yes,yes,no
+1007620033,2024,Boiler (Fuel Oil),DX Cooling,yes,yes,no
+1007620050,2022,Boiler (Fuel Oil),Plant,yes,yes,yes
+1007630024,2023,Boiler (Gas),Plant,no,no,no
+1007630049,2024,Boiler (Elec),DX Cooling,yes,yes,yes
+1007660061,2016,Boiler (Fuel Oil),Plant,yes,yes,yes
+1007750058,2015,Boiler (Elec),DX Cooling,no,no,no
+1007760059,2016,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1007780020,2018,Boiler (Gas),Plant,yes,yes,yes
+1007780043,2018,Boiler (Fuel Oil),DX Cooling,no,no,no
+1007790013,2020,Boiler (Fuel Oil),Plant,yes,yes,yes
+1007790017,2023,Boiler (Elec),Plant,yes,yes,no
+1007790041,2019,Boiler (Gas),DX Cooling,yes,yes,yes
+1007790057,2021,Boiler (Elec),Plant,no,no,no
+1007790075,2021,Boiler (Fuel Oil),Plant,no,no,no
+1007800010,2024,Boiler (Fuel Oil),DX Cooling,yes,yes,no
+1007800013,2022,Boiler (Gas),DX Cooling,yes,yes,yes
+1007800036,2020,Boiler (Gas),Plant,yes,yes,yes
+1007800071,2021,Boiler (Gas),Plant,yes,yes,yes
+1007830070,2023,District Steam,Plant,no,no,no
+1007840041,2024,District Steam,Plant,no,no,no
+1007840051,2024,Boiler (Gas),Plant,no,no,no
+1007840064,2024,Boiler (Gas),DX Cooling,yes,no,no
+1007840077,2024,Boiler (Gas),DX Cooling,yes,no,no
+1007850018,2015,Boiler (Gas),DX Cooling,yes,no,no
+1007850041,2013,Boiler (Gas),DX Cooling,yes,yes,yes
+1007860023,2016,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1007860051,2016,Boiler (Gas),DX Cooling,yes,yes,yes
+1007860068,2016,Boiler (Elec),Plant,no,no,no
+1007870020,2017,Boiler (Fuel Oil),DX Cooling,no,no,no
+1007870040,2017,Boiler (Fuel Oil),DX Cooling,yes,yes,no
+1007870072,2017,Boiler (Fuel Oil),DX Cooling,no,no,no
+1007880049,2018,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1007880073,2018,Boiler (Fuel Oil),DX Cooling,no,no,no
+1007890014,2021,Boiler (Elec),DX Cooling,yes,yes,yes
+1007890021,2019,Boiler (Fuel Oil),Plant,yes,yes,yes
+1007890030,2019,Boiler (Gas),DX Cooling,yes,no,no
+1007890036,2020,Boiler (Gas),DX Cooling,yes,yes,yes
+1007890052,2022,Boiler (Gas),DX Cooling,yes,yes,yes
+1007890062,2020,Boiler (Gas),DX Cooling,no,no,no
+1007890075,2019,Boiler (Gas),DX Cooling,yes,yes,no
+1007940017,2024,Boiler (Gas),DX Cooling,yes,yes,yes
+1007940030,2024,Boiler (Gas),Plant,yes,yes,no
+1007950028,2013,Boiler (Fuel Oil),Plant,yes,yes,yes
+1007950037,2016,Boiler (Gas),DX Cooling,yes,yes,yes
+1007950044,2015,District Steam,DX Cooling,no,no,no
+1007990012,2020,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1007990028,2022,Boiler (Fuel Oil),Plant,yes,yes,yes
+1008000025,2021,Boiler (Elec),DX Cooling,yes,yes,yes
+1008000065,2021,Boiler (Fuel Oil),Plant,no,no,no
+1008000068,2020,Boiler (Gas),DX Cooling,no,no,no
+1008010001,2022,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1008010024,2021,Steam Plant (Gas),DX Cooling,yes,yes,yes
+1008010055,2022,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1008020008,2022,Boiler (Fuel Oil),Plant,yes,yes,yes
+1008020056,2022,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1008020075,2023,Boiler (Fuel Oil),Plant,no,no,no
+1008030021,2023,Boiler (Elec),Plant,no,no,no
+1008030067,2023,Boiler (Fuel Oil),Plant,yes,yes,yes
+1008040001,2024,Boiler (Gas),DX Cooling,yes,yes,yes
+1008040011,2024,Boiler (Fuel Oil),DX Cooling,no,no,no
+1008040044,2024,Boiler (Gas),DX Cooling,yes,yes,yes
+1008050003,2017,Boiler (Fuel Oil),Plant,yes,yes,yes
+1008050019,2015,Boiler (Fuel Oil),DX Cooling,no,no,no
+1008060009,2016,Boiler (Gas),Plant,no,no,no
+1008060058,2016,Boiler (Gas),Plant,yes,no,no
+1008070001,2017,District Steam,Plant,yes,yes,yes
+1008070039,2017,Boiler (Elec),DX Cooling,no,no,no
+1008080040,2019,District Steam,Plant,yes,yes,yes
+1008110021,2021,Boiler (Gas),DX Cooling,yes,yes,yes
+1008110031,2021,District Steam,Plant,yes,yes,yes
+1008110051,2021,Boiler (Gas),DX Cooling,yes,yes,yes
+1008110056,2024,Boiler (Fuel Oil),Plant,yes,yes,no
+1008110062,2022,Boiler (Elec),DX Cooling,no,no,no
+1008120006,2023,Boiler (Gas),DX Cooling,yes,yes,no
+1008120016,2022,Boiler (Gas),DX Cooling,yes,no,no
+1008120019,2022,Boiler (Gas),DX Cooling,yes,no,no
+1008120069,2024,Boiler (Elec),Plant,yes,yes,no
+1008130055,2023,Boiler (Gas),DX Cooling,yes,yes,no
+1008140046,2024,District Steam,Plant,no,no,no
+1008150014,2017,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1008150046,2015,District Steam,Plant,yes,yes,yes
+1008160037,2016,Boiler (Gas),Plant,yes,yes,yes
+1008190037,2019,Boiler (Gas),DX Cooling,yes,yes,yes
+1008190039,2019,Boiler (Gas),Plant,yes,yes,yes
+1008190056,2020,Boiler (Gas),Plant,yes,yes,yes
+1008200026,2024,Boiler (Elec),DX Cooling,no,no,no
+1008200038,2023,Boiler (Fuel Oil),Plant,yes,yes,yes
+1008210014,2022,Boiler (Fuel Oil),Plant,yes,yes,yes
+1008210032,2023,Boiler (Gas),DX Cooling,yes,yes,no
+1008210041,2024,Boiler (Elec),DX Cooling,yes,yes,no
+1008210055,2022,Boiler (Gas),Plant,yes,yes,yes
+1008220015,2022,Boiler (Fuel Oil),Plant,yes,yes,yes
+1008220031,2023,Boiler (Elec),Plant,yes,yes,yes
+1008220049,2022,Boiler (Fuel Oil),Plant,no,no,no
+1008220058,2022,Boiler (Gas),DX Cooling,yes,no,no
+1008220062,2022,Boiler (Elec),DX Cooling,yes,no,no
+1008220070,2022,Boiler (Gas),DX Cooling,yes,yes,yes
+1008230024,2024,Boiler (Elec),Plant,no,no,no
+1008230029,2023,Boiler (Gas),Plant,no,no,no
+1008230073,2024,Boiler (Elec),DX Cooling,yes,yes,no
+1008240032,2024,Boiler (Fuel Oil),DX Cooling,yes,yes,no
+1008260026,2017,Boiler (Gas),DX Cooling,yes,yes,yes
+1008260057,2017,Boiler (Fuel Oil),Plant,yes,yes,yes
+1008260065,2017,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1008260069,2016,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1008280009,2018,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1008280033,2018,Boiler (Fuel Oil),DX Cooling,no,no,no
+1008290011,2020,Steam Plant (Gas),DX Cooling,yes,yes,yes
+1008290016,2019,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1008290032,2020,Steam Plant (Gas),DX Cooling,yes,yes,yes
+1008290036,2022,District Steam,DX Cooling,yes,yes,yes
+1008290068,2020,Boiler (Gas),DX Cooling,no,no,no
+1008320001,2024,Boiler (Fuel Oil),Plant,yes,yes,no
+1008330006,2023,Boiler (Elec),Plant,no,no,no
+1008330038,2023,Boiler (Gas),Plant,yes,yes,no
+1008330057,2023,Boiler (Gas),DX Cooling,no,no,no
+1008340019,2021,Boiler (Fuel Oil),DX Cooling,no,no,no
+1008340049,2024,Boiler (Gas),DX Cooling,yes,yes,yes
+1008360007,2016,Boiler (Gas),DX Cooling,no,no,no
+1008360026,2016,District Steam,Plant,yes,yes,yes
+1008360035,2017,Boiler (Fuel Oil),DX Cooling,no,no,no
+1008360043,2016,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1008370023,2017,District Steam,DX Cooling,no,no,no
+1008370036,2017,Boiler (Fuel Oil),DX Cooling,no,no,no
+1008370056,2017,Boiler (Gas),DX Cooling,yes,yes,yes
+1008370058,2018,Boiler (Gas),DX Cooling,yes,yes,yes
+1008380008,2018,Boiler (Elec),DX Cooling,no,no,no
+1008380012,2018,Boiler (Gas),DX Cooling,yes,yes,yes
+1008380015,2018,Boiler (Elec),Plant,yes,yes,yes
+1008380048,2018,Boiler (Fuel Oil),DX Cooling,yes,yes,no
+1008380062,2018,Boiler (Fuel Oil),DX Cooling,no,no,no
+1008380072,2018,Boiler (Elec),DX Cooling,yes,no,no
+1008390009,2020,Boiler (Gas),Plant,no,no,no
+1008390019,2019,Boiler (Fuel Oil),Plant,yes,yes,yes
+1008390060,2020,Boiler (Gas),DX Cooling,no,no,no
+1008390070,2019,Boiler (Fuel Oil),Plant,yes,yes,yes
+1008400013,2021,Boiler (Gas),DX Cooling,no,no,no
+1008400023,2020,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1008400028,2020,Boiler (Elec),Plant,no,no,no
+1008400031,2022,Boiler (Fuel Oil),Plant,yes,yes,yes
+1008400042,2024,Boiler (Elec),DX Cooling,yes,no,no
+1008410001,2023,Boiler (Gas),DX Cooling,yes,no,no
+1008410018,2023,Boiler (Fuel Oil),Plant,no,no,no
+1008410027,2022,District Steam,DX Cooling,no,no,no
+1008410031,2022,District Steam,Plant,yes,yes,yes
+1008410054,2021,Boiler (Gas),Plant,yes,yes,yes
+1008420042,2023,Boiler (Fuel Oil),DX Cooling,yes,yes,no
+1008430045,2024,Boiler (Gas),DX Cooling,yes,yes,yes
+1008440001,2024,Boiler (Elec),DX Cooling,yes,no,no
+1008440042,2024,Boiler (Gas),Plant,yes,yes,no
+1008460026,2016,Boiler (Fuel Oil),DX Cooling,no,no,no
+1008470040,2017,Boiler (Fuel Oil),Plant,yes,yes,yes
+1008490016,2019,Boiler (Gas),Plant,yes,yes,yes
+1008490031,2019,Boiler (Gas),Plant,yes,yes,yes
+1008490063,2020,Boiler (Gas),DX Cooling,yes,yes,yes
+1008500001,2020,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1008510041,2021,District Steam,DX Cooling,yes,yes,yes
+1008550037,2015,District Steam,Plant,yes,yes,yes
+1008560058,2017,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1008570024,2017,District Steam,Plant,yes,yes,yes
+1008570062,2017,Boiler (Gas),DX Cooling,yes,yes,yes
+1008580022,2018,Boiler (Fuel Oil),DX Cooling,no,no,no
+1008580049,2018,Boiler (Fuel Oil),DX Cooling,no,no,no
+1008590015,2020,Boiler (Fuel Oil),Plant,yes,yes,yes
+1008590024,2019,Boiler (Elec),DX Cooling,yes,yes,yes
+1008590048,2019,Boiler (Gas),Plant,no,no,no
+1008590052,2019,Boiler (Gas),Plant,yes,yes,yes
+1008590064,2019,Boiler (Elec),DX Cooling,yes,yes,yes
+1008590072,2019,Boiler (Elec),Plant,no,no,no
+1008600045,2021,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1008600049,2020,Boiler (Gas),DX Cooling,yes,no,no
+1008610001,2023,Boiler (Gas),Plant,no,no,no
+1008610003,2021,Boiler (Elec),DX Cooling,yes,no,no
+1008610015,2021,Boiler (Elec),DX Cooling,yes,yes,yes
+1008610022,2021,Boiler (Gas),Plant,yes,yes,yes
+1008610047,2023,Boiler (Gas),DX Cooling,yes,yes,yes
+1008610049,2021,Boiler (Gas),DX Cooling,yes,yes,yes
+1008610064,2023,Boiler (Elec),Plant,yes,yes,yes
+1008610072,2023,Boiler (Elec),DX Cooling,no,no,no
+1008610075,2023,Boiler (Gas),DX Cooling,yes,yes,yes
+1008620013,2022,Boiler (Gas),Plant,yes,yes,yes
+1008620016,2023,Boiler (Gas),DX Cooling,yes,no,no
+1008620026,2023,Boiler (Gas),Plant,yes,yes,yes
+1008620045,2022,Boiler (Gas),DX Cooling,yes,yes,yes
+1008630006,2023,Boiler (Gas),DX Cooling,yes,no,no
+1008630027,2024,Boiler (Fuel Oil),DX Cooling,yes,yes,no
+1008630029,2024,Boiler (Gas),DX Cooling,no,no,no
+1008630060,2024,Boiler (Fuel Oil),Plant,yes,no,yes
+1008630067,2024,District Steam,DX Cooling,yes,yes,no
+1008650014,2015,District Steam,Plant,yes,yes,yes
+1008660001,2016,Boiler (Fuel Oil),Plant,yes,yes,yes
+1008660076,2016,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1008680008,2018,Boiler (Gas),DX Cooling,yes,yes,yes
+1008680012,2018,Boiler (Elec),DX Cooling,no,no,no
+1008680016,2018,District Steam,Plant,yes,yes,yes
+1008680025,2018,District Steam,Plant,yes,yes,yes
+1008680072,2018,Boiler (Gas),DX Cooling,yes,yes,yes
+1008690020,2019,Boiler (Gas),DX Cooling,yes,no,no
+1008690034,2019,District Steam,Plant,yes,yes,yes
+1008690064,2019,Boiler (Elec),DX Cooling,yes,yes,no
+1008690066,2020,District Steam,DX Cooling,yes,yes,yes
+1008710003,2021,Boiler (Fuel Oil),Plant,yes,yes,yes
+1008710060,2021,Boiler (Gas),Plant,yes,yes,yes
+1008710070,2021,Boiler (Fuel Oil),Plant,no,no,no
+1008720013,2024,District Steam,DX Cooling,yes,yes,no
+1008730067,2023,Boiler (Fuel Oil),DX Cooling,no,no,no
+1008760001,2018,Boiler (Gas),DX Cooling,yes,yes,yes
+1008760006,2016,Boiler (Gas),DX Cooling,yes,yes,yes
+1008780065,2018,Boiler (Fuel Oil),DX Cooling,no,no,no
+1008790081,2019,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1008810029,2023,Boiler (Elec),DX Cooling,yes,no,no
+1008820076,2022,Boiler (Gas),DX Cooling,yes,yes,yes
+1008830001,2023,Boiler (Gas),DX Cooling,yes,yes,no
+1008830088,2024,Boiler (Fuel Oil),DX Cooling,no,no,no
+1008860001,2016,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1008870095,2017,District Steam,Plant,yes,yes,yes
+1009030047,2024,Boiler (Gas),DX Cooling,no,no,no
+1009400012,2020,Boiler (Elec),Plant,yes,yes,yes
+1009930001,2023,Boiler (Elec),Plant,no,no,no
+1009930022,2023,Boiler (Fuel Oil),DX Cooling,yes,yes,no
+1009930029,2020,District Steam,Plant,yes,yes,yes
+1009930055,2023,District Steam,DX Cooling,no,no,no
+1009940001,2024,District Steam,DX Cooling,yes,yes,no
+1009950005,2015,District Steam,Plant,yes,yes,yes
+1009970041,2018,District Steam,DX Cooling,yes,yes,yes
+1009980012,2018,Boiler (Elec),DX Cooling,yes,yes,yes
+1009980024,2018,Boiler (Gas),DX Cooling,yes,yes,yes
+1009990003,2019,Boiler (Elec),Plant,yes,yes,yes
+1009990009,2019,Boiler (Fuel Oil),Plant,yes,yes,yes
+1009990029,2019,District Steam,DX Cooling,yes,yes,yes
+1010030005,2023,District Steam,Plant,yes,yes,yes
+1010030029,2023,District Steam,Plant,yes,no,no
+1010040020,2024,District Steam,Plant,yes,yes,yes
+1010040029,2024,District Steam,Plant,yes,no,yes
+1010070029,2017,District Steam,Plant,yes,yes,yes
+1010090005,2019,District Steam,DX Cooling,yes,yes,yes
+1010100021,2023,District Steam,DX Cooling,yes,no,no
+1010120023,2022,Boiler (Gas),DX Cooling,no,no,no
+1010130029,2023,District Steam,Plant,yes,yes,no
+1010140033,2024,District Steam,Plant,yes,no,yes
+1010150029,2017,Boiler (Fuel Oil),Plant,yes,yes,yes
+1010160036,2017,District Steam,Plant,yes,yes,yes
+1010210019,2021,Boiler (Gas),DX Cooling,yes,yes,yes
+1010240015,2024,District Steam,DX Cooling,yes,no,no
+1010250025,2015,District Steam,Plant,yes,yes,yes
+1010250043,2015,District Steam,Plant,yes,yes,yes
+1010260032,2016,Boiler (Fuel Oil),Plant,yes,yes,yes
+1010270020,2017,District Steam,Plant,yes,yes,yes
+1010280029,2018,District Steam,Plant,no,no,no
+1010290053,2019,Boiler (Gas),DX Cooling,yes,yes,yes
+1010400029,2022,District Steam,DX Cooling,yes,yes,yes
+1010540041,2024,Boiler (Elec),Plant,no,no,no
+1011020018,2022,Boiler (Gas),Plant,no,no,no
+1011130008,2024,Boiler (Elec),DX Cooling,yes,no,no
+1011130051,2023,Steam Plant (Gas),DX Cooling,yes,yes,no
+1012590019,2019,District Steam,DX Cooling,no,no,no
+1012600024,2021,Boiler (Fuel Oil),Plant,yes,yes,yes
+1012600042,2022,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1012600064,2022,Boiler (Gas),Plant,yes,yes,yes
+1012600071,2018,District Steam,DX Cooling,no,no,no
+1012610016,2024,Boiler (Gas),Plant,no,no,no
+1012610019,2021,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1012610021,2018,Boiler (Gas),DX Cooling,yes,yes,yes
+1012610030,2021,Boiler (Gas),DX Cooling,no,no,no
+1012610034,2023,District Steam,Plant,yes,yes,no
+1012610036,2021,District Steam,DX Cooling,no,no,no
+1012610042,2023,Boiler (Elec),DX Cooling,no,no,no
+1012620001,2023,District Steam,Plant,yes,yes,no
+1012620024,2023,Boiler (Gas),Plant,yes,yes,no
+1012620048,2022,Boiler (Fuel Oil),Plant,yes,yes,yes
+1012620054,2022,Boiler (Elec),Plant,no,no,no
+1012630007,2024,Boiler (Gas),Plant,yes,yes,no
+1012630038,2023,District Steam,Plant,yes,yes,no
+1012630051,2023,Boiler (Elec),Plant,no,no,no
+1012630059,2024,Boiler (Elec),Plant,no,no,no
+1012630071,2023,Boiler (Elec),DX Cooling,no,no,no
+1012640040,2024,District Steam,Plant,yes,yes,no
+1012670001,2017,District Steam,Plant,yes,yes,yes
+1012670041,2013,District Steam,Plant,yes,yes,yes
+1012680001,2018,District Steam,Plant,yes,yes,yes
+1012690001,2014,District Steam,DX Cooling,yes,yes,yes
+1012700049,2022,District Steam,DX Cooling,yes,yes,yes
+1012700071,2018,District Steam,Plant,yes,yes,yes
+1012710038,2022,District Steam,Plant,yes,yes,yes
+1012710071,2021,District Steam,Plant,yes,yes,yes
+1012720034,2022,District Steam,Plant,yes,yes,yes
+1012720066,2022,District Steam,DX Cooling,yes,yes,yes
+1012730001,2023,District Steam,DX Cooling,no,no,no
+1012730012,2013,District Steam,Plant,yes,yes,yes
+1012750001,2013,District Steam,DX Cooling,yes,yes,yes
+1012750012,2016,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1012750014,2015,Boiler (Gas),Plant,yes,yes,yes
+1012750023,2017,District Steam,Plant,yes,yes,yes
+1012750059,2015,Boiler (Gas),Plant,no,no,no
+1012770069,2017,Boiler (Fuel Oil),Plant,yes,yes,yes
+1012780001,2018,District Steam,Plant,yes,yes,yes
+1012780014,2018,Boiler (Fuel Oil),Plant,yes,yes,yes
+1012790057,2020,District Steam,DX Cooling,yes,yes,yes
+1012790069,2021,District Steam,DX Cooling,no,no,no
+1012810059,2024,Boiler (Gas),Plant,yes,yes,yes
+1012810069,2013,Boiler (Elec),Plant,yes,yes,yes
+1012830017,2023,Boiler (Fuel Oil),DX Cooling,yes,no,no
+1012830069,2023,District Steam,Plant,yes,yes,no
+1012840002,2024,District Steam,DX Cooling,no,no,no
+1012840007,2024,District Steam,Plant,yes,yes,yes
+1012840056,2017,District Steam,DX Cooling,no,no,no
+1012850021,2015,District Steam,Plant,yes,yes,yes
+1012870014,2017,District Steam,Plant,yes,yes,yes
+1012870021,2017,District Steam,Plant,yes,yes,yes
+1012870033,2017,District Steam,Plant,yes,yes,yes
+1012880001,2018,District Steam,DX Cooling,yes,yes,yes
+1012880007,2018,District Steam,Plant,yes,yes,yes
+1012890021,2020,District Steam,Plant,no,no,no
+1012890052,2020,Boiler (Elec),DX Cooling,yes,yes,yes
+1012900001,2020,District Steam,Plant,yes,yes,yes
+1012900003,2020,District Steam,Plant,yes,yes,yes
+1012900037,2021,District Steam,Plant,yes,yes,yes
+1012910001,2022,District Steam,Plant,yes,yes,yes
+1012910021,2021,Boiler (Gas),DX Cooling,no,no,no
+1012910028,2021,District Steam,DX Cooling,yes,yes,yes
+1012910038,2021,Boiler (Gas),DX Cooling,yes,yes,yes
+1012910045,2023,District Steam,Plant,no,no,no
+1012920037,2022,District Steam,Plant,yes,yes,yes
+1012920048,2024,Boiler (Elec),DX Cooling,no,no,no
+1012920052,2023,District Steam,Plant,no,no,no
+1012930026,2023,District Steam,DX Cooling,no,no,no
+1012930035,2023,District Steam,Plant,yes,no,no
+1012930059,2023,District Steam,Plant,yes,no,no
+1012930069,2023,District Steam,DX Cooling,yes,yes,no
+1012940037,2024,District Steam,Plant,yes,no,yes
+1012940046,2018,District Steam,Plant,yes,yes,yes
+1012950020,2015,Boiler (Fuel Oil),DX Cooling,no,no,no
+1012950023,2015,District Steam,Plant,yes,yes,yes
+1012950033,2016,District Steam,Plant,yes,yes,yes
+1012960001,2013,Boiler (Gas),DX Cooling,yes,yes,yes
+1012970023,2017,District Steam,Plant,no,no,no
+1012980023,2018,District Steam,Plant,yes,yes,no
+1012990022,2021,District Steam,Plant,yes,yes,yes
+1013000001,2018,District Steam,Plant,yes,yes,yes
+1013000033,2020,District Steam,Plant,yes,yes,yes
+1013010001,2021,District Steam,Plant,yes,yes,yes
+1013010023,2023,District Steam,Plant,yes,yes,yes
+1013010033,2023,District Steam,Plant,yes,yes,no
+1013030001,2023,District Steam,Plant,yes,yes,yes
+1013030033,2024,District Steam,DX Cooling,yes,yes,no
+1013040033,2024,District Steam,DX Cooling,no,no,no
+1013050013,2015,District Steam,Plant,yes,yes,yes
+1013050040,2015,District Steam,Plant,yes,yes,yes
+1013050060,2015,District Steam,Plant,yes,yes,yes
+1013070001,2013,District Steam,Plant,yes,yes,yes
+1013070014,2017,District Steam,DX Cooling,yes,yes,yes
+1013080033,2018,District Steam,Plant,yes,yes,yes
+1013090023,2019,District Steam,Plant,yes,yes,yes
+1013090032,2023,District Steam,DX Cooling,yes,yes,yes
+1013090066,2020,Boiler (Gas),DX Cooling,yes,yes,yes
+1013100041,2021,Boiler (Elec),Plant,yes,yes,yes
+1013120024,2023,Boiler (Elec),DX Cooling,yes,yes,no
+1013120041,2023,District Steam,Plant,yes,yes,yes
+1013130005,2024,Boiler (Gas),Plant,yes,yes,yes
+1013130014,2023,District Steam,DX Cooling,yes,yes,no
+1013150001,2015,District Steam,Plant,yes,yes,yes
+1013160001,2016,District Steam,Plant,yes,yes,yes
+1013170001,2017,District Steam,Plant,yes,yes,yes
+1013170021,2017,District Steam,Plant,yes,yes,yes
+1013180001,2018,District Steam,Plant,yes,yes,yes
+1013180033,2018,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1013200046,2022,Boiler (Elec),DX Cooling,yes,yes,yes
+1013210001,2024,District Steam,Plant,yes,yes,yes
+1013210022,2021,District Steam,Plant,yes,yes,yes
+1013210047,2022,Boiler (Gas),Plant,yes,yes,yes
+1013220001,2023,District Steam,Plant,yes,yes,yes
+1013250001,2015,District Steam,Plant,yes,yes,yes
+1013260001,2016,District Steam,Plant,yes,yes,yes
+1013280001,2018,District Steam,Plant,yes,yes,yes
+1013290001,2024,District Steam,Plant,yes,yes,yes
+1013740014,2024,District Steam,Plant,yes,no,yes
+1013740060,2015,District Steam,Plant,yes,yes,yes
+1013750016,2015,Boiler (Gas),Plant,yes,yes,no
+1013750021,2015,District Steam,Plant,yes,yes,yes
+1013910014,2022,District Steam,DX Cooling,yes,no,no
+1013940013,2015,District Steam,DX Cooling,yes,yes,yes
+1013950017,2016,Boiler (Gas),Plant,yes,yes,yes
+1014350044,2015,Boiler (Fuel Oil),DX Cooling,yes,yes,yes
+1017740056,2014,Boiler (Elec),DX Cooling,yes,yes,yes
+1018840001,2018,Boiler (Gas),DX Cooling,yes,yes,no
+1019860065,2016,Boiler (Gas),Plant,no,no,no
+1019980017,2018,Boiler (Gas),Plant,no,no,no
+1021240043,2013,Boiler (Gas),DX Cooling,yes,yes,yes
+1000160260,2016,District Steam,Plant,yes,yes,no
+1000290073,2019,District Steam,DX Cooling,yes,yes,no
+1000400003,2020,District Steam,Plant,yes,yes,yes
+1000480001,2018,District Steam,Plant,yes,yes,yes
+1000510007,2021,Boiler (Elec),DX Cooling,no,no,no
+1000640012,2024,District Steam,DX Cooling,yes,no,no
+1000680011,2018,District Steam,DX Cooling,yes,no,no
+1000770008,2017,District Steam,Plant,yes,yes,no
+1000880010,2018,District Steam,DX Cooling,yes,yes,no
+1000940025,2024,Boiler (Gas),Plant,yes,yes,yes
+1001190001,2019,District Steam,Plant,yes,no,no
+1001530001,2023,District Steam,DX Cooling,yes,yes,yes
+1001540023,2024,District Steam,DX Cooling,yes,yes,yes
+1001940042,2024,Boiler (Gas),DX Cooling,yes,yes,no
+1004980009,2018,Boiler (Gas),DX Cooling,yes,yes,no
+1005050036,2015,Boiler (Gas),Plant,yes,no,no
+1005310020,2021,Boiler (Gas),DX Cooling,yes,yes,no
+1005450006,2015,Boiler (Gas),Plant,yes,no,no
+1005450053,2015,Boiler (Elec),DX Cooling,yes,yes,no
+1005590016,2019,Boiler (Gas),Plant,yes,yes,yes
+1005760046,2016,Boiler (Gas),DX Cooling,yes,no,no
+1005770034,2017,District Steam,DX Cooling,yes,yes,no
+1005780047,2018,Boiler (Gas),Plant,yes,yes,yes
+1005970012,2017,Boiler (Gas),Plant,yes,yes,yes
+1006460001,2016,Boiler (Gas),Plant,yes,yes,no
+1006460019,2016,Boiler (Gas),DX Cooling,yes,yes,no
+1007580082,2018,Boiler (Gas),Plant,yes,yes,yes
+1007780036,2018,Boiler (Gas),Plant,yes,yes,no
+1007840060,2024,Boiler (Gas),DX Cooling,yes,no,no
+1007850037,2015,Boiler (Gas),DX Cooling,yes,yes,yes
+1007850067,2015,Boiler (Gas),DX Cooling,yes,yes,no
+1007860013,2016,Boiler (Gas),Plant,yes,yes,no
+1007870044,2017,Boiler (Elec),Plant,yes,yes,no
+1007880004,2018,Boiler (Gas),DX Cooling,yes,no,no
+1008150001,2015,District Steam,Plant,yes,yes,no
+1008190010,2019,Boiler (Gas),DX Cooling,yes,no,no
+1008220052,2022,Boiler (Gas),DX Cooling,yes,no,no
+1008240028,2024,Boiler (Gas),Plant,yes,yes,no
+1008250012,2015,Boiler (Gas),DX Cooling,yes,yes,no
+1008260046,2016,Boiler (Gas),DX Cooling,yes,yes,no
+1008300062,2020,Boiler (Gas),DX Cooling,yes,yes,no
+1008320017,2022,Boiler (Gas),DX Cooling,yes,yes,yes
+1008330011,2023,District Steam,Plant,yes,yes,yes
+1008360033,2016,Boiler (Gas),DX Cooling,yes,no,no
+1008380076,2018,Boiler (Gas),DX Cooling,yes,yes,no
+1008400058,2020,District Steam,DX Cooling,yes,no,no
+1008400071,2020,Boiler (Gas),DX Cooling,yes,no,no
+1008410049,2021,District Steam,Plant,yes,yes,no
+1008440003,2024,Boiler (Gas),DX Cooling,yes,yes,no
+1008500025,2020,Boiler (Gas),DX Cooling,yes,no,no
+1008560009,2016,Boiler (Gas),DX Cooling,yes,yes,no
+1008580006,2018,Boiler (Gas),DX Cooling,yes,yes,no
+1008600001,2020,Boiler (Gas),DX Cooling,yes,yes,no
+1008800014,2020,Boiler (Gas),DX Cooling,yes,yes,no
+1008800084,2020,Boiler (Gas),DX Cooling,yes,yes,no
+1008810001,2021,Boiler (Gas),DX Cooling,yes,no,no
+1009950033,2015,District Steam,Plant,yes,yes,no
+1009960001,2016,District Steam,Plant,yes,no,no
+1009960029,2016,Boiler (Gas),Plant,yes,yes,yes
+1009970029,2017,District Steam,Plant,yes,yes,yes
+1009990019,2019,District Steam,Plant,yes,yes,yes
+1010080037,2018,Boiler (Gas),DX Cooling,yes,yes,yes
+1010320048,2022,Boiler (Elec),Plant,yes,yes,yes
+1011050036,2015,Boiler (Gas),DX Cooling,yes,yes,no
+1012670022,2017,Boiler (Gas),Plant,yes,yes,no
+1012670034,2017,District Steam,DX Cooling,yes,yes,no
+1012750027,2015,District Steam,Plant,yes,yes,yes
+1012770014,2017,District Steam,Plant,yes,yes,yes
+1012780069,2018,District Steam,Plant,yes,yes,yes
+1012860043,2016,Boiler (Gas),DX Cooling,yes,yes,no
+1012870052,2017,District Steam,Plant,yes,yes,yes
+1012900006,2020,District Steam,DX Cooling,yes,yes,no
+1012900044,2020,Boiler (Elec),DX Cooling,yes,yes,no
+1012910010,2021,District Steam,Plant,yes,yes,no
+1012950017,2015,District Steam,Plant,yes,yes,no
+1012950058,2015,District Steam,DX Cooling,yes,no,no
+1013060001,2016,District Steam,Plant,yes,yes,no
+1013120015,2022,District Steam,Plant,yes,yes,yes
+1013190047,2019,District Steam,Plant,yes,yes,yes
+1013230047,2023,District Steam,Plant,yes,yes,yes
+1013320001,2022,District Steam,Plant,yes,yes,yes
+1013940001,2024,District Steam,Plant,yes,yes,no
+1017750033,2015,Boiler (Gas),DX Cooling,yes,yes,no
+1019670045,2017,Boiler (Gas),Plant,yes,yes,no
+1005770019,2017,Boiler (Gas),DX Cooling,no,no,no
+1006970056,2017,Boiler (Gas),DX Cooling,yes,yes,no
+1008070028,2017,Boiler (Gas),DX Cooling,no,no,no
+1022150824,2015,Boiler (Gas),DX Cooling,yes,yes,yes
