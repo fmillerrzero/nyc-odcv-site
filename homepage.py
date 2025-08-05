@@ -303,9 +303,13 @@ html = f"""<!DOCTYPE html>
             cursor: pointer; 
             font-weight: 600;
             white-space: nowrap;
+        }}
+        
+        thead {{
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
+            background: var(--rzero-primary);
         }}
         
         th:hover {{ background: var(--rzero-primary-dark); }}
@@ -498,18 +502,18 @@ html += f"""
             Showing <span id="visibleCount">{total_buildings}</span> of <span id="totalCount">{total_buildings}</span> buildings
         </div>
         
-        <div class="table-wrapper" style="overflow-x: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 118, 157, 0.08); position: relative; max-height: calc(100vh - 200px); overflow-y: auto;">
+        <div class="table-wrapper" style="overflow-x: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 118, 157, 0.08); position: relative; max-height: calc(100vh - 200px); overflow-y: auto; contain: layout style paint;">
         <table id="buildingTable" style="width: 100%; background: white; border-collapse: collapse; min-width: 900px;">
-        <thead>
-        <tr style="position: sticky; top: 0; z-index: 100; background: var(--rzero-primary); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-            <th class="thumb-cell" style="position: sticky; top: 0; background: var(--rzero-primary);">Image</th>
-            <th onclick="sortTable(1)" style="cursor: pointer; position: sticky; top: 0; background: var(--rzero-primary);">Rank <span class="sort-indicator">↕</span></th>
-            <th onclick="sortTable(2)" style="cursor: pointer; position: sticky; top: 0; background: var(--rzero-primary);">Building <span class="sort-indicator">↕</span></th>
-            <th onclick="sortTable(3)" style="cursor: pointer; position: sticky; top: 0; background: var(--rzero-primary);">Owner <span class="sort-indicator">↕</span></th>
-            <th onclick="sortTable(4)" style="cursor: pointer; position: sticky; top: 0; background: var(--rzero-primary);">Manager <span class="sort-indicator">↕</span></th>
-            <th onclick="sortTable(5)" style="cursor: pointer; position: sticky; top: 0; background: var(--rzero-primary);">Savings <span class="sort-indicator">↕</span></th>
-            <th onclick="sortTable(6)" style="cursor: pointer; position: sticky; top: 0; background: var(--rzero-primary);">Score <span class="sort-indicator">↕</span></th>
-            <th style="position: sticky; top: 0; background: var(--rzero-primary);">Details</th>
+        <thead style="position: sticky; top: 0; z-index: 1000; background: var(--rzero-primary); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+        <tr>
+            <th class="thumb-cell">Image</th>
+            <th onclick="sortTable(1)" style="cursor: pointer;">Rank <span class="sort-indicator">↕</span></th>
+            <th onclick="sortTable(2)" style="cursor: pointer;">Building <span class="sort-indicator">↕</span></th>
+            <th onclick="sortTable(3)" style="cursor: pointer;">Owner <span class="sort-indicator">↕</span></th>
+            <th onclick="sortTable(4)" style="cursor: pointer;">Manager <span class="sort-indicator">↕</span></th>
+            <th onclick="sortTable(5)" style="cursor: pointer;">Savings <span class="sort-indicator">↕</span></th>
+            <th onclick="sortTable(6)" style="cursor: pointer;">Score <span class="sort-indicator">↕</span></th>
+            <th>Details</th>
         </tr>
         </thead>
         <tbody>
