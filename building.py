@@ -40,30 +40,37 @@ def find_logo_file(company_name):
     clean_name = clean_name.replace(" ", "_")  # Replace spaces with underscores
     logo_filename = f"{clean_name}.png"
     
-    # Handle special case for CommonWealth Partners (jpg not png)
+    # Handle special case for JPG files
     if clean_name == "CommonWealth_Partners":
         logo_filename = "CommonWealth_Partners.jpg"
+    elif clean_name == "Okada_Company":
+        logo_filename = "Okada_Company.jpg"
     
     # List of available logos to verify match exists
     available_logos = [
-        "Actors_Equity_Association.png", "Amazon.png", "Blackstone.png", "Bloomberg.png",
+        "ABS_Partners.png", "Abner_Properties.png", "Actors_Equity_Association.png", "Adams_Company.png",
+        "Amazon.png", "Avison_Young.png", "Blackstone.png", "Bloomberg.png",
         "Brookfield.png", "Brown_Harris_Stevens.png", "CBRE.png", "CBS.png",
         "Century_Link.png", "Chetrit_Group.png", "China_Orient_Asset_Management_Corporation.png",
         "CIM_Group.png", "City_of_New_York.png", "Clarion_Partners.png", "Colliers.png",
         "Columbia_University.png", "CommonWealth_Partners.jpg", "Cooper_Union.png",
-        "Cushman_Wakefield.png", "DCAS.png", "Douglas_Elliman.png", "Durst_Organization.png",
-        "Empire_State_Realty_Trust.png", "Episcopal_Church.png", "EQ_Office.png",
+        "Cushman_Wakefield.png", "DCAS.png", "Dezer_Properties.png", "Douglas_Elliman.png", 
+        "Durst_Organization.png", "Empire_State_Realty_Trust.png", "Episcopal_Church.png", "EQ_Office.png",
         "Extell_Development.png", "Feil_Organization.png", "Fisher_Brothers_Management.png",
         "Fosun_International.png", "George_Comfort_Sons.png", "GFP_Real_Estate.png",
         "Goldman_Sachs_Group.png", "Google.png", "Greystone.png", "Harbor_Group_International.png",
-        "Hines.png", "JLL.png", "Kaufman_Organization.png", "Kushner_Companies.png",
-        "La_Caisse.png", "Lalezarian_Properties.png", "Lee_Associates.png", "Lincoln_Property.png",
-        "MetLife.png", "Metropolitan_Transportation_Authority.png", "Mitsui_Fudosan_America.png",
-        "Moinian_Group.png", "New_School.png", "Newmark.png", "NYU.png", "Olayan_America.png",
-        "Paramount_Group.png", "Piedmont_Realty_Trust.png", "Prudential.png", "RFR_Realty.png",
-        "Rockefeller_Group.png", "Rockpoint.png", "Rudin.png", "RXR_Realty.png",
-        "Safra_National_Bank.png", "Silverstein_Properties.png", "SL_Green_Realty.png",
-        "Tishman_Speyer.png", "Trinity_Church_Wall_Street.png", "Vornado_Realty_Trust.png"
+        "Himmel_Meringoff.png", "Hines.png", "JLL.png", "Jack_Resnick_Sons.png", 
+        "Joseph_P._Day.png", "Kaufman_Organization.png", "Koeppel_Rosen.png", "Kushner_Companies.png",
+        "LSL_Advisors.png", "La_Caisse.png", "Lalezarian_Properties.png", "Lee_Associates.png", 
+        "Lincoln_Property.png", "MetLife.png", "Metropolitan_Transportation_Authority.png", 
+        "Mitsui_Fudosan_America.png", "Moinian_Group.png", "New_School.png", "Newmark.png", 
+        "NYU.png", "Okada_Company.jpg", "Olayan_America.png", "Paramount_Group.png", 
+        "Piedmont_Realty_Trust.png", "Prudential.png", "RFR_Realty.png", "Resolution_Real_Estate.png",
+        "Rockefeller_Group.png", "Rockpoint.png", "Rosen_Equities.png", "Rudin.png", 
+        "RXR_Realty.png", "Safra_National_Bank.png", "Samco_Properties.png", 
+        "Savanna_Real_Estate_Fund.png", "Savitt_Partners.png", "Silverstein_Properties.png", 
+        "Sioni_Group.png", "SL_Green_Realty.png", "Tishman_Speyer.png", 
+        "Trinity_Church_Wall_Street.png", "Vornado_Realty_Trust.png", "Williams_Equities.png"
     ]
     
     # Return logo filename if it exists in our list
@@ -173,7 +180,7 @@ for i, row in scoring.iterrows():
                 hvac_monthly = float(safe_val(energy_data, bbl, f'Elec_HVAC_{m}_2023_kBtu', 0))
                 non_hvac = float(safe_val(energy_data, bbl, f'Elec_NonHVAC_{m}_2023_kBtu', 0))
                 gas = float(safe_val(energy_data, bbl, f'Gas_{m}_2023_kBtu', 0))
-                steam = float(safe_val(energy_data, bbl, f'Steam_{m}_2023_kBtu', 0))
+                steam = float(safe_val(energy_data, bbl, f'District_Steam_{m}_2023_kBtu', 0))
                 total = hvac_monthly + non_hvac
                 
                 elec_usage.append(hvac_monthly)
@@ -223,7 +230,12 @@ for i, row in scoring.iterrows():
             for m in months:
                 elec_cost.append(float(energy_data[f'Elec_HVAC_{m}_2023_Cost_USD'].iloc[0]) + float(energy_data[f'Elec_NonHVAC_{m}_2023_Cost_USD'].iloc[0]) if not energy_data.empty else 0)
                 gas_cost.append(float(energy_data[f'Gas_{m}_2023_Cost_USD'].iloc[0]) if not energy_data.empty else 0)
-                steam_cost.append(float(energy_data[f'Steam_{m}_2023_Cost_USD'].iloc[0]) if not energy_data.empty else 0)
+                # Only add steam cost if there's steam usage
+                steam_val = float(safe_val(energy_data, bbl, f'District_Steam_{m}_2023_kBtu', 0))
+                if steam_val > 0:
+                    steam_cost.append(float(energy_data[f'Steam_{m}_2023_Cost_USD'].iloc[0]) if not energy_data.empty else 0)
+                else:
+                    steam_cost.append(0)  # No cost if no usage
             
             # Office costs
             office_elec_cost = []
@@ -316,15 +328,15 @@ for i, row in scoring.iterrows():
                             if name_part:
                                 # If there's a main name, use it at the beginning
                                 if costar_owner_name and costar_owner_name != name_part:
-                                    landlord_contact = f"{name_part} • {existing_phone} or {costar_owner_name} • {costar_owner_phone}"
+                                    landlord_contact = f"{name_part} • {existing_phone} & {costar_owner_name} • {costar_owner_phone}"
                                 else:
-                                    landlord_contact = f"{name_part} • {existing_phone} or {costar_owner_phone}"
+                                    landlord_contact = f"{name_part} • {existing_phone} & {costar_owner_phone}"
                             else:
                                 # No main name, show both contacts
                                 if costar_owner_name:
-                                    landlord_contact = f"{existing_phone} or {costar_owner_name} • {costar_owner_phone}"
+                                    landlord_contact = f"{existing_phone} & {costar_owner_name} • {costar_owner_phone}"
                                 else:
-                                    landlord_contact = f"{existing_phone} or {costar_owner_phone}"
+                                    landlord_contact = f"{existing_phone} & {costar_owner_phone}"
                         else:
                             # Extract landlord name from the clean contact if possible
                             landlord_name = None
@@ -335,18 +347,18 @@ for i, row in scoring.iterrows():
                                     landlord_name = ' '.join(parts[:-1]).strip()
                             
                             if landlord_name and costar_owner_name and landlord_name != costar_owner_name:
-                                landlord_contact = f"{landlord_name} • {existing_phone} or {costar_owner_name} • {costar_owner_phone}"
+                                landlord_contact = f"{landlord_name} • {existing_phone} & {costar_owner_name} • {costar_owner_phone}"
                             elif landlord_name:
-                                landlord_contact = f"{landlord_name} • {existing_phone} or {costar_owner_phone}"
+                                landlord_contact = f"{landlord_name} • {existing_phone} & {costar_owner_phone}"
                             elif costar_owner_name:
-                                landlord_contact = f"{existing_phone} or {costar_owner_name} • {costar_owner_phone}"
+                                landlord_contact = f"{existing_phone} & {costar_owner_name} • {costar_owner_phone}"
                             else:
-                                landlord_contact = f"{existing_phone} or {costar_owner_phone}"
+                                landlord_contact = f"{existing_phone} & {costar_owner_phone}"
                     else:
                         if costar_owner_name:
-                            landlord_contact = f"{landlord_contact_clean} or {costar_owner_name} • {costar_owner_phone}"
+                            landlord_contact = f"{landlord_contact_clean} & {costar_owner_name} • {costar_owner_phone}"
                         else:
-                            landlord_contact = f"{landlord_contact_clean} or {costar_owner_phone}"
+                            landlord_contact = f"{landlord_contact_clean} & {costar_owner_phone}"
                 else:
                     # Only one phone number or they're the same - format normally without labels
                     if phone_matches or email_matches:
@@ -417,14 +429,18 @@ for i, row in scoring.iterrows():
             # Logo mapping using the same function as homepage
             logo_file = find_logo_file(owner)
             if logo_file:
-                owner_logo = f' <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/Logos/{logo_file}" style="height:30px;margin-left:10px;vertical-align:middle;">'
+                # Make Vornado logo bigger
+                logo_height = "45px" if "Vornado" in owner else "30px"
+                owner_logo = f' <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/Logos/{logo_file}" style="height:{logo_height};margin-left:10px;vertical-align:middle;">'
             else:
                 owner_logo = ""
             
             # Manager logo
             manager_logo_file = find_logo_file(property_manager)
             if manager_logo_file:
-                manager_logo = f' <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/Logos/{manager_logo_file}" style="height:30px;margin-left:10px;vertical-align:middle;">'
+                # Make Vornado logo bigger
+                logo_height = "45px" if "Vornado" in property_manager else "30px"
+                manager_logo = f' <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/Logos/{manager_logo_file}" style="height:{logo_height};margin-left:10px;vertical-align:middle;">'
             else:
                 manager_logo = ""
             
@@ -446,7 +462,9 @@ for i, row in scoring.iterrows():
             office_pct = int(float(safe_val(hvac_data, bbl, 'office_pct_of_building', 0)) * 100)
             year_altered = safe_val(building, bbl, 'yearalter', 'N/A')
             total_units = int(safe_val(building, bbl, 'unitstotal', 0))
-            num_elevators = int(safe_val(building, bbl, 'Number Of Elevators', 0))
+            # Get elevator count - keep as blank if not provided
+            num_elevators_raw = safe_val(building, bbl, 'Number Of Elevators', '')
+            num_elevators = int(num_elevators_raw) if num_elevators_raw and str(num_elevators_raw).strip() != '' else None
             opex_per_sqft = safe_val(building, bbl, '2024 Building OpEx/SF', 'N/A')
             typical_floor_sqft = safe_val(building, bbl, 'Typical Floor Sq Ft', 'N/A')
             # Format as comma-separated number if it's numeric
@@ -469,14 +487,35 @@ for i, row in scoring.iterrows():
             ll33_grade_raw = str(ll33_grade).replace(' ', '').upper() if ll33_grade != 'N/A' else 'NA'
             
             # Get compliance status
-            compliance_2024 = 'Yes' if penalty_2026 == 0 else 'No'
-            compliance_2030 = 'Yes' if penalty_2030 == 0 else 'No'
+            compliance_2024 = 'Compliant' if penalty_2026 == 0 else 'Non-Compliant'
+            compliance_2030 = 'Compliant' if penalty_2030 == 0 else 'Non-Compliant'
+            
+            # Override with CSV data if it exists and transform Yes/No to Compliant/Non-Compliant
+            csv_compliance_2024 = safe_val(ll97_data, bbl, 'compliance_2024', compliance_2024)
+            csv_compliance_2030 = safe_val(ll97_data, bbl, 'compliance_2030', compliance_2030)
+            
+            # Transform Yes/No to Compliant/Non-Compliant
+            if csv_compliance_2024 == 'Yes':
+                compliance_2024 = 'Compliant'
+            elif csv_compliance_2024 == 'No':
+                compliance_2024 = 'Non-Compliant'
+            else:
+                compliance_2024 = csv_compliance_2024
+                
+            if csv_compliance_2030 == 'Yes':
+                compliance_2030 = 'Compliant'
+            elif csv_compliance_2030 == 'No':
+                compliance_2030 = 'Non-Compliant'
+            else:
+                compliance_2030 = csv_compliance_2030
             
             # Get green rating (LEED, Energy Star certification)
             green_rating = safe_val(building, bbl, 'GreenRating', '')
             
             # Get address and building name
             main_address = address_data['main_address'].iloc[0] if not address_data.empty else row['address']
+            # Remove "New York, NY" and keep just the zip code
+            main_address = main_address.replace(", New York, NY", ",")
             building_name = safe_val(address_data, bbl, 'primary_building_name', '')
             neighborhood = safe_val(building, bbl, 'neighborhood', 'Manhattan')
             
@@ -650,13 +689,13 @@ for i, row in scoring.iterrows():
                 has_cooling = cooling_automation == 'yes'
                 
                 if has_heating and has_cooling:
-                    bas_text = '<span style="color: black; font-weight: normal;">Ventilation</span><span style="color: black;">,</span> <span style="color: #ff6600; font-weight: normal;">Heating</span><span style="color: black;">,</span> <span style="color: #0066cc; font-weight: normal;">Cooling</span> <span style="font-weight: normal;">Controls</span>'
+                    bas_text = '<span style="font-weight: normal;">Ventilation</span><span>, </span><span style="color: #ff6600; font-weight: normal;">Heating</span><span>, </span><span style="color: #0066cc; font-weight: normal;">Cooling</span>'
                 elif has_heating:
-                    bas_text = '<span style="color: black; font-weight: normal;">Ventilation</span><span style="color: black;">,</span> <span style="color: #ff6600; font-weight: normal;">Heating</span> <span style="font-weight: normal;">Controls</span>'
+                    bas_text = '<span style="font-weight: normal;">Ventilation</span><span>, </span><span style="color: #ff6600; font-weight: normal;">Heating</span>'
                 elif has_cooling:
-                    bas_text = '<span style="color: black; font-weight: normal;">Ventilation</span><span style="color: black;">,</span> <span style="color: #0066cc; font-weight: normal;">Cooling</span> <span style="font-weight: normal;">Controls</span>'
+                    bas_text = '<span style="font-weight: normal;">Ventilation</span><span>, </span><span style="color: #0066cc; font-weight: normal;">Cooling</span>'
                 else:
-                    bas_text = '<span style="color: black; font-weight: normal;">Ventilation Controls</span>'
+                    bas_text = '<span style="font-weight: normal;">Ventilation</span>'
                 bas_class = 'bas'
             elif has_bas == 'no':
                 bas_text = '<span style="color: #c41e3a; font-weight: 600;">⚠️  Absent</span>'
@@ -721,11 +760,7 @@ for i, row in scoring.iterrows():
                     <h3 class="page-title">LL97 Compliance</h3>
                     <div class="stat">
                         <span class="stat-label">2024-2029 Status: </span>
-                        <span class="stat-value"><span class="{'yes' if compliance_2024 == 'Yes' else 'no'}">{compliance_2024}</span>{f' <span style="color: #c41e3a; font-weight: bold;">(${penalty_2026:,.0f} in annual penalties)</span>' if compliance_2024 == 'No' else ''}</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">2030-2034 Status: </span>
-                        <span class="stat-value"><span class="{'yes' if compliance_2030 == 'Yes' else 'no'}">{compliance_2030}</span>{f' <span style="color: #c41e3a; font-weight: bold;">(${penalty_2030:,.0f} in annual penalties)</span>' if compliance_2030 == 'No' else ''}</span>
+                        <span class="stat-value"><span class="{'yes' if compliance_2024 == 'Compliant' else 'no'}">{compliance_2024}</span>{f' <span style="color: #c41e3a; font-weight: bold;">(${penalty_2026:,.0f} annual penalty)</span>' if compliance_2024 == 'Non-Compliant' else ''}</span>
                     </div>
                     <div class="stat">
                         <span class="stat-label">Current Emissions: </span>
@@ -733,11 +768,7 @@ for i, row in scoring.iterrows():
                     </div>
                     <div class="stat">
                         <span class="stat-label">2024-2029 Limit: </span>
-                        <span class="stat-value">{carbon_limit_2024:,.0f} tCO2e</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">2030-2034 Limit: </span>
-                        <span class="stat-value">{carbon_limit_2030:,.0f} tCO2e</span>
+                        <span class="stat-value">{carbon_limit_2024:,.0f} tCO2e{f" ({carbon_limit_2024 - total_carbon_emissions:+,.0f})" if carbon_limit_2024 < total_carbon_emissions else ""}</span>
                     </div>
                 </div>
             """
@@ -788,6 +819,12 @@ for i, row in scoring.iterrows():
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }}
+        
+        .section-content {{
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
         }}
         
         .rzero-logo {{
@@ -867,22 +904,24 @@ for i, row in scoring.iterrows():
         }}
         
         .container {{ 
-            max-width: 1600px; 
+            max-width: 1200px; 
             margin: 0 auto; 
             background: white;
             box-shadow: 0 4px 20px rgba(0, 118, 157, 0.08);
             padding: 0;
+            border-bottom: none !important;
         }}
         
         /* Section 0 - Title */
         .title-section {{
-            background: linear-gradient(to right, #0066cc, #0052a3);
+            background: url('https://rzero.com/wp-content/uploads/2025/02/bg-cta-bottom.jpg') center/cover;
             color: white;
-            padding: 30px 15%;
+            padding: 80px 15% 30px 15%;
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 3rem;
+            position: relative;
         }}
         
         .back {{ 
@@ -895,15 +934,33 @@ for i, row in scoring.iterrows():
         /* Section styling */
         .section {{ 
             padding: 40px 5%; 
-            border-bottom: 3px solid var(--rzero-primary); 
             background: white;
             position: relative;
             width: 100%;
+            margin: 0;
             box-sizing: border-box;
         }}
         
         .section:nth-child(even) {{
             background: #f8fafb;
+        }}
+        
+        .section:last-child {{
+            border-bottom: none !important;
+        }}
+        
+        /* Remove any borders from last section */
+        .section:last-of-type {{
+            border-bottom: none !important;
+        }}
+        
+        .section-gray:last-child {{
+            border-bottom: none !important;
+        }}
+        
+        /* Ensure no borders on container */
+        .container {{
+            border: none !important;
         }}
         
         /* Override backgrounds to ensure proper alternating pattern */
@@ -915,49 +972,41 @@ for i, row in scoring.iterrows():
             background: #f8fafb !important;
         }}
         
-        .section::after {{
-            content: '';
-            position: absolute;
-            bottom: -3px;
-            left: 0;
-            right: 0;
-            height: 20px;
-            background: linear-gradient(to bottom, rgba(0, 118, 157, 0.05), transparent);
-        }}
         
         .section-header {{ 
             font-size: 2em; 
             color: var(--rzero-primary); 
             margin-bottom: 40px; 
             font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 15px;
             padding-bottom: 20px;
             border-bottom: 2px solid rgba(0, 118, 157, 0.2);
-        }}
-        
-        .section-header::before {{
-            content: '';
-            width: 6px;
-            height: 40px;
-            background: var(--rzero-primary);
-            border-radius: 3px;
+            max-width: 100%;
+            box-sizing: border-box;
         }}
         
         .page {{ 
             margin-bottom: 40px;
             width: 100%;
+            margin: 0 auto;
+            padding: 0;
             box-sizing: border-box;
-            /* max-width: 900px; */
-            /* margin-left: auto; */
-            /* margin-right: auto; */
         }}
         .page-title {{ 
             font-size: 1.3em; 
             color: var(--text-dark); 
             margin-bottom: 20px; 
-            font-weight: 500; 
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }}
+        
+        .page-title::before {{
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: #333;
+            border-radius: 2px;
         }}
         
         /* Stats - Prospector Style */
@@ -1019,11 +1068,12 @@ for i, row in scoring.iterrows():
         .carousel-container {{
             position: relative;
             width: 100%;
-            /* max-width: 900px; */
             height: 675px;
             overflow: hidden;
             border-radius: 12px;
             margin: 20px 0;
+            padding: 0;
+            box-sizing: border-box;
         }}
         
         .carousel-track {{
@@ -1038,6 +1088,9 @@ for i, row in scoring.iterrows():
             display: flex;
             align-items: center;
             justify-content: center;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }}
         
         .carousel-slide img {{
@@ -1174,21 +1227,47 @@ for i, row in scoring.iterrows():
             border: 2px solid #6B4423;
         }}
         
-        /* Energy Grade Styling from Prospector */
+        /* Energy Grade Styling - NYC LL97 Style */
         .energy-grade {{
             display: inline-block;
-            padding: 8px 20px;
-            border-radius: 8px;
+            padding: 12px 24px;
+            border-radius: 6px;
             font-weight: bold;
-            font-size: 1.2em;
+            font-size: 1.4em;
+            border: 2px solid;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }}
         
-        .grade-A {{ background: #d4f1d4; color: #1e7e1e; }}
-        .grade-B {{ background: #e6f3d5; color: #5d7e1e; }}
-        .grade-C {{ background: #fff3cd; color: #856404; }}
-        .grade-D {{ background: #f8d7da; color: #721c24; }}
-        .grade-F {{ background: #f5c6cb; color: #721c24; }}
-        .grade-NA {{ background: #e9ecef; color: #6c757d; }}
+        .grade-A {{ 
+            background: #4CAF50; 
+            color: white; 
+            border-color: #388E3C;
+        }}
+        .grade-B {{ 
+            background: #FFEB3B; 
+            color: #333; 
+            border-color: #F9A825;
+        }}
+        .grade-C {{ 
+            background: #FF9800; 
+            color: white; 
+            border-color: #EF6C00;
+        }}
+        .grade-D {{ 
+            background: #F44336; 
+            color: white; 
+            border-color: #C62828;
+        }}
+        .grade-F {{ 
+            background: #9E9E9E; 
+            color: white; 
+            border-color: #616161;
+        }}
+        .grade-N, .grade-NA {{ 
+            background: #E1BEE7; 
+            color: #4A148C; 
+            border-color: #BA68C8;
+        }}
         
         /* Carousel Loading Animation */
         .carousel-slide iframe {{
@@ -1293,10 +1372,6 @@ for i, row in scoring.iterrows():
             border: 2px solid #8B4513;
         }}
         
-        .grade-A {{ background: #d4f1d4; color: #1e7e1e; padding: 4px 12px; border-radius: 4px; font-weight: bold; }}
-        .grade-B {{ background: #e6f3d5; color: #5d7e1e; padding: 4px 12px; border-radius: 4px; font-weight: bold; }}
-        .grade-C {{ background: #fff3cd; color: #856404; padding: 4px 12px; border-radius: 4px; font-weight: bold; }}
-        .grade-D {{ background: #f8d7da; color: #721c24; padding: 4px 12px; border-radius: 4px; font-weight: bold; }}
         
         .yes {{ color: #38a169; font-weight: bold; }}
         .no {{ color: #c41e3a; font-weight: bold; }}
@@ -1313,8 +1388,9 @@ for i, row in scoring.iterrows():
 <body>
     <div class="container">
         <!-- Navigation Bar -->
-        <div style="background: linear-gradient(to right, #0066cc, #0052a3); padding: 0; margin: 0; width: 100%; position: relative;">
-            <a href="index.html" style="text-decoration: none; display: block;">
+        <!-- Section 0.0 - Title -->
+        <div class="title-section">
+            <a href="index.html" style="text-decoration: none; display: block; position: absolute; top: 0; left: 0; z-index: 10;">
                 <div style="padding: 15px 40px; display: flex; align-items: center; gap: 10px; color: white; cursor: pointer; transition: all 0.3s ease;"
                      onmouseover="this.style.background='rgba(255,255,255,0.1)'" 
                      onmouseout="this.style.background='transparent'">
@@ -1326,31 +1402,28 @@ for i, row in scoring.iterrows():
                     <span style="font-size: 16px; font-weight: 500; opacity: 0.9;">Back to Rankings</span>
                 </div>
             </a>
-        </div>
-        <!-- Section 0.0 - Title -->
-        <div class="title-section">
-            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                <h1 style="margin: 0; color: white; font-size: 2em; font-weight: 700;">
-                    <span style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 25px; font-size: 0.8em;">#{rank}</span>
-                    <span>{main_address}</span>
-                </h1>
-                {"<h2 style='margin: 0; color: white; font-size: 1.5em; font-weight: 600; opacity: 0.9;'>" + building_name + "</h2>" if building_name else ""}
-                <p style="margin: 0; opacity: 0.9; font-size: 1.1em; padding-left: 0.5rem;">
-                    <span style="margin-right: 1.5rem;">{neighborhood}</span>
-                </p>
+            <div style="display: flex; flex-direction: column; justify-content: center;">
+                <div style="display: flex; align-items: baseline; gap: 1rem;">
+                    <span style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 25px; font-size: 1.6em; font-weight: 700;">#{rank}</span>
+                    <span style="font-size: 2.5em; font-weight: 700; color: white; line-height: 1.2;">{main_address}</span>
+                </div>
+                <div style="margin: 0; opacity: 0.9; font-size: 1.1em; margin-left: calc(1.6em * 1.5 + 30px + 1rem); margin-top: -0.2rem;">
+                    <span>{neighborhood}</span>
+                </div>
             </div>
-            <div style="text-align: center; min-width: 200px;">
-                <div style="font-size: 0.9em; opacity: 0.8; margin-bottom: 8px;">2026 ODCV Savings</div>
-                <div style="font-size: 2.5em; font-weight: 700; line-height: 1;">${total_2026_savings:,.0f}</div>
+            <div style="text-align: right; min-width: 200px; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 2.5em; font-weight: 700; line-height: 1; color: white;">${total_2026_savings:,.0f}</div>
+                <div style="font-size: 1.1em; opacity: 0.9; margin-top: 0.5rem;">2026 ODCV Savings</div>
                 {penalty_breakdown_html}
             </div>
         </div>
         
         <!-- Section 1: General -->
         <div class="section section-white">
-            <h2 class="section-header">Image Gallery</h2>
-            
-            <div class="page">
+            <div class="section-content">
+                <h2 class="section-header">Image Gallery</h2>
+                
+                <div class="page">
                 <h3 class="page-title" id="image-gallery-title-{bbl}">Static: <span style="color: #555;">Marketing</span></h3>
                 <div class="carousel-container">
                     <div class="carousel-track" id="carousel-{bbl}">
@@ -1359,7 +1432,7 @@ for i, row in scoring.iterrows():
                                 <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/{bbl}/{bbl}_hero.jpg" 
                                      style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
                                      onerror="handleImageError(this, '{bbl}', 'hero')">
-                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease;">⬇</button>
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 8px 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">⬇</button>
                                 <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
                             </div>
                         </div>
@@ -1368,7 +1441,7 @@ for i, row in scoring.iterrows():
                                 <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/{bbl}/{bbl}_roadview.jpg" 
                                      style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
                                      onerror="handleImageError(this, '{bbl}', 'roadview')">
-                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease;">⬇</button>
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 8px 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">⬇</button>
                                 <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
                             </div>
                         </div>
@@ -1377,7 +1450,7 @@ for i, row in scoring.iterrows():
                                 <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/{bbl}/{bbl}_street.jpg" 
                                      style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
                                      onerror="handleImageError(this, '{bbl}', 'street')">
-                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease;">⬇</button>
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 8px 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">⬇</button>
                                 <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
                             </div>
                         </div>
@@ -1386,7 +1459,7 @@ for i, row in scoring.iterrows():
                                 <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/{bbl}/{bbl}_satellite.jpg" 
                                      style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
                                      onerror="handleImageError(this, '{bbl}', 'satellite')">
-                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease;">⬇</button>
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 8px 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">⬇</button>
                                 <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
                             </div>
                         </div>
@@ -1395,7 +1468,7 @@ for i, row in scoring.iterrows():
                                 <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/{bbl}/{bbl}_equipment.jpg" 
                                      style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
                                      onerror="handleImageError(this, '{bbl}', 'equipment')">
-                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease;">⬇</button>
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 8px 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">⬇</button>
                                 <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
                             </div>
                         </div>
@@ -1404,7 +1477,7 @@ for i, row in scoring.iterrows():
                                 <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/{bbl}/{bbl}_double.jpg" 
                                      style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
                                      onerror="handleImageError(this, '{bbl}', 'double')">
-                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease;">⬇</button>
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 8px 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">⬇</button>
                                 <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
                             </div>
                         </div>
@@ -1413,7 +1486,7 @@ for i, row in scoring.iterrows():
                                 <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/{bbl}/{bbl}_stack.jpg" 
                                      style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
                                      onerror="handleImageError(this, '{bbl}', 'stack')">
-                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease;">⬇</button>
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 8px 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">⬇</button>
                                 <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
                             </div>
                         </div>
@@ -1456,27 +1529,40 @@ for i, row in scoring.iterrows():
                         <span class="dot" onclick="goToInteractiveSlide('{bbl}', 1)" title="360° Virtual Tour"></span>
                     </div>
                 </div>
+                </div>
             </div>
-        </div>
         </div>
         
         <!-- Building Overview Section -->
         <div class="section section-gray">
-            <h2 class="section-header">Building Overview</h2>
+            <div class="section-content">
+                <h2 class="section-header">Building Overview</h2>
+                
+                <div class="page">
+                <h3 class="page-title">Commercial</h3>
+                <div class="stat">
+                    <span class="stat-label">Class: </span>
+                    <span class="stat-value"><span class="class-badge class-{building_class.replace(' ', '')}">{building_class}</span></span>
+                </div>
+                {"<div class='stat'><span class='stat-label'>Owner & Manager: </span><span class='stat-value'>" + owner + owner_logo + "</span></div>" if owner == property_manager else "<div class='stat'><span class='stat-label'>Owner: </span><span class='stat-value'>" + owner + owner_logo + "</span></div><div class='stat'><span class='stat-label'>Manager: </span><span class='stat-value'>" + property_manager + manager_logo + "</span></div>"}
+                {"<div class='stat'><span class='stat-label'>Owner Contact: </span><span class='stat-value'>" + landlord_contact + "</span></div>" if landlord_contact != 'Unavailable' else ""}
+                {"<div class='stat'><span class='stat-label'>Manager Contact: </span><span class='stat-value'>" + property_manager_contact + "</span></div>" if property_manager_contact != 'Unavailable' else ""}
+                <div class="stat">
+                    <span class="stat-label">% Leased: </span>
+                    <span class="stat-value">{pct_leased}%</span>
+                </div>
+                {"<div class='stat'><span class='stat-label'>OpEx per Sq Ft: </span><span class='stat-value'>" + opex_per_sqft + "</span></div>" if opex_per_sqft != 'N/A' else ""}
+            </div>
             
             <div class="page">
                 <h3 class="page-title">Property</h3>
                 <div class="stat">
-                    <span class="stat-label">Last Renovated: </span>
-                    <span class="stat-value">{year_altered}</span>
+                    <span class="stat-label">Units: </span>
+                    <span class="stat-value">{total_units}</span>
                 </div>
                 <div class="stat">
                     <span class="stat-label">Floors: </span>
                     <span class="stat-value">{num_floors}</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-label">Units: </span>
-                    <span class="stat-value">{total_units}</span>
                 </div>
                 {"<div class='stat'><span class='stat-label'>Avg Floor Sq Ft: </span><span class='stat-value'>" + typical_floor_sqft + " sq ft</span></div>" if typical_floor_sqft != 'N/A' else ""}
                 <div class="stat">
@@ -1490,41 +1576,28 @@ for i, row in scoring.iterrows():
             </div>
             
             <div class="page">
-                <h3 class="page-title">Commercial</h3>
-                <div class="stat">
-                    <span class="stat-label">Class: </span>
-                    <span class="stat-value"><span class="class-badge class-{building_class.replace(' ', '')}">{building_class}</span></span>
-                </div>
-                {"<div class='stat'><span class='stat-label'>Owner & Manager: </span><span class='stat-value'>" + owner + owner_logo + "</span></div>" if owner == property_manager else "<div class='stat'><span class='stat-label'>Owner: </span><span class='stat-value'>" + owner + owner_logo + "</span></div><div class='stat'><span class='stat-label'>Manager: </span><span class='stat-value'>" + property_manager + manager_logo + "</span></div>"}
-                {"<div class='stat'><span class='stat-label'>Owner Contact: </span><span class='stat-value'>" + landlord_contact + "</span></div>" if landlord_contact != 'Unavailable' else ""}
-                {"<div class='stat'><span class='stat-label'>Property Manager Contact: </span><span class='stat-value'>" + property_manager_contact + "</span></div>" if property_manager_contact != 'Unavailable' else ""}
-                <div class="stat">
-                    <span class="stat-label">% Leased: </span>
-                    <span class="stat-value">{pct_leased}%</span>
-                </div>
-                {"<div class='stat'><span class='stat-label'>OpEx per Sq Ft: </span><span class='stat-value'>" + opex_per_sqft + "</span></div>" if opex_per_sqft != 'N/A' else ""}
-            </div>
-            
-            <div class="page">
                 <h3 class="page-title">Equipment</h3>
                 <div class="stat">
-                    <span class="stat-label">Elevator Shafts: </span>
-                    <span class="stat-value">{num_elevators}</span>
+                    <span class="stat-label">Last Renovated: </span>
+                    <span class="stat-value">{year_altered}</span>
                 </div>
+                {"<div class='stat'><span class='stat-label'>Elevator Shafts: </span><span class='stat-value'>" + str(num_elevators) + "</span></div>" if num_elevators is not None and num_elevators > 0 else ""}
                 <div class="stat">
                     <span class="stat-label">BMS Controls: </span>
                     <span class="stat-value">{bas_text}</span>
                 </div>
                 {"<div class='stat'><span class='stat-label'>Heating System: </span><span class='stat-value'>" + heating_type + "</span></div>" if heating_type != 'N/A' else ""}
                 {"<div class='stat'><span class='stat-label'>Cooling System: </span><span class='stat-value'>" + cooling_type + "</span></div>" if cooling_type != 'N/A' else ""}
-                {"<div class='stat'><span class='stat-label'>Rooftop System: </span><span class='stat-value'>Cooling Towers: " + str(cooling_towers) + " | Water Tanks: " + str(water_tanks) + "</span></div>" if (cooling_towers > 0 or water_tanks > 0) else ""}
+                {"<div class='stat'><span class='stat-label'>Rooftop System: </span><span class='stat-value'>" + (("Cooling Towers: " + str(cooling_towers)) if cooling_towers > 0 else "") + ((" • " if cooling_towers > 0 and water_tanks > 0 else "") + ("Water Tanks: " + str(water_tanks)) if water_tanks > 0 else "") + "</span></div>" if (cooling_towers > 0 or water_tanks > 0) else ""}
+            </div>
             </div>
         </div>
         
         {f'''<!-- Major Tenants Section -->
         <div class="section section-white">
-            <h2 class="section-header">Major Tenants</h2>
-            <div class="page">
+            <div class="section-content">
+                <h2 class="section-header">Major Tenants</h2>
+                <div class="page">
                 <div style="overflow-x: auto;">
                     <table id="tenantTable-{bbl}" style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
                         <thead>
@@ -1540,7 +1613,7 @@ for i, row in scoring.iterrows():
                         <tbody>
                             {"".join([f"""<tr style="border-bottom: 1px solid #e5e7eb;">
                                 <td style="padding: 12px; color: #1f2937;">{tenant['Tenant']}</td>
-                                <td style="padding: 12px; color: #6b7280;">{tenant['Industry']}</td>
+                                <td style="padding: 12px; color: #6b7280;">{tenant['Industry'] if pd.notna(tenant['Industry']) and str(tenant['Industry']).lower() != 'nan' else 'N/A'}</td>
                                 <td style="padding: 12px; color: #6b7280;">{tenant['Floor']}</td>
                                 <td style="padding: 12px; text-align: right; color: #1f2937; font-weight: 500;">{tenant['SF Occupied']}</td>
                                 <td style="padding: 12px; color: #6b7280;">{tenant['Move In Date']}</td>
@@ -1550,18 +1623,21 @@ for i, row in scoring.iterrows():
                     </table>
                 </div>
                 <div style="margin-top: 16px; font-size: 0.85em; color: #6b7280;">
-                    * Showing top {len(building_tenants)} tenants by square footage
+                    * Top {len(building_tenants)} tenants by sq ft
                 </div>
+            </div>
+            </div>
             </div>
         </div>
         ''' if not building_tenants.empty else ""}
         
         <!-- Section 2: Building -->
-        <div class="section section-white">
-            <h2 class="section-header">Energy Efficiency</h2>
-            
-            <!-- Page 2.0 - Efficiency -->
-            <div class="page">
+        <div class="section section-gray">
+            <div class="section-content">
+                <h2 class="section-header">Energy Efficiency</h2>
+                
+                <!-- Page 2.0 - Efficiency -->
+                <div class="page">
                 <h3 class="page-title">Performance</h3>
                 <div class="stat">
                     <span class="stat-label">ENERGY STAR Score: </span>
@@ -1590,13 +1666,15 @@ for i, row in scoring.iterrows():
             </div>
             
             {penalty_section}
+            </div>
         </div>
         
         <!-- Section 3: Energy Consumption -->
-        <div class="section section-gray">
-            <h2 class="section-header">Energy Consumption</h2>
-            
-            <div class="page">
+        <div class="section section-white">
+            <div class="section-content">
+                <h2 class="section-header">Energy Consumption</h2>
+                
+                <div class="page">
                 <h3 class="page-title">Usage</h3>
             <div class="chart-carousel">
                 <div class="chart-toggle">
@@ -1626,15 +1704,16 @@ for i, row in scoring.iterrows():
                     <div id="office_cost_chart" style="width: 100%; height: 400px;"></div>
                 </div>
             </div>
-        </div>
+            </div>
         </div>
         
         <!-- Section 4: ODCV -->
-        <div class="section section-white">
-            <h2 class="section-header">HVAC Analysis</h2>
-            
-            <div class="page">
-                <h3 class="page-title">Electricity Disaggregation</h3>
+        <div class="section section-gray">
+            <div class="section-content">
+                <h2 class="section-header">HVAC Analysis</h2>
+                
+                <div class="page">
+                <h3 class="page-title">Usage Disaggregation</h3>
                 <div id="hvac_pct_chart" style="width: 100%; height: 400px;"></div>
             </div>
             
@@ -1642,17 +1721,19 @@ for i, row in scoring.iterrows():
                 <h3 class="page-title">Savings Potential</h3>
                 <div id="odcv_savings_chart" style="width: 100%; height: 400px;"></div>
             </div>
+            </div>
         </div>
         
 {f'''        <!-- Air Quality Section -->
         <div class="section section-gray">
-            <h2 class="section-header">Air Quality</h2>
-            
-            <div class="page">
-                <h3 class="page-title">Outdoor Pollution (PM2.5)</h3>''' if chart_dates else ""}
+            <div class="section-content">
+                <h2 class="section-header">Air Quality</h2>
+                
+                <div class="page">
+                <h3 class="page-title">Outdoor Pollution</h3>
             
             <div class="iaq-summary" style="margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
-                <div class="iaq-stat-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; text-align: center;">
+                <div class="iaq-stat-grid" style="display: grid; grid-template-columns: repeat({3 if avg_pm25 > 12 else 2}, 1fr); gap: {40 if avg_pm25 > 12 else 80}px; text-align: center; max-width: {600 if avg_pm25 > 12 else 500}px; margin: 0 auto;">
                     <div class="iaq-stat">
                         <div class="iaq-label" style="font-size: 12px; color: #6c757d; margin-bottom: 4px;">Max</div>
                         <div class="iaq-value" style="font-size: 24px; font-weight: bold; color: #c41e3a;">{max_pm25:.1f} μg/m³</div>
@@ -1663,20 +1744,15 @@ for i, row in scoring.iterrows():
                         <div class="iaq-value" style="font-size: 24px; font-weight: bold; color: {aqi_color};">{avg_pm25:.1f} μg/m³</div>
                         <div class="iaq-category" style="font-size: 11px; color: #6c757d; margin-top: 4px;">Daily Average</div>
                     </div>
-                    <div class="iaq-stat">
-                        <div class="iaq-label" style="font-size: 12px; color: #6c757d; margin-bottom: 4px;">Good</div>
-                        <div class="iaq-value" style="font-size: 24px; font-weight: bold; color: #00e400;">12 μg/m³</div>
-                        <div class="iaq-category" style="font-size: 11px; color: #6c757d; margin-top: 4px;">EPA Threshold</div>
-                    </div>
+                    {"<div class='iaq-stat'><div class='iaq-label' style='font-size: 12px; color: #6c757d; margin-bottom: 4px;'>Good</div><div class='iaq-value' style='font-size: 24px; font-weight: bold; color: #00e400;'>12 μg/m³</div><div class='iaq-category' style='font-size: 11px; color: #6c757d; margin-top: 4px;'>EPA Threshold</div></div>" if avg_pm25 > 12 else ""}
                 </div>
             </div>
             
             <div id="pm25_chart" style="width: 100%; height: 400px;"></div>
             </div>
-        </div>''' if chart_dates else ""}}
+            </div>
+        </div>''' if chart_dates else ""}
         
-    </div>
-    
     <script>
     // Unit conversion functions
     function kBtuToKwh(kbtu) {{ return kbtu / 3.412; }}
@@ -1870,14 +1946,41 @@ for i, row in scoring.iterrows():
         }}
     }}
     
-    function downloadImage(button) {{
+    async function downloadImage(button) {{
         const img = button.parentElement.querySelector('img');
-        const link = document.createElement('a');
-        link.href = img.src;
-        link.download = img.src.split('/').pop();
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const imageUrl = img.src;
+        const fileName = imageUrl.split('/').pop();
+        
+        try {{
+            // Fetch the image as a blob
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            
+            // Create a blob URL
+            const blobUrl = URL.createObjectURL(blob);
+            
+            // Create and click the download link
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = fileName;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            
+            // Clean up
+            document.body.removeChild(link);
+            URL.revokeObjectURL(blobUrl);
+        }} catch (error) {{
+            console.error('Download failed:', error);
+            // Fallback to simple download if fetch fails
+            const link = document.createElement('a');
+            link.href = imageUrl;
+            link.download = fileName;
+            link.target = '_self';  // Ensure it doesn't open in new tab
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }}
     }}
     
     // Enhanced Interactive carousel with smooth transitions
@@ -1976,7 +2079,7 @@ for i, row in scoring.iterrows():
     const elecData = {{
         x: months,
         y: {elec_usage},
-        name: 'Electricity',
+        name: 'Elec',
         type: 'scatter',
         mode: 'lines+markers',
         line: {{color: '#0066cc', width: 3}},
@@ -2043,7 +2146,7 @@ for i, row in scoring.iterrows():
     const officeElecData = {{
         x: months,
         y: {office_elec_usage},
-        name: 'Electricity',
+        name: 'Elec',
         type: 'bar',
         marker: {{color: '#0066cc'}}
     }};
@@ -2101,7 +2204,7 @@ for i, row in scoring.iterrows():
     const elecCost = {{
         x: months, 
         y: {elec_cost}, 
-        name: 'Electricity', 
+        name: 'Elec', 
         type: 'scatter', 
         mode: 'lines+markers', 
         line: {{color: '#0066cc', width: 3}},
@@ -2168,7 +2271,7 @@ for i, row in scoring.iterrows():
     const officeElecCost = {{
         x: months, 
         y: {office_elec_cost}, 
-        name: 'Electricity', 
+        name: 'Elec', 
         type: 'bar', 
         marker: {{color: '#0066cc'}}
     }};
@@ -2228,18 +2331,74 @@ for i, row in scoring.iterrows():
         '<div style="text-align: center; margin-top: 10px; font-size: 16px; color: #666;">Annual Cost: $' + ({annual_office_cost:.0f}).toLocaleString() + '</div>'
     );
     
-    // HVAC Percentage Chart
-    const hvacData = {{
-        x: months,
-        y: {hvac_pct},
+    // HVAC Percentage Chart with seasonal colors
+    const hvacValues = {hvac_pct};
+    
+    // Create separate traces for each season with filled area only below the curve
+    const hvacTraces = [];
+    
+    // Cool season (Jan-Mar) - Blue
+    hvacTraces.push({{
+        x: months.slice(0, 3),
+        y: hvacValues.slice(0, 3),
         type: 'scatter',
-        mode: 'lines+markers',
+        mode: 'lines',
         fill: 'tozeroy',
-        line: {{color: '#0066cc', width: 3}},
-        fillcolor: 'rgba(0, 102, 204, 0.2)',
-        marker: {{size: 8}},
-        name: 'HVAC %'
-    }};
+        line: {{color: '#1e90ff', width: 3}},
+        fillcolor: 'rgba(30, 144, 255, 0.3)',
+        showlegend: false,
+        hovertemplate: '%{{x}}: %{{y:.1%}}<extra></extra>'
+    }});
+    
+    // Warm season (Apr-Jun) - Yellow
+    hvacTraces.push({{
+        x: months.slice(3, 6),
+        y: hvacValues.slice(3, 6),
+        type: 'scatter',
+        mode: 'lines',
+        fill: 'tozeroy',
+        line: {{color: '#daa520', width: 3}},
+        fillcolor: 'rgba(255, 215, 0, 0.3)',
+        showlegend: false,
+        hovertemplate: '%{{x}}: %{{y:.1%}}<extra></extra>'
+    }});
+    
+    // Hot season (Jul-Sep) - Red
+    hvacTraces.push({{
+        x: months.slice(6, 9),
+        y: hvacValues.slice(6, 9),
+        type: 'scatter',
+        mode: 'lines',
+        fill: 'tozeroy',
+        line: {{color: '#ff4500', width: 3}},
+        fillcolor: 'rgba(255, 69, 0, 0.3)',
+        showlegend: false,
+        hovertemplate: '%{{x}}: %{{y:.1%}}<extra></extra>'
+    }});
+    
+    // Cold season (Oct-Dec) - Blue
+    hvacTraces.push({{
+        x: months.slice(9, 12),
+        y: hvacValues.slice(9, 12),
+        type: 'scatter',
+        mode: 'lines',
+        fill: 'tozeroy',
+        line: {{color: '#1e90ff', width: 3}},
+        fillcolor: 'rgba(30, 144, 255, 0.3)',
+        showlegend: false,
+        hovertemplate: '%{{x}}: %{{y:.1%}}<extra></extra>'
+    }});
+    
+    // Add connecting lines between seasons
+    hvacTraces.push({{
+        x: months,
+        y: hvacValues,
+        type: 'scatter',
+        mode: 'lines',
+        line: {{color: '#2c3e50', width: 3}},
+        showlegend: false,
+        hovertemplate: '%{{x}}: %{{y:.1%}}<extra></extra>'
+    }});
     
     const hvacLayout = {{
         title: {{
@@ -2250,7 +2409,8 @@ for i, row in scoring.iterrows():
             title: '',
             tickformat: '.0%',
             showgrid: false,
-            rangemode: 'tozero'  // Auto-scale but start at 0
+            rangemode: 'tozero',
+            range: [0, Math.max(...hvacValues) * 1.2]  // Add space above for labels
         }},
         xaxis: {{
             showgrid: false
@@ -2258,19 +2418,56 @@ for i, row in scoring.iterrows():
         font: {{family: 'Arial, sans-serif'}},
         plot_bgcolor: '#ffffff',
         paper_bgcolor: 'white',
-        hovermode: 'x unified'
+        hovermode: 'x unified',
+        annotations: [
+            // Cool label - below the curve
+            {{
+                x: 1,
+                y: 0.05,
+                xref: 'x',
+                yref: 'paper',
+                text: 'Cool',
+                showarrow: false,
+                font: {{size: 16, color: '#1e90ff', weight: 'bold'}}
+            }},
+            // Warm label - below the curve
+            {{
+                x: 4,
+                y: 0.05,
+                xref: 'x',
+                yref: 'paper',
+                text: 'Warm',
+                showarrow: false,
+                font: {{size: 16, color: '#daa520', weight: 'bold'}}
+            }},
+            // Hot label - below the curve
+            {{
+                x: 7,
+                y: 0.05,
+                xref: 'x',
+                yref: 'paper',
+                text: 'Hot',
+                showarrow: false,
+                font: {{size: 16, color: '#ff4500', weight: 'bold'}}
+            }},
+            // Cold label - below the curve
+            {{
+                x: 10,
+                y: 0.05,
+                xref: 'x',
+                yref: 'paper',
+                text: 'Cold',
+                showarrow: false,
+                font: {{size: 16, color: '#1e90ff', weight: 'bold'}}
+            }}
+        ]
     }};
     
-    Plotly.newPlot('hvac_pct_chart', [hvacData], hvacLayout, {{
+    Plotly.newPlot('hvac_pct_chart', hvacTraces, hvacLayout, {{
         modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
         displaylogo: false,
         displayModeBar: true
     }});
-
-    // Add annual average caption below the chart
-    document.getElementById('hvac_pct_chart').insertAdjacentHTML('afterend', 
-        '<div style="text-align: center; margin-top: 10px; font-size: 16px; color: #666;">Annual Average: {annual_avg_hvac_pct * 100:.1f}%</div>'
-    );
     
     // ODCV Savings Chart
     const odcvElecSave = {{x: months, y: {odcv_elec_savings}, name: 'Elec', type: 'bar', marker: {{color: '#0066cc'}}}};
@@ -2314,17 +2511,6 @@ for i, row in scoring.iterrows():
         '<div style="text-align: center; margin-top: 10px; font-size: 16px; color: #666;">Annual Savings: $' + totalSavings.toFixed(0).replace(/\\B(?=(\\d{{3}})+(?!\\d))/g, ',') + '</div>'
     );
     
-    // PM2.5 Chart - Business Hours Only
-    const pm25Data = {{
-        x: {json.dumps(chart_dates)},
-        y: {json.dumps(chart_values)},
-        type: 'scatter',
-        mode: 'lines',
-        line: {{color: '#0066cc', width: 3}},
-        name: 'Daily Average PM2.5',
-        hovertemplate: '%{{x|%b %d, %Y}}<br>PM2.5: %{{y:.1f}} μg/m³<extra></extra>'
-    }};
-    
     // EPA Good threshold line
     const goodThreshold = {{
         x: {json.dumps(chart_dates)},
@@ -2335,9 +2521,39 @@ for i, row in scoring.iterrows():
         hoverinfo: 'skip'
     }};
 
-    Plotly.newPlot('pm25_chart', [pm25Data, goodThreshold], {{
+    // Create fill traces for areas above and below threshold
+    const dates = {json.dumps(chart_dates)};
+    const values = {json.dumps(chart_values)};
+    const threshold = 12;
+    
+    // Create PM2.5 data with fill below the line
+    const pm25DataWithFill = {{
+        x: dates,
+        y: values,
+        type: 'scatter',
+        mode: 'lines',
+        line: {{color: '#0066cc', width: 3}},
+        fill: 'tozeroy',
+        fillcolor: 'rgba(0, 102, 204, 0.15)',  // Light blue fill below the line
+        name: 'Daily Average PM2.5',
+        hovertemplate: '%{{x|%b %d, %Y}}<br>PM2.5: %{{y:.1f}} μg/m³<extra></extra>'
+    }};
+    
+    // Create yellow fill for areas above threshold
+    const worseFill = {{
+        x: dates.concat([...dates].reverse()),
+        y: values.map(v => Math.max(v, threshold)).concat(Array(dates.length).fill(threshold)),
+        fill: 'toself',
+        fillcolor: 'rgba(255, 235, 59, 0.15)',  // Lighter yellow
+        line: {{width: 0}},
+        showlegend: false,
+        hoverinfo: 'skip',
+        type: 'scatter'
+    }};
+
+    Plotly.newPlot('pm25_chart', [pm25DataWithFill, worseFill, goodThreshold], {{
         title: {{
-            text: 'Neighborhood PM2.5 Levels ({len(chart_dates) if chart_dates else 0}-Day History)',
+            text: 'Neighborhood Latest',
             y: 0.95
         }},
         yaxis: {{
@@ -2381,28 +2597,34 @@ for i, row in scoring.iterrows():
         // Manhattan grid even/odd logic for yaw
         function getBuildingYaw(address) {{
             const match = address.match(/\\b(\\d+)/);
-            if (!match) return 119;
+            if (!match) return 0;
             
             const buildingNumber = parseInt(match[1]);
             const isEven = buildingNumber % 2 === 0;
             const addressLower = address.toLowerCase();
             
-            // Manhattan grid is rotated ~29° clockwise from true north
-            const northOffset = -29;  // Was -2.45, now proper grid rotation
+            // Fix the yaw angles to actually look at buildings
+            // In pannellum: 0° = North, 90° = East, 180° = South, 270° = West
             
             if (addressLower.includes('street') || addressLower.includes(' st')) {{
-                // STREETS: Even = South side, Odd = North side
-                return isEven ? (29 + northOffset) : (209 + northOffset);
+                // STREETS run East-West
+                // For 111 E 58th St (odd building number), yaw should be -91.56° (looking west)
+                // Even building numbers are on SOUTH side, Odd on NORTH side
+                return isEven ? 90 : -91.56;
             }} else if (addressLower.includes('avenue') || addressLower.includes(' ave')) {{
-                // AVENUES: Even = West side, Odd = East side
-                return isEven ? (299 + northOffset) : (119 + northOffset);
+                // AVENUES run North-South
+                // Even numbers are on WEST side (need to look EAST = 90°)
+                // Odd numbers are on EAST side (need to look WEST = 270°)
+                return isEven ? 90 : 270;
             }} else if (addressLower.includes('broadway')) {{
-                // Broadway runs diagonal
-                return isEven ? (330 + northOffset) : (150 + northOffset);
+                // Broadway runs diagonal NE-SW
+                // Even = NW side (look SE = ~135°)
+                // Odd = SE side (look NW = ~315°)
+                return isEven ? 135 : 315;
             }}
             
-            // Default (assume street)
-            return isEven ? (29 + northOffset) : (209 + northOffset);
+            // Default to north-facing
+            return 0;
         }}
         
         // Function to initialize panorama
@@ -2416,13 +2638,16 @@ for i, row in scoring.iterrows():
             // Calculate yaw based on address
             const yaw = getBuildingYaw(address);
             
+            // Use yaw directly without adjustment
+            let adjustedYaw = yaw;
+            
             // Calculate pitch based on building height
             // We're at street level looking at buildings
-            // Based on: 737ft building = 40.10665551348826° pitch (optimal viewing angle)
-            // This gives a proportional pitch for all building heights
-            const pitch = Math.min(buildingHeight * (40.10665551348826 / 737), 60);  // Max 60° for very tall buildings
+            // Based on ideal pitch for 463.31ft building = 37.03° pitch
+            // This gives us 0.0799 degrees per foot of building height
+            const pitch = Math.min(buildingHeight * 0.0799, 60);  // Max 60° for very tall buildings
             
-            console.log(`Panorama {bbl}: Address="${{address}}", Height=${{buildingHeight}}ft, Yaw=${{yaw}}°, Pitch=${{pitch}}°`);
+            console.log(`Panorama {bbl}: Address="${{address}}", Height=${{buildingHeight}}ft, Yaw=${{yaw}}° (adjusted: ${{adjustedYaw}}°), Pitch=${{pitch}}°`);
             
             try {{
                 const viewer = pannellum.viewer('viewer-{bbl}', {{
@@ -2431,7 +2656,7 @@ for i, row in scoring.iterrows():
                     "autoLoad": true,
                     "autoRotate": 0,  // Will be started when user navigates to this slide
                     "pitch": pitch,
-                    "yaw": yaw,
+                    "yaw": adjustedYaw,
                     "hfov": 120,
                     "maxHfov": 120,
                     "minHfov": 30,
@@ -2537,10 +2762,11 @@ for i, row in scoring.iterrows():
     }}
     
     </script>
-    </div>
     
-    <div style="text-align: center; color: black; font-size: 14px; padding: 20px 0; font-family: 'Inter', sans-serif;">
-        Build: {datetime.now(pytz.timezone('America/Mexico_City')).strftime('%I:%M:%S %p CST')}{' | ' + sys.argv[1] if len(sys.argv) > 1 else ''}
+    </div><!-- End of container -->
+    
+    <div style="text-align: center; color: black; font-size: 14px; padding: 20px 0; font-family: 'Inter', sans-serif; border: none !important; box-shadow: none !important; background: transparent;">
+        Build: {datetime.now(pytz.timezone('America/Mexico_City')).strftime('%-d %b %Y %I:%M:%S %p CST')}{' | ' + sys.argv[1] if len(sys.argv) > 1 else ''}
     </div>
 </body>
 </html>

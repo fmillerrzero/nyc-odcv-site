@@ -111,12 +111,14 @@ html = f"""<!DOCTYPE html>
         .container {{ max-width: 1400px; margin: 0 auto; padding: 0 7.5%; }}
         
         .header {{
-            background: white;
+            background: url('https://rzero.com/wp-content/uploads/2025/02/bg-cta-bottom.jpg') center/cover;
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 118, 157, 0.08);
             margin-bottom: 30px;
             text-align: center;
+            position: relative;
+            color: white;
         }}
         
         .logo-header {{
@@ -128,14 +130,14 @@ html = f"""<!DOCTYPE html>
         }}
         
         h1 {{ 
-            color: var(--rzero-primary); 
+            color: white; 
             margin: 0;
             font-size: 2.5em;
             font-weight: 700;
         }}
         
         .subtitle {{ 
-            color: #666; 
+            color: rgba(255, 255, 255, 0.9); 
             margin: 10px 0 0 0;
             font-size: 1.1em;
         }}
@@ -210,11 +212,14 @@ html = f"""<!DOCTYPE html>
         
         .savings-medium {{
             color: #f57c00;
-            font-weight: 600;
+            font-weight: 700;
+            position: relative;
         }}
         
         .savings-low {{
             color: #616161;
+            font-weight: 700;
+            position: relative;
         }}
         
         tr:nth-child(-n+10) .savings-high {{
@@ -430,7 +435,7 @@ html += f"""
         <div style="background: #f8f8f8; border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
             <details>
                 <summary style="cursor: pointer; font-size: 1.5em; color: var(--rzero-primary); font-weight: 600; padding: 10px 0; list-style: none;">
-                    NYC Office Occupancy <span style="font-size: 0.8em; transition: transform 0.3s; display: inline-block;">▼</span>
+                    Office Occupancy Trend <span style="font-size: 0.8em; transition: transform 0.3s; display: inline-block;">▼</span>
                 </summary>
                 <div style="margin-top: 15px;">
                     <div style="display: flex; gap: 25px; font-size: 0.95em; margin-bottom: 20px; justify-content: center;">
