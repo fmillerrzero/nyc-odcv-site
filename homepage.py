@@ -292,7 +292,6 @@ html = f"""<!DOCTYPE html>
             border-collapse: collapse; 
             box-shadow: 0 4px 20px rgba(0, 118, 157, 0.08);
             border-radius: 12px;
-            overflow: hidden;
         }}
         
         th {{ 
