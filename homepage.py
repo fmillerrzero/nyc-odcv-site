@@ -501,7 +501,7 @@ html += f"""
             Showing <span id="visibleCount">{total_buildings}</span> of <span id="totalCount">{total_buildings}</span> buildings
         </div>
         
-        <div class="table-wrapper" style="overflow-x: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 118, 157, 0.08); position: relative; max-height: calc(100vh - 200px); overflow-y: auto; contain: layout style paint;">
+        <div class="table-wrapper" style="overflow-x: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 118, 157, 0.08); position: relative; max-height: calc(100vh - 200px); overflow-y: auto;">
         <table id="buildingTable" style="width: 100%; background: white; border-collapse: collapse; min-width: 900px;">
         <thead style="position: sticky; top: 0; z-index: 1000; background: var(--rzero-primary); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
         <tr>
@@ -536,6 +536,14 @@ for i, row in scoring.iterrows():
                 alt_addr = address_info.iloc[0][col]
                 if pd.notna(alt_addr) and alt_addr:
                     search_terms.append(str(alt_addr).lower())
+        
+        # Add building names from CSV
+        building_name_cols = ['primary_building_name', 'alternative_name_1', 'alternative_name_2', 'alternative_name_3']
+        for col in building_name_cols:
+            if col in address_info.columns:
+                building_name = address_info.iloc[0][col]
+                if pd.notna(building_name) and building_name:
+                    search_terms.append(str(building_name).lower())
         
         address = main_address
     else:
@@ -1035,7 +1043,7 @@ html += f"""
     </button>
     
     <div style="text-align: center; color: black; font-size: 14px; padding: 20px 0;">
-        Build: {datetime.now(pytz.timezone('America/Mexico_City')).strftime('%I:%M:%S %p CST')}{' | ' + sys.argv[1] if len(sys.argv) > 1 else ''}
+        Build: {datetime.now(pytz.timezone('America/Mexico_City')).strftime('%I:%M:%S %p CST')}{' | ' + sys.argv[1] if len(sys.argv) > 1 else ''} | STICKY FIX
     </div>
 </body>
 </html>
