@@ -303,6 +303,9 @@ html = f"""<!DOCTYPE html>
             cursor: pointer; 
             font-weight: 600;
             white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }}
         
         th:hover {{ background: var(--rzero-primary-dark); }}
