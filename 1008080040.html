@@ -1,0 +1,1998 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>100 W 33rd St, New York, NY 10001 - ODCV Analysis (v1754370111)</title>
+    <link rel="icon" type="image/png" href="https://rzero.com/wp-content/themes/rzero/build/images/favicons/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Preload aerial video for faster playback -->
+    <link rel="preload" 
+          as="video" 
+          href="https://aerial-videos-forrest.s3.us-east-2.amazonaws.com/1008080040_aerial.mp4"
+          type="video/mp4"
+          crossorigin="anonymous">
+    <style>
+        :root {
+            --rzero-primary: #0066cc;
+            --rzero-secondary: #0052a3;
+            --text-light: #6b7280;
+            --background: #f4fbfd;
+            --card-bg: white;
+            --border: #e5e7eb;
+        }
+        
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: var(--background); 
+            color: #1a202c;
+            line-height: 1.6;
+        }
+        
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0;
+        }
+        
+        .logo-header {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .rzero-logo {
+            width: 200px;
+            height: 50px;
+        }
+        
+        h1 {
+            color: var(--rzero-primary);
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+        
+        /* Building Identity Bar */
+        .building-identity {
+            padding: 15px 40px;
+            background: #f8f8f8;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .neighborhood-badge {
+            font-size: 1.4em;
+            color: var(--rzero-primary);
+            font-weight: 600;
+        }
+
+        .building-stats {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .stat-item {
+            color: #666;
+            font-size: 0.95em;
+        }
+        
+        /* Green Rating Badges */
+        .green-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .green-badge.platinum {
+            background: #e5e4e2;
+            color: #333;
+            border: 1px solid #999;
+        }
+
+        .green-badge.gold {
+            background: #ffd700;
+            color: #333;
+        }
+
+        .green-badge.silver {
+            background: #c0c0c0;
+            color: #333;
+        }
+
+        .green-badge.certified {
+            background: #28a745;
+            color: white;
+        }
+
+        .green-badge:not(.platinum):not(.gold):not(.silver):not(.certified) {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: white;
+            box-shadow: 0 4px 20px rgba(0, 118, 157, 0.08);
+            padding: 0;
+            border-bottom: none !important;
+        }
+        
+        /* Section 0 - Title */
+        .title-section {
+            background: url('https://rzero.com/wp-content/uploads/2025/02/bg-cta-bottom.jpg') center/cover;
+            color: white;
+            padding: 80px 15% 30px 15%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 3rem;
+            position: relative;
+        }
+        
+        .back { 
+            margin: 20px 0; 
+            padding: 0 20px;
+        }
+        .back a { color: var(--rzero-primary); text-decoration: none; font-weight: 500; }
+        .back a:hover { text-decoration: underline; }
+        
+        /* Section styling */
+        .section { 
+            padding: 40px 5%; 
+            background: white;
+            position: relative;
+            width: 100%;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        
+        .section:nth-child(even) {
+            background: #f8fafb;
+        }
+        
+        .section:last-child {
+            border-bottom: none !important;
+        }
+        
+        /* Remove any borders from last section */
+        .section:last-of-type {
+            border-bottom: none !important;
+        }
+        
+        .section-gray:last-child {
+            border-bottom: none !important;
+        }
+        
+        /* Ensure no borders on container */
+        .container {
+            border: none !important;
+        }
+        
+        /* Override backgrounds to ensure proper alternating pattern */
+        .section-white {
+            background: white !important;
+        }
+        
+        .section-gray {
+            background: #f8fafb !important;
+        }
+        
+        
+        .section-header { 
+            font-size: 2em; 
+            color: var(--rzero-primary); 
+            margin-bottom: 40px; 
+            font-weight: 700;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(0, 118, 157, 0.2);
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .page { 
+            margin-bottom: 40px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .page-title { 
+            font-size: 1.3em; 
+            color: var(--text-dark); 
+            margin-bottom: 20px; 
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .page-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: #333;
+            border-radius: 2px;
+        }
+        
+        /* Stats - Prospector Style */
+        .stat { 
+            margin: 15px 0; 
+            display: flex; 
+            align-items: baseline;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 102, 204, 0.08);
+        }
+        
+        .stat:last-child { border-bottom: none; }
+        
+        .stat-label { 
+            font-weight: 500; 
+            color: #333; 
+            min-width: 200px; 
+            font-size: 1em;
+        }
+        
+        .stat-value { 
+            font-size: 1.1em; 
+            color: #555; 
+            font-weight: 400;
+        }
+        
+        .penalty { color: #c41e3a; }
+        .savings { color: #38a169; }
+        
+        /* Highlight boxes */
+        .highlight-box { 
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); 
+            padding: 40px; 
+            border-radius: 12px; 
+            text-align: center; 
+            margin: 20px 0;
+            border: 1px solid #2196f3;
+        }
+        
+        .highlight-box h4 { 
+            margin: 0 0 15px 0; 
+            color: var(--rzero-primary); 
+            font-size: 1.4em; 
+        }
+        
+        .highlight-box div { 
+            margin: 8px 0; 
+            font-size: 1.1em; 
+        }
+        
+        .highlight-score { 
+            font-size: 3.5em; 
+            font-weight: 700; 
+            color: var(--rzero-primary); 
+            margin: 10px 0; 
+        }
+        
+        /* Carousel styles */
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            height: 675px;
+            overflow: hidden;
+            border-radius: 12px;
+            margin: 20px 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .carousel-track {
+            display: flex;
+            transition: transform 0.3s ease;
+            height: 100%;
+        }
+        
+        .carousel-slide {
+            min-width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .carousel-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #f0f0f0;
+        }
+        
+        /* Carousel Navigation */
+        .fullscreen-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 20px;
+            z-index: 10;
+            transition: background 0.3s ease;
+        }
+        
+        .fullscreen-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+        
+        .download-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+        
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 20px;
+            cursor: pointer;
+            font-size: 24px;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+            z-index: 5;
+        }
+        
+        .carousel-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+        
+        .carousel-prev { left: 20px; }
+        .carousel-next { right: 20px; }
+        
+        .carousel-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 5;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .dot.active {
+            background: white;
+        }
+        
+        .dot:hover {
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Professional Class Badge from Prospector */
+        .class-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 1.8em;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent);
+        }
+
+        .class-badge::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        .class-A { 
+            background-color: #FFD700;
+            background-image: linear-gradient(135deg, #FFED4E 0%, #FFD700 50%, #B8860B 100%);
+            color: #6B4423;
+            border: 2px solid #B8860B;
+        }
+
+        .class-B { 
+            background-color: #C0C0C0;
+            background-image: linear-gradient(135deg, #E8E8E8 0%, #C0C0C0 50%, #8B8B8B 100%);
+            color: #2C2C2C;
+            border: 2px solid #8B8B8B;
+        }
+
+        .class-C { 
+            background-color: #CD7F32;
+            background-image: linear-gradient(135deg, #E89658 0%, #CD7F32 50%, #8B4513 100%);
+            color: #4A2511;
+            border: 2px solid #8B4513;
+        }
+
+        .class-D, .class-E, .class-F { 
+            background-color: #8B7355;
+            background-image: linear-gradient(135deg, #A0826D 0%, #8B7355 50%, #6B4423 100%);
+            color: #FFFFFF;
+            border: 2px solid #6B4423;
+        }
+        
+        /* Energy Grade Styling - NYC LL97 Style */
+        .energy-grade {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 1.4em;
+            border: 2px solid;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .grade-A { 
+            background: #4CAF50; 
+            color: white; 
+            border-color: #388E3C;
+        }
+        .grade-B { 
+            background: #FFEB3B; 
+            color: #333; 
+            border-color: #F9A825;
+        }
+        .grade-C { 
+            background: #FF9800; 
+            color: white; 
+            border-color: #EF6C00;
+        }
+        .grade-D { 
+            background: #F44336; 
+            color: white; 
+            border-color: #C62828;
+        }
+        .grade-F { 
+            background: #9E9E9E; 
+            color: white; 
+            border-color: #616161;
+        }
+        .grade-N, .grade-NA { 
+            background: #E1BEE7; 
+            color: #4A148C; 
+            border-color: #BA68C8;
+        }
+        
+        /* Carousel Loading Animation */
+        .carousel-slide iframe {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .carousel-slide iframe.loaded {
+            opacity: 1;
+        }
+        
+        /* Videos should be visible immediately */
+        .carousel-slide video {
+            opacity: 1;
+        }
+        
+        
+        /* Chart Controls from Prospector */
+        .chart-carousel { position: relative; }
+        .chart-toggle { 
+            display: flex; 
+            justify-content: center; 
+            gap: 10px; 
+            margin-bottom: 20px;
+        }
+        .toggle-btn {
+            padding: 8px 20px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        .toggle-btn.active {
+            background: var(--rzero-primary);
+            color: white;
+            border-color: var(--rzero-primary);
+        }
+        .toggle-btn:hover {
+            opacity: 0.8;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+        }
+        .dot.active {
+            background: white;
+        }
+        
+        .fullscreen-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 20px;
+            z-index: 10;
+            transition: background 0.3s ease;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+        
+        .class-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 1.8em;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .class-A { 
+            background: linear-gradient(135deg, #FFED4E 0%, #FFD700 50%, #B8860B 100%);
+            color: #6B4423;
+            border: 2px solid #B8860B;
+        }
+        
+        .class-B { 
+            background: linear-gradient(135deg, #E8E8E8 0%, #C0C0C0 50%, #8B8B8B 100%);
+            color: #2C2C2C;
+            border: 2px solid #8B8B8B;
+        }
+        
+        .class-C { 
+            background: linear-gradient(135deg, #E89658 0%, #CD7F32 50%, #8B4513 100%);
+            color: #4A2511;
+            border: 2px solid #8B4513;
+        }
+        
+        
+        .yes { color: #38a169; font-weight: bold; }
+        .no { color: #c41e3a; font-weight: bold; }
+        .urgent { color: #c41e3a; font-weight: bold; }
+        .bas { color: #38a169; font-weight: 600; }
+        .no-bas { color: #c41e3a; font-weight: 600; }
+    </style>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
+    <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+    <!-- Preload aerial video for faster playback -->
+    <link rel="preload" as="video" href="https://aerial-videos-forrest.s3.us-east-2.amazonaws.com/1008080040_aerial.mp4">
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation Bar -->
+        <!-- Section 0.0 - Title -->
+        <div class="title-section">
+            <a href="index.html" style="text-decoration: none; display: block; position: absolute; top: 0; left: 0; z-index: 10;">
+                <div style="padding: 15px 40px; display: flex; align-items: center; gap: 10px; color: white; cursor: pointer; transition: all 0.3s ease;"
+                     onmouseover="this.style.background='rgba(255,255,255,0.1)'" 
+                     onmouseout="this.style.background='transparent'">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s ease;"
+                         onmouseover="this.style.transform='translateX(-5px)'" 
+                         onmouseout="this.style.transform='translateX(0)'">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    <span style="font-size: 16px; font-weight: 500; opacity: 0.9;">Back to Rankings</span>
+                </div>
+            </a>
+            <div style="display: flex; flex-direction: column; justify-content: center;">
+                <div style="display: flex; align-items: baseline; gap: 1rem;">
+                    <span style="background: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 25px; font-size: 1.6em; font-weight: 700;">#43</span>
+                    <span style="font-size: 2.5em; font-weight: 700; color: white; line-height: 1.2;">100 W 33rd St, 10001</span>
+                </div>
+                <div style="margin: 0; opacity: 0.9; font-size: 1.1em; margin-left: calc(1.6em * 1.5 + 30px + 1rem); margin-top: -0.2rem;">
+                    <span>Midtown South-Flatiron-Union Square</span>
+                </div>
+            </div>
+            <div style="text-align: right; min-width: 200px; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 2.5em; font-weight: 700; line-height: 1; color: white;">$147,648</div>
+                <div style="font-size: 1.1em; opacity: 0.9; margin-top: 0.5rem;">2026 ODCV Savings</div>
+                
+            </div>
+        </div>
+        
+        <!-- Section 1: General -->
+        <div class="section section-white">
+            <div class="section-content">
+                <h2 class="section-header">Image Gallery</h2>
+                
+                <div class="page">
+                <h3 class="page-title" id="image-gallery-title-1008080040">Static: <span style="color: #555;">Marketing</span></h3>
+                <div class="carousel-container">
+                    <div class="carousel-track" id="carousel-1008080040">
+                        <div class="carousel-slide active" data-image-type="hero">
+                            <div style="position: relative; width: 100%; height: 100%;">
+                                <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/1008080040/1008080040_hero.jpg" 
+                                     style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
+                                     onerror="handleImageError(this, '1008080040', 'hero')">
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 8px 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">⬇</button>
+                                <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
+                            </div>
+                        </div>
+                        <div class="carousel-slide" data-image-type="roadview">
+                            <div style="position: relative; width: 100%; height: 100%;">
+                                <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/1008080040/1008080040_roadview.jpg" 
+                                     style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
+                                     onerror="handleImageError(this, '1008080040', 'roadview')">
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 8px 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">⬇</button>
+                                <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
+                            </div>
+                        </div>
+                        <div class="carousel-slide" data-image-type="street">
+                            <div style="position: relative; width: 100%; height: 100%;">
+                                <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/1008080040/1008080040_street.jpg" 
+                                     style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
+                                     onerror="handleImageError(this, '1008080040', 'street')">
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 8px 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">⬇</button>
+                                <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
+                            </div>
+                        </div>
+                        <div class="carousel-slide" data-image-type="satellite">
+                            <div style="position: relative; width: 100%; height: 100%;">
+                                <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/1008080040/1008080040_satellite.jpg" 
+                                     style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
+                                     onerror="handleImageError(this, '1008080040', 'satellite')">
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 8px 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">⬇</button>
+                                <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
+                            </div>
+                        </div>
+                        <div class="carousel-slide" data-image-type="equipment">
+                            <div style="position: relative; width: 100%; height: 100%;">
+                                <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/1008080040/1008080040_equipment.jpg" 
+                                     style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
+                                     onerror="handleImageError(this, '1008080040', 'equipment')">
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 8px 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">⬇</button>
+                                <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
+                            </div>
+                        </div>
+                        <div class="carousel-slide" data-image-type="double">
+                            <div style="position: relative; width: 100%; height: 100%;">
+                                <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/1008080040/1008080040_double.jpg" 
+                                     style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
+                                     onerror="handleImageError(this, '1008080040', 'double')">
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 8px 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">⬇</button>
+                                <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
+                            </div>
+                        </div>
+                        <div class="carousel-slide" data-image-type="stack">
+                            <div style="position: relative; width: 100%; height: 100%;">
+                                <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/1008080040/1008080040_stack.jpg" 
+                                     style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
+                                     onerror="handleImageError(this, '1008080040', 'stack')">
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 8px 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">⬇</button>
+                                <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="carousel-btn carousel-prev" onclick="moveCarousel('1008080040', -1)">❮</button>
+                    <button class="carousel-btn carousel-next" onclick="moveCarousel('1008080040', 1)">❯</button>
+                    <div class="carousel-dots" id="carousel-dots-1008080040">
+                        <span class="dot active" onclick="goToSlide('1008080040', 0)"></span>
+                        <span class="dot" onclick="goToSlide('1008080040', 1)"></span>
+                        <span class="dot" onclick="goToSlide('1008080040', 2)"></span>
+                        <span class="dot" onclick="goToSlide('1008080040', 3)"></span>
+                        <span class="dot" onclick="goToSlide('1008080040', 4)"></span>
+                        <span class="dot" onclick="goToSlide('1008080040', 5)"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="page">
+                <h3 class="page-title" id="interactive-views-title-1008080040">Dynamic: <span style="color: #555;">Drone Footage</span></h3>
+                <div class="carousel-container">
+                    <div class="carousel-track" id="interactive-carousel-1008080040">
+                        <div class="carousel-slide" data-type="video">
+                            <div id="aerial-video-1008080040" style="width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; position: relative;">
+                    <video controls autoplay loop muted preload="auto" style="width: 100%; height: 100%; object-fit: contain;" 
+                           onerror="this.style.display='none'; document.getElementById('video-error-1008080040').style.display='flex';">
+                        <source src="https://aerial-videos-forrest.s3.us-east-2.amazonaws.com/1008080040_aerial.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <div id="video-error-1008080040" style="display: none; width: 100%; height: 100%; background: #f0f0f0; align-items: center; justify-content: center; flex-direction: column; position: absolute; top: 0; left: 0;">
+                        <div style="text-align: center; color: #666;">
+                            <h3>Aerial Video Unavailable</h3>
+                            <p>The aerial view for this building is being processed</p>
+                            <p style="font-size: 0.9em;">Please check back later</p>
+                        </div>
+                    </div>
+                    <script>
+                        // Ensure video autoplays on page load
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const video = document.querySelector('#aerial-video-1008080040 video');
+                            if (video) {
+                                video.play().catch(e => console.log('Autoplay prevented:', e));
+                            }
+                        });
+                    </script>
+                </div>
+                        </div>
+                        <div class="carousel-slide" data-type="pano">
+                            <div id="panorama-1008080040" style="width: 100%; height: 675px; background: #f0f0f0; position: relative;">
+                                <div id="viewer-1008080040" style="width: 100%; height: 100%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                    <!-- Navigation Controls -->
+                    <button class="carousel-btn carousel-prev" onclick="moveInteractiveCarousel('1008080040', -1)" title="Previous">❮</button>
+                    <button class="carousel-btn carousel-next" onclick="moveInteractiveCarousel('1008080040', 1)" title="Next">❯</button>
+                    
+                    <!-- Dot Navigation with Labels -->
+                    <div class="carousel-dots">
+                        <span class="dot active" onclick="goToInteractiveSlide('1008080040', 0)" title="Aerial Video"></span>
+                        <span class="dot" onclick="goToInteractiveSlide('1008080040', 1)" title="360° Virtual Tour"></span>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Building Overview Section -->
+        <div class="section section-gray">
+            <div class="section-content">
+                <h2 class="section-header">Building Overview</h2>
+                
+                <div class="page">
+                <h3 class="page-title">Commercial</h3>
+                <div class="stat">
+                    <span class="stat-label">Class: </span>
+                    <span class="stat-value"><span class="class-badge class-B">B</span></span>
+                </div>
+                <div class='stat'><span class='stat-label'>Owner & Manager: </span><span class='stat-value'>Vornado Realty Trust <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/Logos/Vornado_Realty_Trust.png" style="height:45px;margin-left:10px;vertical-align:middle;"></span></div>
+                <div class='stat'><span class='stat-label'>Owner Contact: </span><span class='stat-value'>Jared Silverman • (212) 894-7458</span></div>
+                
+                <div class="stat">
+                    <span class="stat-label">% Leased: </span>
+                    <span class="stat-value">100%</span>
+                </div>
+                
+            </div>
+            
+            <div class="page">
+                <h3 class="page-title">Property</h3>
+                <div class="stat">
+                    <span class="stat-label">Units: </span>
+                    <span class="stat-value">82</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Floors: </span>
+                    <span class="stat-value">12</span>
+                </div>
+                
+                <div class="stat">
+                    <span class="stat-label">Total Floor Area: </span>
+                    <span class="stat-value">1,123,365 sq ft</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Office Floor Area: </span>
+                    <span class="stat-value">766,718 sq ft (68% of total)</span>
+                </div>
+            </div>
+            
+            <div class="page">
+                <h3 class="page-title">Equipment</h3>
+                <div class="stat">
+                    <span class="stat-label">Last Renovated: </span>
+                    <span class="stat-value">2016</span>
+                </div>
+                
+                <div class="stat">
+                    <span class="stat-label">BMS Controls: </span>
+                    <span class="stat-value"><span style="font-weight: normal;">Ventilation</span><span>, </span><span style="color: #ff6600; font-weight: normal;">Heating</span><span>, </span><span style="color: #0066cc; font-weight: normal;">Cooling</span></span>
+                </div>
+                <div class='stat'><span class='stat-label'>Heating System: </span><span class='stat-value'>District Steam</span></div>
+                <div class='stat'><span class='stat-label'>Cooling System: </span><span class='stat-value'>Plant</span></div>
+                <div class='stat'><span class='stat-label'>Rooftop System: </span><span class='stat-value'>Cooling Towers: 9</span></div>
+            </div>
+            </div>
+        </div>
+        
+        
+        
+        <!-- Section 2: Building -->
+        <div class="section section-gray">
+            <div class="section-content">
+                <h2 class="section-header">Energy Efficiency</h2>
+                
+                <!-- Page 2.0 - Efficiency -->
+                <div class="page">
+                <h3 class="page-title">Performance</h3>
+                <div class="stat">
+                    <span class="stat-label">ENERGY STAR Score: </span>
+                    <div style="display: flex; align-items: center; gap: 30px;">
+                        <svg viewBox="0 0 200 120" style="width: 200px; height: 120px;">
+                            <!-- Colored sections -->
+                            <path d="M 20 100 A 80 80 0 0 1 73 30" fill="none" stroke="#c41e3a" stroke-width="20"/>
+                            <path d="M 73 30 A 80 80 0 0 1 127 30" fill="none" stroke="#ffc107" stroke-width="20"/>
+                            <path d="M 127 30 A 80 80 0 0 1 180 100" fill="none" stroke="#38a169" stroke-width="20"/>
+                            <!-- Score number in center -->
+                            <text x="100" y="85" text-anchor="middle" font-size="36" font-weight="bold" fill="#38a169">92</text>
+                            <!-- Labels -->
+                            <text x="20" y="115" text-anchor="middle" font-size="12" fill="#666">0</text>
+                            <text x="180" y="115" text-anchor="middle" font-size="12" fill="#666">100</text>
+                        </svg>
+                        <div>
+                            <div style="font-size: 1.2em; color: #666; font-weight: 500;">Target Score: 75 (self reported)</div>
+                            <div style="font-size: 1.1em; margin-top: 5px;"><div style="color: #38a169;">✓ Exceeds target by 17 points</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">LL33 Grade: </span>
+                    <span class="stat-value"><span class="energy-grade grade-A">A</span></span>
+                </div>
+            </div>
+            
+            
+                <div class="page">
+                    <h3 class="page-title">LL97 Compliance</h3>
+                    <div class="stat">
+                        <span class="stat-label">2024-2029 Status: </span>
+                        <span class="stat-value"><span class="yes">Compliant</span></span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Current Emissions: </span>
+                        <span class="stat-value">2,764 tCO2e</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">2024-2029 Limit: </span>
+                        <span class="stat-value">9,109 tCO2e</span>
+                    </div>
+                </div>
+            
+            </div>
+        </div>
+        
+        <!-- Section 3: Energy Consumption -->
+        <div class="section section-white">
+            <div class="section-content">
+                <h2 class="section-header">Energy Consumption</h2>
+                
+                <div class="page">
+                <h3 class="page-title">Usage</h3>
+            <div class="chart-carousel">
+                <div class="chart-toggle">
+                    <button class="toggle-btn active" onclick="showChart('usage', 'building')">Building</button>
+                    <button class="toggle-btn" onclick="showChart('usage', 'office')">Office</button>
+                </div>
+                <div id="building_usage_container" class="chart-container">
+                    <div id="energy_chart" style="width: 100%; height: 400px;"></div>
+                </div>
+                <div id="office_usage_container" class="chart-container" style="display: none;">
+                    <div id="office_energy_chart" style="width: 100%; height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="page">
+            <h3 class="page-title">Cost</h3>
+            <div class="chart-carousel">
+                <div class="chart-toggle">
+                    <button class="toggle-btn active" onclick="showChart('cost', 'building')">Building</button>
+                    <button class="toggle-btn" onclick="showChart('cost', 'office')">Office</button>
+                </div>
+                <div id="building_cost_container" class="chart-container">
+                    <div id="energy_cost_chart" style="width: 100%; height: 400px;"></div>
+                </div>
+                <div id="office_cost_container" class="chart-container" style="display: none;">
+                    <div id="office_cost_chart" style="width: 100%; height: 400px;"></div>
+                </div>
+            </div>
+            </div>
+        </div>
+        
+        <!-- Section 4: ODCV -->
+        <div class="section section-gray">
+            <div class="section-content">
+                <h2 class="section-header">HVAC Analysis</h2>
+                
+                <div class="page">
+                <h3 class="page-title">Usage Disaggregation</h3>
+                <div id="hvac_pct_chart" style="width: 100%; height: 400px;"></div>
+            </div>
+            
+            <div class="page">
+                <h3 class="page-title">Savings Potential</h3>
+                <div id="odcv_savings_chart" style="width: 100%; height: 400px;"></div>
+            </div>
+            </div>
+        </div>
+        
+        <!-- Air Quality Section -->
+        <div class="section section-gray">
+            <div class="section-content">
+                <h2 class="section-header">Air Quality</h2>
+                
+                <div class="page">
+                <h3 class="page-title">Outdoor Pollution</h3>
+            
+            <div class="iaq-summary" style="margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
+                <div class="iaq-stat-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 80px; text-align: center; max-width: 500px; margin: 0 auto;">
+                    <div class="iaq-stat">
+                        <div class="iaq-label" style="font-size: 12px; color: #6c757d; margin-bottom: 4px;">Max</div>
+                        <div class="iaq-value" style="font-size: 24px; font-weight: bold; color: #c41e3a;">17.9 μg/m³</div>
+                        <div class="iaq-category" style="font-size: 11px; color: #6c757d; margin-top: 4px;">Daily Average</div>
+                    </div>
+                    <div class="iaq-stat">
+                        <div class="iaq-label" style="font-size: 12px; color: #6c757d; margin-bottom: 4px;">Average</div>
+                        <div class="iaq-value" style="font-size: 24px; font-weight: bold; color: #00e400;">7.6 μg/m³</div>
+                        <div class="iaq-category" style="font-size: 11px; color: #6c757d; margin-top: 4px;">Daily Average</div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <div id="pm25_chart" style="width: 100%; height: 400px;"></div>
+            </div>
+            </div>
+        </div>
+        
+    <script>
+    // Unit conversion functions
+    function kBtuToKwh(kbtu) { return kbtu / 3.412; }
+    function kBtuToTherms(kbtu) { return kbtu / 100; }
+    function kBtuToLbs(kbtu) { return kbtu / 1.194; }
+    
+    // Toggle chart function
+    function showChart(type, view) {
+        let buildingContainer, officeContainer;
+        
+        if (type === 'usage') {
+            buildingContainer = document.getElementById('building_usage_container');
+            officeContainer = document.getElementById('office_usage_container');
+        } else if (type === 'cost') {
+            buildingContainer = document.getElementById('building_cost_container');
+            officeContainer = document.getElementById('office_cost_container');
+        }
+        
+        const buttons = event.target.parentElement.querySelectorAll('.toggle-btn');
+        
+        buttons.forEach(btn => {
+            btn.style.background = '#f0f0f0';
+            btn.style.color = '#333';
+            btn.style.border = '1px solid #ddd';
+            btn.classList.remove('active');
+        });
+        
+        event.target.classList.add('active');
+        event.target.style.background = '#0066cc';
+        event.target.style.color = 'white';
+        event.target.style.border = 'none';
+        
+        if (view === 'building') {
+            buildingContainer.style.display = 'block';
+            officeContainer.style.display = 'none';
+        } else {
+            buildingContainer.style.display = 'none';
+            officeContainer.style.display = 'block';
+            
+            // Resize the office chart after making it visible
+            // This fixes the "squished" chart issue
+            setTimeout(() => {
+                if (type === 'usage' && window.Plotly) {
+                    Plotly.Plots.resize('office_energy_chart');
+                } else if (type === 'cost' && window.Plotly) {
+                    Plotly.Plots.resize('office_cost_chart');
+                }
+            }, 10);  // Small delay to ensure DOM update
+        }
+    }
+    
+    let carouselIndex = {};
+    let hiddenSlides = {};
+    
+    // Handle missing images by hiding slides
+    function handleImageError(img, bbl, imageType) {
+        const slide = img.closest('.carousel-slide');
+        const track = slide.parentElement;
+        const allSlides = Array.from(track.querySelectorAll('.carousel-slide'));
+        const slideIndex = allSlides.indexOf(slide);
+        
+        // Hide the slide
+        slide.style.display = 'none';
+        
+        // Track hidden slides
+        if (!hiddenSlides[bbl]) hiddenSlides[bbl] = [];
+        hiddenSlides[bbl].push(slideIndex);
+        
+        // Update dots
+        updateCarouselDots(bbl);
+        
+        // If current slide is hidden, move to next visible
+        if (carouselIndex[bbl] === slideIndex) {
+            moveCarousel(bbl, 1);
+        }
+        
+        console.log(`Image not found: ${bbl}_${imageType}.jpg`);
+    }
+    
+    // Update dots to only show for visible slides
+    function updateCarouselDots(bbl) {
+        const track = document.getElementById(`carousel-${bbl}`);
+        const slides = Array.from(track.querySelectorAll('.carousel-slide'));
+        const dotsContainer = document.getElementById(`carousel-dots-${bbl}`);
+        
+        // Clear existing dots
+        dotsContainer.innerHTML = '';
+        
+        // Add dots only for visible slides
+        slides.forEach((slide, index) => {
+            if (slide.style.display !== 'none') {
+                const dot = document.createElement('span');
+                dot.className = 'dot';
+                if (index === carouselIndex[bbl]) dot.classList.add('active');
+                dot.onclick = () => goToSlide(bbl, index);
+                dotsContainer.appendChild(dot);
+            }
+        });
+    }
+    
+    function moveCarousel(bbl, direction) {
+        const track = document.getElementById(bbl.includes('carousel') ? bbl : `carousel-${bbl}`);
+        const slides = Array.from(track.querySelectorAll('.carousel-slide'));
+        const visibleSlides = slides.filter(s => s.style.display !== 'none');
+        
+        if (visibleSlides.length === 0) return;
+        
+        if (!carouselIndex[bbl]) carouselIndex[bbl] = 0;
+        
+        // Find next visible slide
+        let currentIndex = carouselIndex[bbl];
+        let attempts = 0;
+        do {
+            currentIndex += direction;
+            if (currentIndex < 0) currentIndex = slides.length - 1;
+            if (currentIndex >= slides.length) currentIndex = 0;
+            attempts++;
+        } while (slides[currentIndex].style.display === 'none' && attempts < slides.length);
+        
+        carouselIndex[bbl] = currentIndex;
+        track.style.transform = `translateX(-${currentIndex * 100}%)`;
+        
+        // Update title based on current slide
+        const currentSlide = slides[currentIndex];
+        const imageType = currentSlide.getAttribute('data-image-type');
+        const actualBbl = bbl.includes('carousel') ? bbl.replace('carousel-', '') : bbl;
+        const titleElement = document.getElementById(`image-gallery-title-${actualBbl}`);
+        if (titleElement) {
+            const imageTypeMap = {
+                'hero': 'Marketing',
+                'roadview': 'Streetview (Cyclomedia)',
+                'street': 'Streetview (Google)',
+                'satellite': 'Satellite (Unannotated)',
+                'equipment': 'Satellite (Annotated)',
+                'double': 'Side-by-Side',
+                'stack': 'Stacking Diagram'
+            };
+            titleElement.innerHTML = `Static: <span style="color: #555;">${imageTypeMap[imageType] || 'Unknown'}</span>`;
+        }
+        
+        // Update dots for visible slides only
+        updateCarouselDots(bbl.includes('carousel') ? bbl.replace('carousel-', '') : bbl);
+    }
+    
+    function goToSlide(bbl, index) {
+        const track = document.getElementById(`carousel-${bbl}`);
+        const slides = Array.from(track.querySelectorAll('.carousel-slide'));
+        
+        // Make sure target slide is visible
+        if (slides[index] && slides[index].style.display !== 'none') {
+            carouselIndex[bbl] = index;
+            track.style.transform = `translateX(-${index * 100}%)`;
+            
+            // Update title based on current slide
+            const currentSlide = slides[index];
+            const imageType = currentSlide.getAttribute('data-image-type');
+            const titleElement = document.getElementById(`image-gallery-title-${bbl}`);
+            if (titleElement) {
+                const imageTypeMap = {
+                    'hero': 'Marketing',
+                    'roadview': 'Streetview (Cyclomedia)',
+                    'street': 'Streetview (Google)',
+                    'satellite': 'Satellite (Unannotated)',
+                    'equipment': 'Satellite (Annotated)',
+                    'double': 'Side-by-Side',
+                    'stack': 'Stacking Diagram'
+                };
+                titleElement.innerHTML = `Static: <span style="color: #555;">${imageTypeMap[imageType] || 'Unknown'}</span>`;
+            }
+            
+            updateCarouselDots(bbl);
+        }
+    }
+    
+    function toggleFullscreen(button) {
+        const container = button.parentElement;
+        const img = container.querySelector('img');
+        
+        if (!document.fullscreenElement) {
+            if (container.requestFullscreen) {
+                container.requestFullscreen();
+            } else if (container.webkitRequestFullscreen) {
+                container.webkitRequestFullscreen();
+            }
+            button.innerHTML = '✕';
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+            button.innerHTML = '⛶';
+        }
+    }
+    
+    async function downloadImage(button) {
+        const img = button.parentElement.querySelector('img');
+        const imageUrl = img.src;
+        const fileName = imageUrl.split('/').pop();
+        
+        try {
+            // Fetch the image as a blob
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            
+            // Create a blob URL
+            const blobUrl = URL.createObjectURL(blob);
+            
+            // Create and click the download link
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = fileName;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            
+            // Clean up
+            document.body.removeChild(link);
+            URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+            console.error('Download failed:', error);
+            // Fallback to simple download if fetch fails
+            const link = document.createElement('a');
+            link.href = imageUrl;
+            link.download = fileName;
+            link.target = '_self';  // Ensure it doesn't open in new tab
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    }
+    
+    // Enhanced Interactive carousel with smooth transitions
+    let interactiveIndex = 0;
+    
+    function moveInteractiveCarousel(bbl, direction) {
+        const carousel = document.getElementById('interactive-carousel-' + bbl);
+        const dots = carousel.parentElement.querySelectorAll('.dot');
+        const totalViews = 2;
+        
+        interactiveIndex += direction;
+        
+        // Handle wrap-around
+        if (interactiveIndex < 0) interactiveIndex = totalViews - 1;
+        if (interactiveIndex >= totalViews) interactiveIndex = 0;
+        
+        // Smooth transition with enhanced transform
+        carousel.style.transform = `translateX(-${interactiveIndex * 100}%)`;
+        
+        // Update dot indicators with smooth animation
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === interactiveIndex);
+        });
+        
+        // Add subtle button feedback animation
+        const buttons = carousel.parentElement.querySelectorAll('.carousel-btn');
+        buttons.forEach(btn => {
+            btn.style.transform = 'scale(0.95)';
+            setTimeout(() => btn.style.transform = 'scale(1)', 100);
+        });
+        
+        // Update title based on current slide
+        const currentSlide = carousel.children[interactiveIndex];
+        const slideType = currentSlide.getAttribute('data-type');
+        const titleElement = document.getElementById(`interactive-views-title-${bbl}`);
+        if (titleElement) {
+            const typeMap = {
+                'video': 'Drone Footage',
+                'pano': '360 Panorama'
+            };
+            titleElement.innerHTML = `Dynamic: <span style="color: #555;">${typeMap[slideType] || 'Unknown'}</span>`;
+        }
+        
+        // Auto-play video when navigating to aerial slide
+        if (slideType === 'video' && interactiveIndex === 0) {
+            const video = document.querySelector(`#aerial-video-${bbl} video`);
+            if (video) {
+                video.play().catch(e => console.log('Autoplay prevented on carousel navigation:', e));
+            }
+        }
+        
+        // Handle panorama initialization and rotation
+        if (slideType === 'pano') {
+            const viewerEl = document.getElementById(`viewer-${bbl}`);
+            if (viewerEl && viewerEl.pannellumViewer) {
+                // Start auto rotation when user navigates to panorama
+                viewerEl.pannellumViewer.startAutoRotate(-2);
+            }
+        }
+        
+        // Trigger loading animation for iframes
+        const iframe = currentSlide.querySelector('iframe');
+        if (iframe && !iframe.classList.contains('loaded')) {
+            setTimeout(() => iframe.classList.add('loaded'), 500);
+        }
+    }
+    
+    function goToInteractiveSlide(bbl, index) {
+        const direction = index - interactiveIndex;
+        interactiveIndex = index;
+        moveInteractiveCarousel(bbl, 0);
+    }
+    
+    // Enhanced fullscreen functionality
+    function toggleFullscreen(button) {
+        const container = button.closest('.carousel-slide, .carousel-container');
+        const iframe = container.querySelector('iframe, video');
+        
+        if (!document.fullscreenElement) {
+            if (iframe && iframe.requestFullscreen) {
+                iframe.requestFullscreen();
+            } else if (container.requestFullscreen) {
+                container.requestFullscreen();
+            }
+            button.textContent = '⛷';
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+                button.textContent = '⛶';
+            }
+        }
+    }
+    
+    // Energy chart
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const elecData = {
+        x: months,
+        y: [1605267.867, 1599202.909, 1249284.056, 520115.1274, 313513.845, 669407.4274, 910683.045, 910683.045, 1128601.133, 893300.2453, 1128601.133, 1427275.961],
+        name: 'Elec',
+        type: 'scatter',
+        mode: 'lines+markers',
+        line: {color: '#0066cc', width: 3},
+        marker: {size: 8},
+        hovertemplate: '%{x}<br>Elec: %{y:,.0f} kBtu<br>(%{customdata:,.0f} kWh)<extra></extra>',
+        customdata: [1605267.867, 1599202.909, 1249284.056, 520115.1274, 313513.845, 669407.4274, 910683.045, 910683.045, 1128601.133, 893300.2453, 1128601.133, 1427275.961].map(v => kBtuToKwh(v))
+    };
+    
+    const gasData = {
+        x: months,
+        y: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        name: 'Gas',
+        type: 'scatter',
+        mode: 'lines+markers',
+        line: {color: '#ff6600', width: 3},
+        marker: {size: 8},
+        hovertemplate: '%{x}<br>Gas: %{y:,.0f} kBtu<br>(%{customdata:,.0f} Therms)<extra></extra>',
+        customdata: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0].map(v => kBtuToTherms(v))
+    };
+    
+    const steamData = {
+        x: months,
+        y: [1191604.565, 1217855.78, 790621.6244, 335122.7039, 137895.8691, 3100.905815, 0.0, 0.0, 0.0, 100471.1414, 494289.3963, 971942.0141],
+        name: 'Steam',
+        type: 'scatter',
+        mode: 'lines+markers',
+        line: {color: '#ffc107', width: 3},
+        marker: {size: 8},
+        hovertemplate: '%{x}<br>Steam: %{y:,.0f} kBtu<br>(%{customdata:,.0f} lbs)<extra></extra>',
+        customdata: [1191604.565, 1217855.78, 790621.6244, 335122.7039, 137895.8691, 3100.905815, 0.0, 0.0, 0.0, 100471.1414, 494289.3963, 971942.0141].map(v => kBtuToLbs(v))
+    };
+    
+    const layout = {
+        title: {
+            text: 'Monthly Usage (2023)',
+            font: {size: 20}
+        },
+        yaxis: {
+            title: 'Usage (kBtu)',
+            showgrid: false
+        },
+        xaxis: {
+            showgrid: false
+        },
+        font: {family: 'Arial, sans-serif'},
+        plot_bgcolor: '#ffffff',
+        paper_bgcolor: 'white',
+        hovermode: 'x unified'
+    };
+    
+    // Building usage chart - only show fuels with usage
+    const buildingUsageData = [];
+    if ([1605267.867, 1599202.909, 1249284.056, 520115.1274, 313513.845, 669407.4274, 910683.045, 910683.045, 1128601.133, 893300.2453, 1128601.133, 1427275.961].some(v => v > 0)) buildingUsageData.push(elecData);
+    if ([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0].some(v => v > 0)) buildingUsageData.push(gasData);
+    if ([1191604.565, 1217855.78, 790621.6244, 335122.7039, 137895.8691, 3100.905815, 0.0, 0.0, 0.0, 100471.1414, 494289.3963, 971942.0141].some(v => v > 0)) buildingUsageData.push(steamData);
+    
+    Plotly.newPlot('energy_chart', buildingUsageData, layout, {
+        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        displaylogo: false,
+        displayModeBar: true
+    });
+    
+    // Office Energy Chart
+    const officeElecData = {
+        x: months,
+        y: [1937366.0, 1835400.0, 1733433.0, 1529500.0, 1427533.0, 1631466.0, 1835400.0, 1835400.0, 1631466.0, 1529500.0, 1631466.0, 1835400.0],
+        name: 'Elec',
+        type: 'bar',
+        marker: {color: '#0066cc'}
+    };
+    
+    const officeGasData = {
+        x: months,
+        y: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        name: 'Gas',
+        type: 'bar',
+        marker: {color: '#ff6600'}
+    };
+    
+    const officeSteamData = {
+        x: months,
+        y: [813866.0, 831795.0, 539995.0, 228889.0, 94183.0, 2118.0, 0.0, 0.0, 0.0, 68622.0, 337600.0, 663836.0],
+        name: 'Steam',
+        type: 'bar',
+        marker: {color: '#ffc107'}
+    };
+    
+    const officeLayout = {
+        title: {
+            text: 'Monthly Office Usage (2023)',
+            font: {size: 20}
+        },
+        yaxis: {
+            title: 'Usage (kBtu)',
+            showgrid: false
+        },
+        xaxis: {
+            showgrid: false,
+            range: [-0.5, 11.5],  // Force x-axis to show all 12 months with padding
+            fixedrange: true
+        },
+        barmode: 'group',
+        font: {family: 'Arial, sans-serif'},
+        plot_bgcolor: '#ffffff',
+        paper_bgcolor: 'white',
+        hovermode: 'x unified'
+    };
+    
+    // Office usage chart - only show fuels with usage
+    const officeUsageData = [];
+    if ([1937366.0, 1835400.0, 1733433.0, 1529500.0, 1427533.0, 1631466.0, 1835400.0, 1835400.0, 1631466.0, 1529500.0, 1631466.0, 1835400.0].some(v => v > 0)) officeUsageData.push(officeElecData);
+    if ([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0].some(v => v > 0)) officeUsageData.push(officeGasData);
+    if ([813866.0, 831795.0, 539995.0, 228889.0, 94183.0, 2118.0, 0.0, 0.0, 0.0, 68622.0, 337600.0, 663836.0].some(v => v > 0)) officeUsageData.push(officeSteamData);
+    
+    Plotly.newPlot('office_energy_chart', officeUsageData, officeLayout, {
+        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        displaylogo: false,
+        displayModeBar: true
+    });
+    
+    // Energy Cost Chart
+    const elecCost = {
+        x: months, 
+        y: [174998.34, 182067.34996000002, 149617.1, 126246.83, 141935.49, 290766.58999999997, 321961.47, 330368.07, 283237.6, 151417.11, 152427.40000000002, 160140.1], 
+        name: 'Elec', 
+        type: 'scatter', 
+        mode: 'lines+markers', 
+        line: {color: '#0066cc', width: 3},
+        marker: {size: 8}
+    };
+    
+    const gasCost = {
+        x: months, 
+        y: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 
+        name: 'Gas', 
+        type: 'scatter', 
+        mode: 'lines+markers', 
+        line: {color: '#ff6600', width: 3},
+        marker: {size: 8}
+    };
+    
+    const steamCostData = {
+        x: months, 
+        y: [57804.74, 59078.18, 38353.05, 16256.8, 6689.33, 150.42, 0, 0, 0, 4873.86, 23977.98, 47148.91], 
+        name: 'Steam', 
+        type: 'scatter', 
+        mode: 'lines+markers', 
+        line: {color: '#ffc107', width: 3},
+        marker: {size: 8}
+    };
+    
+    const costLayout = {
+        title: {
+            text: 'Monthly Cost (2023)',
+            font: {size: 20}
+        },
+        yaxis: {
+            title: '',
+            tickformat: '$,.0f',
+            showgrid: false
+        },
+        xaxis: {
+            showgrid: false
+        },
+        font: {family: 'Inter, sans-serif'},
+        plot_bgcolor: '#ffffff',
+        paper_bgcolor: 'white',
+        hovermode: 'x unified'
+    };
+
+    // Building cost chart - only show fuels with costs
+    const buildingCostData = [];
+    if ([174998.34, 182067.34996000002, 149617.1, 126246.83, 141935.49, 290766.58999999997, 321961.47, 330368.07, 283237.6, 151417.11, 152427.40000000002, 160140.1].some(v => v > 0)) buildingCostData.push(elecCost);
+    if ([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0].some(v => v > 0)) buildingCostData.push(gasCost);
+    if ([57804.74, 59078.18, 38353.05, 16256.8, 6689.33, 150.42, 0, 0, 0, 4873.86, 23977.98, 47148.91].some(v => v > 0)) buildingCostData.push(steamCostData);
+    
+    Plotly.newPlot('energy_cost_chart', buildingCostData, costLayout, {
+        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        displaylogo: false,
+        displayModeBar: true
+    });
+
+    // Add annual cost caption below the chart
+    document.getElementById('energy_cost_chart').insertAdjacentHTML('afterend', 
+        '<div style="text-align: center; margin-top: 10px; font-size: 16px; color: #666;">Annual Cost: $' + (2719517).toLocaleString() + '</div>'
+    );
+    
+    // Office Cost Chart
+    const officeElecCost = {
+        x: months, 
+        y: [63404.22, 63015.91, 53740.85, 47936.03, 47716.87, 62801.23, 71227.37, 73109.29, 64373.66, 49531.48, 54321.97, 56988.63], 
+        name: 'Elec', 
+        type: 'bar', 
+        marker: {color: '#0066cc'}
+    };
+    
+    const officeGasCost = {
+        x: months, 
+        y: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+        name: 'Gas', 
+        type: 'bar', 
+        marker: {color: '#ff6600'}
+    };
+    
+    const officeSteamCostData = {
+        x: months, 
+        y: [46350.83, 47371.91, 30753.48, 13035.55, 5363.86, 120.62, 0, 0, 0, 3908.12, 19226.8, 37806.41], 
+        name: 'Steam', 
+        type: 'bar', 
+        marker: {color: '#ffc107'}
+    };
+    
+    const officeCostLayout = {
+        title: {
+            text: 'Office Space Monthly Cost (2023)',
+            font: {size: 20}
+        },
+        yaxis: {
+            title: '',
+            tickformat: '$,.0f',
+            showgrid: false
+        },
+        xaxis: {
+            showgrid: false,
+            range: [-0.5, 11.5],  // Force x-axis to show all 12 months with padding
+            fixedrange: true
+        },
+        barmode: 'group',
+        font: {family: 'Inter, sans-serif'},
+        plot_bgcolor: '#ffffff',
+        paper_bgcolor: 'white',
+        hovermode: 'x unified'
+    };
+
+    // Office cost chart - only show fuels with costs
+    const officeCostData = [];
+    if ([63404.22, 63015.91, 53740.85, 47936.03, 47716.87, 62801.23, 71227.37, 73109.29, 64373.66, 49531.48, 54321.97, 56988.63].some(v => v > 0)) officeCostData.push(officeElecCost);
+    if ([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].some(v => v > 0)) officeCostData.push(officeGasCost);
+    if ([46350.83, 47371.91, 30753.48, 13035.55, 5363.86, 120.62, 0, 0, 0, 3908.12, 19226.8, 37806.41].some(v => v > 0)) officeCostData.push(officeSteamCostData);
+    
+    Plotly.newPlot('office_cost_chart', officeCostData, officeCostLayout, {
+        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        displaylogo: false,
+        displayModeBar: true
+    });
+
+    // Add annual cost caption below the chart
+    document.getElementById('office_cost_chart').insertAdjacentHTML('afterend', 
+        '<div style="text-align: center; margin-top: 10px; font-size: 16px; color: #666;">Annual Cost: $' + (912105).toLocaleString() + '</div>'
+    );
+    
+    // HVAC Percentage Chart with seasonal colors
+    const hvacValues = [0.5659218827437718, 0.5951050573232266, 0.4922376741214984, 0.2322580620171706, 0.15, 0.28024193112425677, 0.33888888185984134, 0.33888888185984134, 0.47247961120233545, 0.39890434415791226, 0.47247961120233545, 0.5311265617432468];
+    
+    // Create separate traces for each season with filled area only below the curve
+    const hvacTraces = [];
+    
+    // Cool season (Jan-Mar) - Blue
+    hvacTraces.push({
+        x: months.slice(0, 3),
+        y: hvacValues.slice(0, 3),
+        type: 'scatter',
+        mode: 'lines',
+        fill: 'tozeroy',
+        line: {color: '#1e90ff', width: 3},
+        fillcolor: 'rgba(30, 144, 255, 0.3)',
+        showlegend: false,
+        hovertemplate: '%{x}: %{y:.1%}<extra></extra>'
+    });
+    
+    // Warm season (Apr-Jun) - Yellow
+    hvacTraces.push({
+        x: months.slice(3, 6),
+        y: hvacValues.slice(3, 6),
+        type: 'scatter',
+        mode: 'lines',
+        fill: 'tozeroy',
+        line: {color: '#daa520', width: 3},
+        fillcolor: 'rgba(255, 215, 0, 0.3)',
+        showlegend: false,
+        hovertemplate: '%{x}: %{y:.1%}<extra></extra>'
+    });
+    
+    // Hot season (Jul-Sep) - Red
+    hvacTraces.push({
+        x: months.slice(6, 9),
+        y: hvacValues.slice(6, 9),
+        type: 'scatter',
+        mode: 'lines',
+        fill: 'tozeroy',
+        line: {color: '#ff4500', width: 3},
+        fillcolor: 'rgba(255, 69, 0, 0.3)',
+        showlegend: false,
+        hovertemplate: '%{x}: %{y:.1%}<extra></extra>'
+    });
+    
+    // Cold season (Oct-Dec) - Blue
+    hvacTraces.push({
+        x: months.slice(9, 12),
+        y: hvacValues.slice(9, 12),
+        type: 'scatter',
+        mode: 'lines',
+        fill: 'tozeroy',
+        line: {color: '#1e90ff', width: 3},
+        fillcolor: 'rgba(30, 144, 255, 0.3)',
+        showlegend: false,
+        hovertemplate: '%{x}: %{y:.1%}<extra></extra>'
+    });
+    
+    // Add connecting lines between seasons
+    hvacTraces.push({
+        x: months,
+        y: hvacValues,
+        type: 'scatter',
+        mode: 'lines',
+        line: {color: '#2c3e50', width: 3},
+        showlegend: false,
+        hovertemplate: '%{x}: %{y:.1%}<extra></extra>'
+    });
+    
+    const hvacLayout = {
+        title: {
+            text: 'HVAC as % of Total Electricity Usage',
+            font: {size: 20}
+        },
+        yaxis: {
+            title: '',
+            tickformat: '.0%',
+            showgrid: false,
+            rangemode: 'tozero',
+            range: [0, Math.max(...hvacValues) * 1.2]  // Add space above for labels
+        },
+        xaxis: {
+            showgrid: false
+        },
+        font: {family: 'Arial, sans-serif'},
+        plot_bgcolor: '#ffffff',
+        paper_bgcolor: 'white',
+        hovermode: 'x unified',
+        annotations: [
+            // Cool label - below the curve
+            {
+                x: 1,
+                y: 0.05,
+                xref: 'x',
+                yref: 'paper',
+                text: 'Cool',
+                showarrow: false,
+                font: {size: 16, color: '#1e90ff', weight: 'bold'}
+            },
+            // Warm label - below the curve
+            {
+                x: 4,
+                y: 0.05,
+                xref: 'x',
+                yref: 'paper',
+                text: 'Warm',
+                showarrow: false,
+                font: {size: 16, color: '#daa520', weight: 'bold'}
+            },
+            // Hot label - below the curve
+            {
+                x: 7,
+                y: 0.05,
+                xref: 'x',
+                yref: 'paper',
+                text: 'Hot',
+                showarrow: false,
+                font: {size: 16, color: '#ff4500', weight: 'bold'}
+            },
+            // Cold label - below the curve
+            {
+                x: 10,
+                y: 0.05,
+                xref: 'x',
+                yref: 'paper',
+                text: 'Cold',
+                showarrow: false,
+                font: {size: 16, color: '#1e90ff', weight: 'bold'}
+            }
+        ]
+    };
+    
+    Plotly.newPlot('hvac_pct_chart', hvacTraces, hvacLayout, {
+        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        displaylogo: false,
+        displayModeBar: true
+    });
+    
+    // ODCV Savings Chart
+    const odcvElecSave = {x: months, y: [10680.880000000005, 11158.830000000002, 7858.119999999995, 3301.4400000000023, 2124.6900000000023, 5233.18, 7192.819999999992, 7384.209999999992, 9044.300000000005, 5868.890000000007, 7620.980000000003, 8998.399999999994], name: 'Elec', type: 'bar', marker: {color: '#0066cc'}};
+    const odcvGasSave = {x: months, y: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], name: 'Gas', type: 'bar', marker: {color: '#ff6600'}};
+    const odcvSteamSave = {x: months, y: [13905.25, 14211.57, 9226.05, 3910.67, 1609.16, 36.19, 0, 0, 0, 1172.44, 5768.04, 11341.92], name: 'Steam', type: 'bar', marker: {color: '#ffc107'}};
+    
+    const totalSavings = 147648.02999999997;
+    
+    // ODCV savings chart - only show fuels with savings
+    const odcvSavingsData = [];
+    if ([10680.880000000005, 11158.830000000002, 7858.119999999995, 3301.4400000000023, 2124.6900000000023, 5233.18, 7192.819999999992, 7384.209999999992, 9044.300000000005, 5868.890000000007, 7620.980000000003, 8998.399999999994].some(v => v > 0)) odcvSavingsData.push(odcvElecSave);
+    if ([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].some(v => v > 0)) odcvSavingsData.push(odcvGasSave);
+    if ([13905.25, 14211.57, 9226.05, 3910.67, 1609.16, 36.19, 0, 0, 0, 1172.44, 5768.04, 11341.92].some(v => v > 0)) odcvSavingsData.push(odcvSteamSave);
+    
+    Plotly.newPlot('odcv_savings_chart', odcvSavingsData, {
+        title: {
+            text: 'Monthly ODCV Savings',
+            font: {size: 20}
+        },
+        yaxis: {
+            title: '',
+            tickformat: '$,.0f',
+            showgrid: false
+        },
+        xaxis: {
+            showgrid: false
+        },
+        barmode: 'stack',
+        font: {family: 'Arial, sans-serif'},
+        plot_bgcolor: '#ffffff',
+        paper_bgcolor: 'white',
+        hovermode: 'x unified'
+    }, {
+        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        displaylogo: false,
+        displayModeBar: true
+    });
+
+    // Add annual savings caption below the chart
+    document.getElementById('odcv_savings_chart').insertAdjacentHTML('afterend', 
+        '<div style="text-align: center; margin-top: 10px; font-size: 16px; color: #666;">Annual Savings: $' + totalSavings.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '</div>'
+    );
+    
+    // EPA Good threshold line
+    const goodThreshold = {
+        x: ["2025-07-06", "2025-07-07", "2025-07-08", "2025-07-09", "2025-07-10", "2025-07-11", "2025-07-12", "2025-07-13", "2025-07-14", "2025-07-15", "2025-07-16", "2025-07-17", "2025-07-18", "2025-07-19", "2025-07-20", "2025-07-21", "2025-07-22", "2025-07-23", "2025-07-24", "2025-07-25", "2025-07-26", "2025-07-27", "2025-07-28", "2025-07-29", "2025-07-30", "2025-07-31", "2025-08-01", "2025-08-02", "2025-08-03", "2025-08-04", "2025-08-05"],
+        y: Array(31).fill(12),
+        mode: 'lines',
+        line: {color: '#00e400', dash: 'dash', width: 2},
+        name: 'Good AQ Threshold (EPA)',
+        hoverinfo: 'skip'
+    };
+
+    // Create fill traces for areas above and below threshold
+    const dates = ["2025-07-06", "2025-07-07", "2025-07-08", "2025-07-09", "2025-07-10", "2025-07-11", "2025-07-12", "2025-07-13", "2025-07-14", "2025-07-15", "2025-07-16", "2025-07-17", "2025-07-18", "2025-07-19", "2025-07-20", "2025-07-21", "2025-07-22", "2025-07-23", "2025-07-24", "2025-07-25", "2025-07-26", "2025-07-27", "2025-07-28", "2025-07-29", "2025-07-30", "2025-07-31", "2025-08-01", "2025-08-02", "2025-08-03", "2025-08-04", "2025-08-05"];
+    const values = [6.115, 4.422083333333333, 10.684583333333334, 10.950000000000001, 8.28625, 5.12, 2.6916666666666664, 3.34, 2.56, 8.960833333333333, 9.414583333333333, 4.015, 5.425, 8.310416666666667, 7.578749999999999, 7.402083333333334, 5.293333333333334, 4.048333333333333, 4.769166666666666, 8.834583333333333, 5.9679166666666665, 6.728333333333333, 11.052083333333334, 16.017083333333336, 17.909166666666668, 10.72375, 5.53, 6.8825, 8.910416666666666, 9.85625, 8.315];
+    const threshold = 12;
+    
+    // Create PM2.5 data with fill below the line
+    const pm25DataWithFill = {
+        x: dates,
+        y: values,
+        type: 'scatter',
+        mode: 'lines',
+        line: {color: '#0066cc', width: 3},
+        fill: 'tozeroy',
+        fillcolor: 'rgba(0, 102, 204, 0.15)',  // Light blue fill below the line
+        name: 'Daily Average PM2.5',
+        hovertemplate: '%{x|%b %d, %Y}<br>PM2.5: %{y:.1f} μg/m³<extra></extra>'
+    };
+    
+    // Create yellow fill for areas above threshold
+    const worseFill = {
+        x: dates.concat([...dates].reverse()),
+        y: values.map(v => Math.max(v, threshold)).concat(Array(dates.length).fill(threshold)),
+        fill: 'toself',
+        fillcolor: 'rgba(255, 235, 59, 0.15)',  // Lighter yellow
+        line: {width: 0},
+        showlegend: false,
+        hoverinfo: 'skip',
+        type: 'scatter'
+    };
+
+    Plotly.newPlot('pm25_chart', [pm25DataWithFill, worseFill, goodThreshold], {
+        title: {
+            text: 'Neighborhood Latest',
+            y: 0.95
+        },
+        yaxis: {
+            title: 'PM2.5 (μg/m³)',
+            showgrid: false,
+            zeroline: false,
+            range: [0, 19.700083333333335]
+        },
+        xaxis: {
+            title: '',
+            showgrid: false,
+            type: 'date',
+            tickformat: '%b %d',
+            dtick: 86400000 * 3,  // Dynamic tick interval
+            tickangle: -45,
+            showticklabels: true,
+            range: ["2025-07-06", "2025-08-05"]
+        },
+        legend: {
+            orientation: 'h',
+            x: 0.5,
+            xanchor: 'center',
+            y: -0.12,
+            yanchor: 'top',
+            bgcolor: 'transparent',
+            borderwidth: 0
+        },
+        margin: {t: 50, r: 50, b: 80, l: 60},
+        plot_bgcolor: '#ffffff',
+        paper_bgcolor: '#ffffff',
+        font: {family: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'},
+        hovermode: 'x unified'
+    }, {
+        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        displaylogo: false,
+        displayModeBar: true
+    });
+    
+    // Initialize 360° panorama with Manhattan grid logic
+    document.addEventListener('DOMContentLoaded', () => {
+        // Manhattan grid even/odd logic for yaw
+        function getBuildingYaw(address) {
+            const match = address.match(/\b(\d+)/);
+            if (!match) return 0;
+            
+            const buildingNumber = parseInt(match[1]);
+            const isEven = buildingNumber % 2 === 0;
+            const addressLower = address.toLowerCase();
+            
+            // Fix the yaw angles to actually look at buildings
+            // In pannellum: 0° = North, 90° = East, 180° = South, 270° = West
+            
+            if (addressLower.includes('street') || addressLower.includes(' st')) {
+                // STREETS run East-West
+                // For 111 E 58th St (odd building number), yaw should be -91.56° (looking west)
+                // Even building numbers are on SOUTH side, Odd on NORTH side
+                return isEven ? 90 : -91.56;
+            } else if (addressLower.includes('avenue') || addressLower.includes(' ave')) {
+                // AVENUES run North-South
+                // Even numbers are on WEST side (need to look EAST = 90°)
+                // Odd numbers are on EAST side (need to look WEST = 270°)
+                return isEven ? 90 : 270;
+            } else if (addressLower.includes('broadway')) {
+                // Broadway runs diagonal NE-SW
+                // Even = NW side (look SE = ~135°)
+                // Odd = SE side (look NW = ~315°)
+                return isEven ? 135 : 315;
+            }
+            
+            // Default to north-facing
+            return 0;
+        }
+        
+        // Function to initialize panorama
+        function initPanorama() {
+            const viewerEl = document.getElementById('viewer-1008080040');
+            if (!viewerEl || viewerEl._pannellumInitialized) return;
+            
+            const buildingHeight = 187.59;
+            const address = "100 W 33rd St, 10001";
+            
+            // Calculate yaw based on address
+            const yaw = getBuildingYaw(address);
+            
+            // Use yaw directly without adjustment
+            let adjustedYaw = yaw;
+            
+            // Calculate pitch based on building height
+            // We're at street level looking at buildings
+            // Based on ideal pitch for 463.31ft building = 37.03° pitch
+            // This gives us 0.0799 degrees per foot of building height
+            const pitch = Math.min(buildingHeight * 0.0799, 60);  // Max 60° for very tall buildings
+            
+            console.log(`Panorama 1008080040: Address="${address}", Height=${buildingHeight}ft, Yaw=${yaw}° (adjusted: ${adjustedYaw}°), Pitch=${pitch}°`);
+            
+            try {
+                const viewer = pannellum.viewer('viewer-1008080040', {
+                    "type": "equirectangular",
+                    "panorama": "https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/1008080040/1008080040_360.jpg",
+                    "autoLoad": true,
+                    "autoRotate": 0,  // Will be started when user navigates to this slide
+                    "pitch": pitch,
+                    "yaw": adjustedYaw,
+                    "hfov": 120,
+                    "maxHfov": 120,
+                    "minHfov": 30,
+                    "showZoomCtrl": true,
+                    "showFullscreenCtrl": true,
+                    "mouseZoom": false,
+                    "minPitch": -85,
+                    "maxPitch": 90
+                });
+                viewerEl._pannellumInitialized = true;
+                viewerEl.pannellumViewer = viewer;  // Store viewer instance
+                window[`panoramaViewer_1008080040`] = viewer;  // Also store globally for easy access
+                console.log('Panorama initialized successfully for BBL 1008080040');
+            } catch (e) {
+                console.error('Failed to initialize panorama:', e);
+            }
+        }
+        
+        // Don't initialize immediately - wait for user to navigate to panorama slide
+        
+        // Reinitialize when carousel shows panorama
+        const originalMoveCarousel = window.moveInteractiveCarousel;
+        window.moveInteractiveCarousel = function(bbl, direction) {
+            if (originalMoveCarousel) originalMoveCarousel(bbl, direction);
+            if (interactiveIndex === 1) {
+                setTimeout(() => {
+                    initPanorama();
+                    // Ensure rotation starts after panorama loads
+                    setTimeout(() => {
+                        const viewerEl = document.getElementById('viewer-1008080040');
+                        if (viewerEl && viewerEl.pannellumViewer) {
+                            viewerEl.pannellumViewer.startAutoRotate(-2);
+                        }
+                    }, 500);
+                }, 100);
+            }
+        };
+    });
+    
+    // Tenant table sorting
+    let tenantSortDir = {};
+    function sortTenantTable(col) {
+        // Find the tenant table (there should only be one per page)
+        const table = document.querySelector('[id^="tenantTable-"]');
+        if (!table) return;
+        
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        
+        // Toggle sort direction
+        tenantSortDir[col] = !tenantSortDir[col];
+        
+        rows.sort((a, b) => {
+            let aVal, bVal;
+            
+            if (col === 3) {
+                // SF Occupied - parse number from formatted string
+                aVal = parseInt(a.cells[col].textContent.replace(/,/g, '') || '0');
+                bVal = parseInt(b.cells[col].textContent.replace(/,/g, '') || '0');
+            } else if (col === 4 || col === 5) {
+                // Dates - convert to sortable format
+                aVal = a.cells[col].textContent.trim();
+                bVal = b.cells[col].textContent.trim();
+                // Handle N/A values
+                if (aVal === 'N/A') aVal = '';
+                if (bVal === 'N/A') bVal = '';
+                // Convert Mon-YY to YYYY-MM for sorting
+                if (aVal && aVal !== 'N/A') {
+                    const [month, year] = aVal.split('-');
+                    const monthNum = new Date(month + ' 1, 2000').getMonth() + 1;
+                    aVal = `20${year}-${monthNum.toString().padStart(2, '0')}`;
+                }
+                if (bVal && bVal !== 'N/A') {
+                    const [month, year] = bVal.split('-');
+                    const monthNum = new Date(month + ' 1, 2000').getMonth() + 1;
+                    bVal = `20${year}-${monthNum.toString().padStart(2, '0')}`;
+                }
+            } else {
+                // Text columns (Tenant, Industry, Floor)
+                aVal = a.cells[col].textContent.toLowerCase().trim();
+                bVal = b.cells[col].textContent.toLowerCase().trim();
+            }
+            
+            if (tenantSortDir[col]) {
+                return aVal > bVal ? 1 : -1;
+            } else {
+                return aVal < bVal ? 1 : -1;
+            }
+        });
+        
+        // Clear and rebuild tbody
+        tbody.innerHTML = '';
+        rows.forEach(row => tbody.appendChild(row));
+        
+        // Update sort indicators
+        const headers = table.querySelectorAll('th');
+        headers.forEach((th, idx) => {
+            const indicator = th.querySelector('.sort-indicator');
+            if (indicator) {
+                indicator.textContent = idx === col ? (tenantSortDir[col] ? '↑' : '↓') : '↕';
+            }
+        });
+    }
+    
+    </script>
+    
+    </div><!-- End of container -->
+    
+    <div style="text-align: center; color: black; font-size: 14px; padding: 20px 0; font-family: 'Inter', sans-serif; border: none !important; box-shadow: none !important; background: transparent;">
+        Build: 4 Aug 2025 11:02:42 PM CST
+    </div>
+</body>
+</html>
