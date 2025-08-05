@@ -8,15 +8,21 @@ from dotenv import load_dotenv
 import sys
 import json
 import re
+import time
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Server key for report generation (air quality API) - unrestricted
 SERVER_API_KEY = "AIzaSyCZU0mRkd5VlOXgsLFyH_tzWT3nT6MUZlI"
+# OpenWeatherMap API key for air pollution data (30 days historical)
+OPENWEATHER_API_KEY = "9e666d3512bac2a16c6b9c3c029dcef6"
 
 # Client key for aerial videos (domain-restricted to test and main sites)
-CLIENT_API_KEY = "AIzaSyDQdR4xY0a_qmEsYairsp6r6tXwh5qx_ho"
+# CLIENT_API_KEY = "AIzaSyDQdR4xY0a_qmEsYairsp6r6tXwh5qx_ho"
+
+# AWS S3 bucket URL for aerial videos
+AWS_VIDEO_BUCKET = "https://aerial-videos-forrest.s3.us-east-2.amazonaws.com"
 
 # Version tracking for cache busting
 version = int(datetime.now().timestamp())
@@ -97,15 +103,16 @@ try:
 except:
     equipment_counts = pd.DataFrame()  # Empty dataframe if file not found
 
-# Read aerial videos data
-aerial_videos = {}
+# Check which aerial videos exist in S3
+aerial_videos_available = set()
 try:
     aerial_df = pd.read_csv('data/aerial_videos.csv')
     for _, row in aerial_df.iterrows():
         if row['status'] == 'active' and pd.notna(row['video_id']):
-            aerial_videos[int(row['bbl'])] = row['video_id']
+            aerial_videos_available.add(int(row['bbl']))
 except:
-    pass
+    # If no CSV, assume all videos are available
+    aerial_videos_available = set(scoring['bbl'].values)
 
 # Read CostarExport data for owner phone information
 try:
@@ -116,9 +123,7 @@ except:
 # Read tenant data
 try:
     tenants_df = pd.read_csv('data/Costar_Tenants_2025_07_31_17_56.csv')
-    # Extract PropertyID from URL
-    tenants_df['PropertyID'] = tenants_df['source_CoStar_URL'].str.extract(r'/all-properties/(\d+)/')
-    tenants_df['PropertyID'] = pd.to_numeric(tenants_df['PropertyID'], errors='coerce')
+    # PropertyID extraction removed - using BBL directly
     # Clean SF Occupied - remove commas and convert to numeric
     tenants_df['SF_Occupied_Clean'] = tenants_df['SF Occupied'].str.replace(',', '').str.replace('"', '')
     tenants_df['SF_Occupied_Clean'] = pd.to_numeric(tenants_df['SF_Occupied_Clean'], errors='coerce')
@@ -176,6 +181,9 @@ for i, row in scoring.iterrows():
                 steam_usage.append(steam)
                 hvac_pct.append(hvac_monthly/total if total > 0 else 0)
             
+            # Calculate annual average HVAC percentage
+            annual_avg_hvac_pct = sum(hvac_pct) / len(hvac_pct) if hvac_pct else 0
+            
             # Get ODCV savings data from hvac CSV
             hvac_data = hvac[hvac['bbl'] == bbl]
             odcv_elec_savings = []
@@ -228,6 +236,10 @@ for i, row in scoring.iterrows():
                 office_gas_cost.append(float(val) if pd.notna(val) else 0)
                 val = office_data[f'Office_Steam_Cost_Current_{m}_USD'].iloc[0] if not office_data.empty else 0
                 office_steam_cost.append(float(val) if pd.notna(val) else 0)
+            
+            # Calculate annual cost totals
+            annual_building_cost = sum(elec_cost) + sum(gas_cost) + sum(steam_cost)
+            annual_office_cost = sum(office_elec_cost) + sum(office_gas_cost) + sum(office_steam_cost)
             
             # Extract values (default to 'N/A' if missing) - SIMPLE VERSION
             owner = building['ownername'].iloc[0] if not building.empty else 'N/A'
@@ -303,10 +315,16 @@ for i, row in scoring.iterrows():
                             
                             if name_part:
                                 # If there's a main name, use it at the beginning
-                                landlord_contact = f"{name_part} • {existing_phone} ({landlord_label}) {costar_owner_phone} ({owner_label})"
+                                if costar_owner_name and costar_owner_name != name_part:
+                                    landlord_contact = f"{name_part} • {existing_phone} or {costar_owner_name} • {costar_owner_phone}"
+                                else:
+                                    landlord_contact = f"{name_part} • {existing_phone} or {costar_owner_phone}"
                             else:
-                                # No main name, just show phones with labels
-                                landlord_contact = f"{existing_phone} ({landlord_label}) {costar_owner_phone} ({owner_label})"
+                                # No main name, show both contacts
+                                if costar_owner_name:
+                                    landlord_contact = f"{existing_phone} or {costar_owner_name} • {costar_owner_phone}"
+                                else:
+                                    landlord_contact = f"{existing_phone} or {costar_owner_phone}"
                         else:
                             # Extract landlord name from the clean contact if possible
                             landlord_name = None
@@ -316,13 +334,19 @@ for i, row in scoring.iterrows():
                                 if len(parts) > 1:
                                     landlord_name = ' '.join(parts[:-1]).strip()
                             
-                            landlord_label = landlord_name if landlord_name else "landlord"
-                            owner_label = costar_owner_name if costar_owner_name else "owner"
-                            landlord_contact = f"{existing_phone} ({landlord_label}) {costar_owner_phone} ({owner_label})"
+                            if landlord_name and costar_owner_name and landlord_name != costar_owner_name:
+                                landlord_contact = f"{landlord_name} • {existing_phone} or {costar_owner_name} • {costar_owner_phone}"
+                            elif landlord_name:
+                                landlord_contact = f"{landlord_name} • {existing_phone} or {costar_owner_phone}"
+                            elif costar_owner_name:
+                                landlord_contact = f"{existing_phone} or {costar_owner_name} • {costar_owner_phone}"
+                            else:
+                                landlord_contact = f"{existing_phone} or {costar_owner_phone}"
                     else:
-                        landlord_label = "landlord"
-                        owner_label = costar_owner_name if costar_owner_name else "owner"
-                        landlord_contact = f"{landlord_contact_clean} ({landlord_label}) {costar_owner_phone} ({owner_label})"
+                        if costar_owner_name:
+                            landlord_contact = f"{landlord_contact_clean} or {costar_owner_name} • {costar_owner_phone}"
+                        else:
+                            landlord_contact = f"{landlord_contact_clean} or {costar_owner_phone}"
                 else:
                     # Only one phone number or they're the same - format normally without labels
                     if phone_matches or email_matches:
@@ -462,17 +486,12 @@ for i, row in scoring.iterrows():
             
             # Get tenant data for this building
             building_tenants = pd.DataFrame()  # Default empty
-            if 'costar_df' in globals() and not tenants_df.empty:
-                # Get PropertyID for this BBL from CostarExport
-                costar_building = costar_df[costar_df['BBL'].astype(str).str.replace('.0', '', regex=False) == str(bbl)]
-                if not costar_building.empty:
-                    property_id = costar_building['PropertyID'].iloc[0]
-                    if pd.notna(property_id):
-                        # Get tenants for this PropertyID
-                        building_tenants = tenants_df[tenants_df['PropertyID'] == property_id].copy()
-                        if not building_tenants.empty:
-                            # Sort by SF Occupied (descending) and get top 10
-                            building_tenants = building_tenants.sort_values('SF_Occupied_Clean', ascending=False).head(10)
+            if not tenants_df.empty:
+                # Get tenants for this BBL directly
+                building_tenants = tenants_df[tenants_df['BBL'] == bbl].copy()
+                if not building_tenants.empty:
+                    # Sort by SF Occupied (descending) and get top 10
+                    building_tenants = building_tenants.sort_values('SF_Occupied_Clean', ascending=False).head(10)
             
             # Get equipment counts for this building
             cooling_towers = 0
@@ -496,41 +515,48 @@ for i, row in scoring.iterrows():
             chart_dates = []
             chart_values = []
             try:
-                air_response = requests.post(
-                    f"https://airquality.googleapis.com/v1/history:lookup?key={SERVER_API_KEY}",
-                    json={
-                        "location": {"latitude": lat, "longitude": lon},
-                        "hours": 720,  # 30 days of hourly data
-                        "extraComputations": ["POLLUTANT_CONCENTRATION"]
+                # Calculate timestamps for 30 days ago and now
+                end_timestamp = int(time.time())
+                start_timestamp = end_timestamp - (30 * 24 * 60 * 60)  # 30 days ago
+                
+                air_response = requests.get(
+                    f"http://api.openweathermap.org/data/2.5/air_pollution/history",
+                    params={
+                        "lat": lat,
+                        "lon": lon,
+                        "start": start_timestamp,
+                        "end": end_timestamp,
+                        "appid": OPENWEATHER_API_KEY
                     }
                 )
+                
                 if air_response.status_code == 200:
                     data = air_response.json()
-                    if 'hoursInfo' in data:
-                        for hour in data.get('hoursInfo', [])[-720:]:  # Last 30 days
-                            date_str = hour.get('dateTime', '')
-                            
-                            if date_str:
-                                dt = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+                    if 'list' in data:
+                        print(f"OpenWeatherMap API returned {len(data.get('list', []))} hours of data for BBL {bbl}")
+                        
+                        for hour_data in data.get('list', []):
+                            # Get timestamp and convert to date
+                            timestamp = hour_data.get('dt', 0)
+                            if timestamp:
+                                dt = datetime.fromtimestamp(timestamp, tz=pytz.UTC)
                                 dt_local = dt.astimezone(pytz.timezone('America/New_York'))
                                 date_key = dt_local.strftime('%Y-%m-%d')
                                 
-                                # Get PM2.5 value
-                                pm25_value = 0
-                                if 'pollutants' in hour:
-                                    for pollutant in hour.get('pollutants', []):
-                                        if pollutant.get('code') == 'pm25':
-                                            conc = pollutant.get('concentration', {})
-                                            pm25_value = conc.get('value', 0) if conc else 0
-                                            break
+                                # Get PM2.5 value from components
+                                pm25_value = hour_data.get('components', {}).get('pm2_5', 0)
                                 
                                 # Add to daily collection
                                 if date_key not in daily_pm25:
                                     daily_pm25[date_key] = []
                                 daily_pm25[date_key].append(pm25_value)
+                    else:
+                        print(f"OpenWeatherMap API response missing 'list' for BBL {bbl}")
+                else:
+                    print(f"OpenWeatherMap API error {air_response.status_code} for BBL {bbl}")
                                 
             except Exception as e:
-                print(f"PM2.5 API error for {bbl}: {e}")
+                print(f"OpenWeatherMap API error for {bbl}: {e}")
             
             # Calculate daily averages
             for date_key in sorted(daily_pm25.keys()):
@@ -539,6 +565,10 @@ for i, row in scoring.iterrows():
                     daily_avg = sum(daily_values) / len(daily_values)
                     chart_dates.append(date_key)
                     chart_values.append(daily_avg)
+            
+            print(f"PM2.5 processed {len(chart_dates)} days of data for BBL {bbl}")
+            if len(chart_dates) > 0:
+                print(f"Date range: {chart_dates[0]} to {chart_dates[-1]}")
             
             # Calculate overall statistics
             if chart_values:
@@ -651,56 +681,30 @@ for i, row in scoring.iterrows():
                 green_rating_badge = f' <span class="{badge_class}">{green_rating}</span>'
             
             # Check if building has aerial video
-            if bbl in aerial_videos:
-                video_id = aerial_videos[bbl]
-                aerial_content = f'''<div id="aerial-video-{bbl}" style="width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center;">
-                    <div style="color: white; text-align: center;">
-                        <h3>Loading Aerial View...</h3>
-                        <p>Fetching video from Google Maps</p>
+            if bbl in aerial_videos_available:
+                aerial_content = f'''<div id="aerial-video-{bbl}" style="width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; position: relative;">
+                    <video controls autoplay loop muted preload="auto" style="width: 100%; height: 100%; object-fit: contain;" 
+                           onerror="this.style.display='none'; document.getElementById('video-error-{bbl}').style.display='flex';">
+                        <source src="{AWS_VIDEO_BUCKET}/{bbl}_aerial.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <div id="video-error-{bbl}" style="display: none; width: 100%; height: 100%; background: #f0f0f0; align-items: center; justify-content: center; flex-direction: column; position: absolute; top: 0; left: 0;">
+                        <div style="text-align: center; color: #666;">
+                            <h3>Aerial Video Unavailable</h3>
+                            <p>The aerial view for this building is being processed</p>
+                            <p style="font-size: 0.9em;">Please check back later</p>
+                        </div>
                     </div>
-                </div>
-                <script>
-                    document.addEventListener('DOMContentLoaded', () => {{
-                        const bbl = '{bbl}';
-                        const videoId = '{video_id}';
-                        
-                        function loadWhenReady() {{
-                            const container = document.getElementById(`aerial-video-${{bbl}}`);
-                            if (container) {{
-                                // Check sessionStorage for pre-fetched video URL
-                                try {{
-                                    const storedVideos = JSON.parse(sessionStorage.getItem('aerialVideoUrls') || '{{}}');
-                                    const videoUrl = storedVideos[bbl];
-                                    
-                                    if (videoUrl) {{
-                                        console.log('Using pre-fetched video URL for BBL ' + bbl);
-                                        container.innerHTML = `
-                                            <video controls autoplay loop muted style="width: 100%; height: 100%; object-fit: contain;">
-                                                <source src="${{videoUrl}}" type="video/mp4">
-                                                Your browser does not support the video tag.
-                                            </video>
-                                        `;
-                                        return;
-                                    }} else {{
-                                        console.log('No pre-fetched video URL found for BBL ' + bbl);
-                                    }}
-                                }} catch (e) {{
-                                    console.log('Error reading sessionStorage:', e);
-                                }}
-                                
-                                // Fall back to API call if no stored URL
-                                console.log('No pre-fetched URL found, falling back to API call for BBL ' + bbl);
-                                loadAerialVideo(bbl, videoId);
-                            }} else {{
-                                // Keep checking until container exists
-                                requestAnimationFrame(loadWhenReady);
+                    <script>
+                        // Ensure video autoplays on page load
+                        document.addEventListener('DOMContentLoaded', function() {{
+                            const video = document.querySelector('#aerial-video-{bbl} video');
+                            if (video) {{
+                                video.play().catch(e => console.log('Autoplay prevented:', e));
                             }}
-                        }}
-                        
-                        // Add small delay to ensure DOM is fully ready
-                        setTimeout(loadWhenReady, 100);
-                    }});
-                </script>'''
+                        }});
+                    </script>
+                </div>'''
             else:
                 # Video still processing
                 aerial_content = '''<div style="width: 100%; height: 100%; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
@@ -717,11 +721,11 @@ for i, row in scoring.iterrows():
                     <h3 class="page-title">LL97 Compliance</h3>
                     <div class="stat">
                         <span class="stat-label">2024-2029 Status: </span>
-                        <span class="stat-value"><span class="{'yes' if compliance_2024 == 'Yes' else 'no'}">{compliance_2024}</span></span>
+                        <span class="stat-value"><span class="{'yes' if compliance_2024 == 'Yes' else 'no'}">{compliance_2024}</span>{f' <span style="color: #c41e3a; font-weight: bold;">(${penalty_2026:,.0f} in annual penalties)</span>' if compliance_2024 == 'No' else ''}</span>
                     </div>
                     <div class="stat">
                         <span class="stat-label">2030-2034 Status: </span>
-                        <span class="stat-value"><span class="{'yes' if compliance_2030 == 'Yes' else 'no'}">{compliance_2030}</span></span>
+                        <span class="stat-value"><span class="{'yes' if compliance_2030 == 'Yes' else 'no'}">{compliance_2030}</span>{f' <span style="color: #c41e3a; font-weight: bold;">(${penalty_2030:,.0f} in annual penalties)</span>' if compliance_2030 == 'No' else ''}</span>
                     </div>
                     <div class="stat">
                         <span class="stat-label">Current Emissions: </span>
@@ -735,23 +739,6 @@ for i, row in scoring.iterrows():
                         <span class="stat-label">2030-2034 Limit: </span>
                         <span class="stat-value">{carbon_limit_2030:,.0f} tCO2e</span>
                     </div>
-                    
-                    {"" if penalty_2026 == 0 and penalty_2030 == 0 else f'''
-                    <h3 class="page-title" style="margin-top: 30px;">Financial Impact</h3>
-                    <div class="highlight-box" style="background: #f8f8f8; padding: 20px; margin: 20px 0;">
-                        <h4 style="margin-top: 0;">Annual Penalties Without ODCV</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                            <div>
-                                <div style="color: #666;">2026-2029</div>
-                                <div style="font-size: 1.5em; font-weight: bold; color: {'#c41e3a' if penalty_2026 > 0 else '#28a745'};">${penalty_2026:,.0f}</div>
-                            </div>
-                            <div>
-                                <div style="color: #666;">2030-2034</div>
-                                <div style="font-size: 1.5em; font-weight: bold; color: {'#c41e3a' if penalty_2030 > 0 else '#28a745'};">${penalty_2030:,.0f}</div>
-                            </div>
-                        </div>
-                    </div>
-                    '''}
                 </div>
             """
 
@@ -762,6 +749,12 @@ for i, row in scoring.iterrows():
     <title>{row['address']} - ODCV Analysis (v{version})</title>
     <link rel="icon" type="image/png" href="https://rzero.com/wp-content/themes/rzero/build/images/favicons/favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Preload aerial video for faster playback -->
+    <link rel="preload" 
+          as="video" 
+          href="https://aerial-videos-forrest.s3.us-east-2.amazonaws.com/{bbl}_aerial.mp4"
+          type="video/mp4"
+          crossorigin="anonymous">
     <style>
         :root {{
             --rzero-primary: #0066cc;
@@ -901,10 +894,12 @@ for i, row in scoring.iterrows():
         
         /* Section styling */
         .section {{ 
-            padding: 40px 15%; 
+            padding: 40px 5%; 
             border-bottom: 3px solid var(--rzero-primary); 
             background: white;
             position: relative;
+            width: 100%;
+            box-sizing: border-box;
         }}
         
         .section:nth-child(even) {{
@@ -952,9 +947,11 @@ for i, row in scoring.iterrows():
         
         .page {{ 
             margin-bottom: 40px;
-            max-width: 900px;
-            margin-left: auto;
-            margin-right: auto;
+            width: 100%;
+            box-sizing: border-box;
+            /* max-width: 900px; */
+            /* margin-left: auto; */
+            /* margin-right: auto; */
         }}
         .page-title {{ 
             font-size: 1.3em; 
@@ -1022,8 +1019,7 @@ for i, row in scoring.iterrows():
         .carousel-container {{
             position: relative;
             width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
+            /* max-width: 900px; */
             height: 675px;
             overflow: hidden;
             border-radius: 12px;
@@ -1068,6 +1064,10 @@ for i, row in scoring.iterrows():
         }}
         
         .fullscreen-btn:hover {{
+            background: rgba(0, 0, 0, 0.8);
+        }}
+        
+        .download-btn:hover {{
             background: rgba(0, 0, 0, 0.8);
         }}
         
@@ -1307,6 +1307,8 @@ for i, row in scoring.iterrows():
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
     <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+    <!-- Preload aerial video for faster playback -->
+    <link rel="preload" as="video" href="{AWS_VIDEO_BUCKET}/{bbl}_aerial.mp4">
 </head>
 <body>
     <div class="container">
@@ -1357,6 +1359,7 @@ for i, row in scoring.iterrows():
                                 <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/{bbl}/{bbl}_hero.jpg" 
                                      style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
                                      onerror="handleImageError(this, '{bbl}', 'hero')">
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease;">⬇</button>
                                 <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
                             </div>
                         </div>
@@ -1365,6 +1368,7 @@ for i, row in scoring.iterrows():
                                 <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/{bbl}/{bbl}_roadview.jpg" 
                                      style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
                                      onerror="handleImageError(this, '{bbl}', 'roadview')">
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease;">⬇</button>
                                 <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
                             </div>
                         </div>
@@ -1373,6 +1377,7 @@ for i, row in scoring.iterrows():
                                 <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/{bbl}/{bbl}_street.jpg" 
                                      style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
                                      onerror="handleImageError(this, '{bbl}', 'street')">
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease;">⬇</button>
                                 <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
                             </div>
                         </div>
@@ -1381,6 +1386,7 @@ for i, row in scoring.iterrows():
                                 <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/{bbl}/{bbl}_satellite.jpg" 
                                      style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
                                      onerror="handleImageError(this, '{bbl}', 'satellite')">
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease;">⬇</button>
                                 <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
                             </div>
                         </div>
@@ -1389,6 +1395,7 @@ for i, row in scoring.iterrows():
                                 <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/{bbl}/{bbl}_equipment.jpg" 
                                      style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
                                      onerror="handleImageError(this, '{bbl}', 'equipment')">
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease;">⬇</button>
                                 <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
                             </div>
                         </div>
@@ -1397,6 +1404,7 @@ for i, row in scoring.iterrows():
                                 <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/{bbl}/{bbl}_double.jpg" 
                                      style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
                                      onerror="handleImageError(this, '{bbl}', 'double')">
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease;">⬇</button>
                                 <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
                             </div>
                         </div>
@@ -1405,6 +1413,7 @@ for i, row in scoring.iterrows():
                                 <img src="https://raw.githubusercontent.com/fmillerrzero/nyc-odcv-site/main/images/{bbl}/{bbl}_stack.jpg" 
                                      style="width: 100%; height: 100%; object-fit: contain; background: #f0f0f0;"
                                      onerror="handleImageError(this, '{bbl}', 'stack')">
+                                <button class="download-btn" onclick="downloadImage(this)" title="Download Image" style="position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; font-size: 20px; z-index: 10; transition: background 0.3s ease;">⬇</button>
                                 <button class="fullscreen-btn" onclick="toggleFullscreen(this)" title="Fullscreen">⛶</button>
                             </div>
                         </div>
@@ -1448,30 +1457,6 @@ for i, row in scoring.iterrows():
                     </div>
                 </div>
             </div>
-            
-            <!-- Page 1.2 - Commercial -->
-            <div class="page">
-                <h3 class="page-title">Commercial Stats</h3>
-                <div class="stat">
-                    <span class="stat-label">Class: </span>
-                    <span class="stat-value"><span class="class-badge class-{building_class}">{building_class}</span></span>
-                </div>
-                <div class="stat">
-                    <span class="stat-label">Owner: </span>
-                    <span class="stat-value">{owner}{owner_logo}</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-label">Manager: </span>
-                    <span class="stat-value">{property_manager}{manager_logo}</span>
-                </div>
-                {"<div class='stat'><span class='stat-label'>Owner Contact: </span><span class='stat-value'>" + landlord_contact + "</span></div>" if landlord_contact != 'Unavailable' else ""}
-                {"<div class='stat'><span class='stat-label'>Property Manager Contact: </span><span class='stat-value'>" + property_manager_contact + "</span></div>" if property_manager_contact != 'Unavailable' else ""}
-                <div class="stat">
-                    <span class="stat-label">% Leased: </span>
-                    <span class="stat-value">{pct_leased}%</span>
-                </div>
-                {"<div class='stat'><span class='stat-label'>OpEx per Sq Ft: </span><span class='stat-value'>" + opex_per_sqft + "</span></div>" if opex_per_sqft != 'N/A' else ""}
-            </div>
         </div>
         </div>
         
@@ -1480,7 +1465,7 @@ for i, row in scoring.iterrows():
             <h2 class="section-header">Building Overview</h2>
             
             <div class="page">
-                <h3 class="page-title">Property Details</h3>
+                <h3 class="page-title">Property</h3>
                 <div class="stat">
                     <span class="stat-label">Last Renovated: </span>
                     <span class="stat-value">{year_altered}</span>
@@ -1490,45 +1475,27 @@ for i, row in scoring.iterrows():
                     <span class="stat-value">{num_floors}</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-label">Elevator Shafts: </span>
-                    <span class="stat-value">{num_elevators}</span>
-                </div>
-                <div class="stat">
                     <span class="stat-label">Units: </span>
                     <span class="stat-value">{total_units}</span>
                 </div>
                 {"<div class='stat'><span class='stat-label'>Avg Floor Sq Ft: </span><span class='stat-value'>" + typical_floor_sqft + " sq ft</span></div>" if typical_floor_sqft != 'N/A' else ""}
                 <div class="stat">
-                    <span class="stat-label">Total Gross Floor Area: </span>
+                    <span class="stat-label">Total Floor Area: </span>
                     <span class="stat-value">{int(total_area):,} sq ft</span>
                 </div>
                 <div class="stat">
                     <span class="stat-label">Office Floor Area: </span>
                     <span class="stat-value">{office_sqft:,} sq ft ({office_pct}% of total)</span>
                 </div>
-                <div class="stat">
-                    <span class="stat-label">BMS Controls: </span>
-                    <span class="stat-value">{bas_text}</span>
-                </div>
-                {"<div class='stat'><span class='stat-label'>Heating System: </span><span class='stat-value'>" + heating_type + "</span></div>" if heating_type != 'N/A' else ""}
-                {"<div class='stat'><span class='stat-label'>Cooling System: </span><span class='stat-value'>" + cooling_type + "</span></div>" if cooling_type != 'N/A' else ""}
-                {"<div class='stat'><span class='stat-label'>Equipment Counts: </span><span class='stat-value'>Cooling Towers: " + str(cooling_towers) + " | Water Tanks: " + str(water_tanks) + "</span></div>" if (cooling_towers > 0 or water_tanks > 0) else ""}
             </div>
             
             <div class="page">
-                <h3 class="page-title">Commercial Stats</h3>
+                <h3 class="page-title">Commercial</h3>
                 <div class="stat">
                     <span class="stat-label">Class: </span>
                     <span class="stat-value"><span class="class-badge class-{building_class.replace(' ', '')}">{building_class}</span></span>
                 </div>
-                <div class="stat">
-                    <span class="stat-label">Owner: </span>
-                    <span class="stat-value">{owner}{owner_logo}</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-label">Manager: </span>
-                    <span class="stat-value">{property_manager}{manager_logo}</span>
-                </div>
+                {"<div class='stat'><span class='stat-label'>Owner & Manager: </span><span class='stat-value'>" + owner + owner_logo + "</span></div>" if owner == property_manager else "<div class='stat'><span class='stat-label'>Owner: </span><span class='stat-value'>" + owner + owner_logo + "</span></div><div class='stat'><span class='stat-label'>Manager: </span><span class='stat-value'>" + property_manager + manager_logo + "</span></div>"}
                 {"<div class='stat'><span class='stat-label'>Owner Contact: </span><span class='stat-value'>" + landlord_contact + "</span></div>" if landlord_contact != 'Unavailable' else ""}
                 {"<div class='stat'><span class='stat-label'>Property Manager Contact: </span><span class='stat-value'>" + property_manager_contact + "</span></div>" if property_manager_contact != 'Unavailable' else ""}
                 <div class="stat">
@@ -1537,22 +1504,37 @@ for i, row in scoring.iterrows():
                 </div>
                 {"<div class='stat'><span class='stat-label'>OpEx per Sq Ft: </span><span class='stat-value'>" + opex_per_sqft + "</span></div>" if opex_per_sqft != 'N/A' else ""}
             </div>
+            
+            <div class="page">
+                <h3 class="page-title">Equipment</h3>
+                <div class="stat">
+                    <span class="stat-label">Elevator Shafts: </span>
+                    <span class="stat-value">{num_elevators}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">BMS Controls: </span>
+                    <span class="stat-value">{bas_text}</span>
+                </div>
+                {"<div class='stat'><span class='stat-label'>Heating System: </span><span class='stat-value'>" + heating_type + "</span></div>" if heating_type != 'N/A' else ""}
+                {"<div class='stat'><span class='stat-label'>Cooling System: </span><span class='stat-value'>" + cooling_type + "</span></div>" if cooling_type != 'N/A' else ""}
+                {"<div class='stat'><span class='stat-label'>Rooftop System: </span><span class='stat-value'>Cooling Towers: " + str(cooling_towers) + " | Water Tanks: " + str(water_tanks) + "</span></div>" if (cooling_towers > 0 or water_tanks > 0) else ""}
+            </div>
         </div>
         
         {f'''<!-- Major Tenants Section -->
         <div class="section section-white">
             <h2 class="section-header">Major Tenants</h2>
-            <div class="page" style="max-width: 100%;">
+            <div class="page">
                 <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
+                    <table id="tenantTable-{bbl}" style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
                         <thead>
                             <tr style="background: #f8f9fa; border-bottom: 2px solid #e5e7eb;">
-                                <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151;">Tenant</th>
-                                <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151;">Industry</th>
-                                <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151;">Floor</th>
-                                <th style="padding: 12px; text-align: right; font-weight: 600; color: #374151;">SF Occupied</th>
-                                <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151;">Move Date</th>
-                                <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151;">Exp Date</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151; cursor: pointer;" onclick="sortTenantTable(0)">Tenant* <span class="sort-indicator">↕</span></th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151; cursor: pointer;" onclick="sortTenantTable(1)">Industry <span class="sort-indicator">↕</span></th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151; cursor: pointer;" onclick="sortTenantTable(2)">Floor <span class="sort-indicator">↕</span></th>
+                                <th style="padding: 12px; text-align: right; font-weight: 600; color: #374151; cursor: pointer;" onclick="sortTenantTable(3)">SF Occupied <span class="sort-indicator">↕</span></th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151; cursor: pointer;" onclick="sortTenantTable(4)">Move Date <span class="sort-indicator">↕</span></th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151; cursor: pointer;" onclick="sortTenantTable(5)">Exp Date <span class="sort-indicator">↕</span></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1615,7 +1597,7 @@ for i, row in scoring.iterrows():
             <h2 class="section-header">Energy Consumption</h2>
             
             <div class="page">
-                <h3 class="page-title">Energy Usage</h3>
+                <h3 class="page-title">Usage</h3>
             <div class="chart-carousel">
                 <div class="chart-toggle">
                     <button class="toggle-btn active" onclick="showChart('usage', 'building')">Building</button>
@@ -1631,7 +1613,7 @@ for i, row in scoring.iterrows():
         </div>
         
         <div class="page">
-            <h3 class="page-title">Energy Cost</h3>
+            <h3 class="page-title">Cost</h3>
             <div class="chart-carousel">
                 <div class="chart-toggle">
                     <button class="toggle-btn active" onclick="showChart('cost', 'building')">Building</button>
@@ -1649,25 +1631,25 @@ for i, row in scoring.iterrows():
         
         <!-- Section 4: ODCV -->
         <div class="section section-white">
-            <h2 class="section-header">ODCV Savings</h2>
+            <h2 class="section-header">HVAC Analysis</h2>
             
             <div class="page">
-                <h3 class="page-title">HVAC Electricity Usage (% of Total)</h3>
+                <h3 class="page-title">Electricity Disaggregation</h3>
                 <div id="hvac_pct_chart" style="width: 100%; height: 400px;"></div>
             </div>
             
             <div class="page">
-                <h3 class="page-title">ODCV Savings Potential</h3>
+                <h3 class="page-title">Savings Potential</h3>
                 <div id="odcv_savings_chart" style="width: 100%; height: 400px;"></div>
             </div>
         </div>
         
-        <!-- Air Quality Section -->
+{f'''        <!-- Air Quality Section -->
         <div class="section section-gray">
             <h2 class="section-header">Air Quality</h2>
             
             <div class="page">
-                <h3 class="page-title">Outdoor Pollution Level</h3>
+                <h3 class="page-title">Outdoor Pollution (PM2.5)</h3>''' if chart_dates else ""}
             
             <div class="iaq-summary" style="margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
                 <div class="iaq-stat-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; text-align: center;">
@@ -1691,7 +1673,7 @@ for i, row in scoring.iterrows():
             
             <div id="pm25_chart" style="width: 100%; height: 400px;"></div>
             </div>
-        </div>
+        </div>''' if chart_dates else ""}}
         
     </div>
     
@@ -1888,6 +1870,16 @@ for i, row in scoring.iterrows():
         }}
     }}
     
+    function downloadImage(button) {{
+        const img = button.parentElement.querySelector('img');
+        const link = document.createElement('a');
+        link.href = img.src;
+        link.download = img.src.split('/').pop();
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }}
+    
     // Enhanced Interactive carousel with smooth transitions
     let interactiveIndex = 0;
     
@@ -1927,6 +1919,14 @@ for i, row in scoring.iterrows():
                 'pano': '360 Panorama'
             }};
             titleElement.innerHTML = `Dynamic: <span style="color: #555;">${{typeMap[slideType] || 'Unknown'}}</span>`;
+        }}
+        
+        // Auto-play video when navigating to aerial slide
+        if (slideType === 'video' && interactiveIndex === 0) {{
+            const video = document.querySelector(`#aerial-video-${{bbl}} video`);
+            if (video) {{
+                video.play().catch(e => console.log('Autoplay prevented on carousel navigation:', e));
+            }}
         }}
         
         // Handle panorama initialization and rotation
@@ -2011,11 +2011,11 @@ for i, row in scoring.iterrows():
     
     const layout = {{
         title: {{
-            text: 'Monthly Energy Usage (2023)',
+            text: 'Monthly Usage (2023)',
             font: {{size: 20}}
         }},
         yaxis: {{
-            title: 'Energy Usage (kBtu)',
+            title: 'Usage (kBtu)',
             showgrid: false
         }},
         xaxis: {{
@@ -2027,7 +2027,13 @@ for i, row in scoring.iterrows():
         hovermode: 'x unified'
     }};
     
-    Plotly.newPlot('energy_chart', [elecData, gasData, steamData], layout, {{
+    // Building usage chart - only show fuels with usage
+    const buildingUsageData = [];
+    if ({elec_usage}.some(v => v > 0)) buildingUsageData.push(elecData);
+    if ({gas_usage}.some(v => v > 0)) buildingUsageData.push(gasData);
+    if ({steam_usage}.some(v => v > 0)) buildingUsageData.push(steamData);
+    
+    Plotly.newPlot('energy_chart', buildingUsageData, layout, {{
         modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
         displaylogo: false,
         displayModeBar: true
@@ -2060,11 +2066,11 @@ for i, row in scoring.iterrows():
     
     const officeLayout = {{
         title: {{
-            text: 'Monthly Office Energy Usage (2023)',
+            text: 'Monthly Office Usage (2023)',
             font: {{size: 20}}
         }},
         yaxis: {{
-            title: 'Energy Usage (kBtu)',
+            title: 'Usage (kBtu)',
             showgrid: false
         }},
         xaxis: {{
@@ -2079,7 +2085,13 @@ for i, row in scoring.iterrows():
         hovermode: 'x unified'
     }};
     
-    Plotly.newPlot('office_energy_chart', [officeElecData, officeGasData, officeSteamData], officeLayout, {{
+    // Office usage chart - only show fuels with usage
+    const officeUsageData = [];
+    if ({office_elec_usage}.some(v => v > 0)) officeUsageData.push(officeElecData);
+    if ({office_gas_usage}.some(v => v > 0)) officeUsageData.push(officeGasData);
+    if ({office_steam_usage}.some(v => v > 0)) officeUsageData.push(officeSteamData);
+    
+    Plotly.newPlot('office_energy_chart', officeUsageData, officeLayout, {{
         modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
         displaylogo: false,
         displayModeBar: true
@@ -2118,11 +2130,11 @@ for i, row in scoring.iterrows():
     
     const costLayout = {{
         title: {{
-            text: 'Monthly Energy Cost (2023)',
+            text: 'Monthly Cost (2023)',
             font: {{size: 20}}
         }},
         yaxis: {{
-            title: 'Cost ($)',
+            title: '',
             tickformat: '$,.0f',
             showgrid: false
         }},
@@ -2135,11 +2147,22 @@ for i, row in scoring.iterrows():
         hovermode: 'x unified'
     }};
 
-    Plotly.newPlot('energy_cost_chart', [elecCost, gasCost, steamCostData], costLayout, {{
+    // Building cost chart - only show fuels with costs
+    const buildingCostData = [];
+    if ({elec_cost}.some(v => v > 0)) buildingCostData.push(elecCost);
+    if ({gas_cost}.some(v => v > 0)) buildingCostData.push(gasCost);
+    if ({steam_cost}.some(v => v > 0)) buildingCostData.push(steamCostData);
+    
+    Plotly.newPlot('energy_cost_chart', buildingCostData, costLayout, {{
         modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
         displaylogo: false,
         displayModeBar: true
     }});
+
+    // Add annual cost caption below the chart
+    document.getElementById('energy_cost_chart').insertAdjacentHTML('afterend', 
+        '<div style="text-align: center; margin-top: 10px; font-size: 16px; color: #666;">Annual Cost: $' + ({annual_building_cost:.0f}).toLocaleString() + '</div>'
+    );
     
     // Office Cost Chart
     const officeElecCost = {{
@@ -2172,7 +2195,7 @@ for i, row in scoring.iterrows():
             font: {{size: 20}}
         }},
         yaxis: {{
-            title: 'Cost ($)',
+            title: '',
             tickformat: '$,.0f',
             showgrid: false
         }},
@@ -2188,11 +2211,22 @@ for i, row in scoring.iterrows():
         hovermode: 'x unified'
     }};
 
-    Plotly.newPlot('office_cost_chart', [officeElecCost, officeGasCost, officeSteamCostData], officeCostLayout, {{
+    // Office cost chart - only show fuels with costs
+    const officeCostData = [];
+    if ({office_elec_cost}.some(v => v > 0)) officeCostData.push(officeElecCost);
+    if ({office_gas_cost}.some(v => v > 0)) officeCostData.push(officeGasCost);
+    if ({office_steam_cost}.some(v => v > 0)) officeCostData.push(officeSteamCostData);
+    
+    Plotly.newPlot('office_cost_chart', officeCostData, officeCostLayout, {{
         modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
         displaylogo: false,
         displayModeBar: true
     }});
+
+    // Add annual cost caption below the chart
+    document.getElementById('office_cost_chart').insertAdjacentHTML('afterend', 
+        '<div style="text-align: center; margin-top: 10px; font-size: 16px; color: #666;">Annual Cost: $' + ({annual_office_cost:.0f}).toLocaleString() + '</div>'
+    );
     
     // HVAC Percentage Chart
     const hvacData = {{
@@ -2213,7 +2247,7 @@ for i, row in scoring.iterrows():
             font: {{size: 20}}
         }},
         yaxis: {{
-            title: 'Percentage',
+            title: '',
             tickformat: '.0%',
             showgrid: false,
             rangemode: 'tozero'  // Auto-scale but start at 0
@@ -2232,6 +2266,11 @@ for i, row in scoring.iterrows():
         displaylogo: false,
         displayModeBar: true
     }});
+
+    // Add annual average caption below the chart
+    document.getElementById('hvac_pct_chart').insertAdjacentHTML('afterend', 
+        '<div style="text-align: center; margin-top: 10px; font-size: 16px; color: #666;">Annual Average: {annual_avg_hvac_pct * 100:.1f}%</div>'
+    );
     
     // ODCV Savings Chart
     const odcvElecSave = {{x: months, y: {odcv_elec_savings}, name: 'Elec', type: 'bar', marker: {{color: '#0066cc'}}}};
@@ -2240,13 +2279,19 @@ for i, row in scoring.iterrows():
     
     const totalSavings = {total_odcv_savings};
     
-    Plotly.newPlot('odcv_savings_chart', [odcvElecSave, odcvGasSave, odcvSteamSave], {{
+    // ODCV savings chart - only show fuels with savings
+    const odcvSavingsData = [];
+    if ({odcv_elec_savings}.some(v => v > 0)) odcvSavingsData.push(odcvElecSave);
+    if ({odcv_gas_savings}.some(v => v > 0)) odcvSavingsData.push(odcvGasSave);
+    if ({odcv_steam_savings}.some(v => v > 0)) odcvSavingsData.push(odcvSteamSave);
+    
+    Plotly.newPlot('odcv_savings_chart', odcvSavingsData, {{
         title: {{
-            text: 'Monthly ODCV Savings (Annual: $' + totalSavings.toFixed(0).replace(/\\B(?=(\\d{{3}})+(?!\\d))/g, ',') + ')',
+            text: 'Monthly ODCV Savings',
             font: {{size: 20}}
         }},
         yaxis: {{
-            title: 'Savings ($)',
+            title: '',
             tickformat: '$,.0f',
             showgrid: false
         }},
@@ -2263,6 +2308,11 @@ for i, row in scoring.iterrows():
         displaylogo: false,
         displayModeBar: true
     }});
+
+    // Add annual savings caption below the chart
+    document.getElementById('odcv_savings_chart').insertAdjacentHTML('afterend', 
+        '<div style="text-align: center; margin-top: 10px; font-size: 16px; color: #666;">Annual Savings: $' + totalSavings.toFixed(0).replace(/\\B(?=(\\d{{3}})+(?!\\d))/g, ',') + '</div>'
+    );
     
     // PM2.5 Chart - Business Hours Only
     const pm25Data = {{
@@ -2287,7 +2337,7 @@ for i, row in scoring.iterrows():
 
     Plotly.newPlot('pm25_chart', [pm25Data, goodThreshold], {{
         title: {{
-            text: 'Daily PM2.5 Levels (30-Day History)',
+            text: 'Neighborhood PM2.5 Levels ({len(chart_dates) if chart_dates else 0}-Day History)',
             y: 0.95
         }},
         yaxis: {{
@@ -2301,8 +2351,10 @@ for i, row in scoring.iterrows():
             showgrid: false,
             type: 'date',
             tickformat: '%b %d',
-            dtick: 86400000 * 3,  // Show every 3 days to avoid crowding
-            tickangle: -45
+            dtick: 86400000 * {max(1, len(chart_dates) // 10) if chart_dates else 3},  // Dynamic tick interval
+            tickangle: -45,
+            showticklabels: true,
+            range: [{json.dumps(chart_dates[0] if chart_dates else '')}, {json.dumps(chart_dates[-1] if chart_dates else '')}]
         }},
         legend: {{
             orientation: 'h',
@@ -2335,21 +2387,18 @@ for i, row in scoring.iterrows():
             const isEven = buildingNumber % 2 === 0;
             const addressLower = address.toLowerCase();
             
-            // Manhattan grid with panorama northOffset correction
-            // After fixing even/odd logic: Broadway even (270°) should be -92.45° (~267.55°)
-            // This means we need to subtract ~2.45° from all values
-            const northOffset = -2.45;
+            // Manhattan grid is rotated ~29° clockwise from true north
+            const northOffset = -29;  // Was -2.45, now proper grid rotation
             
             if (addressLower.includes('street') || addressLower.includes(' st')) {{
-                // STREETS: Even = South side (look north), Odd = North side (look south)
+                // STREETS: Even = South side, Odd = North side
                 return isEven ? (29 + northOffset) : (209 + northOffset);
             }} else if (addressLower.includes('avenue') || addressLower.includes(' ave')) {{
-                // AVENUES: Even = West side (look east), Odd = East side (look west)
-                return isEven ? (119 + northOffset) : (299 + northOffset);
+                // AVENUES: Even = West side, Odd = East side
+                return isEven ? (299 + northOffset) : (119 + northOffset);
             }} else if (addressLower.includes('broadway')) {{
-                // Broadway runs diagonal NE-SW through Manhattan
-                // Even = west side (look west), Odd = east side (look east)
-                return isEven ? (270 + northOffset) : (90 + northOffset);
+                // Broadway runs diagonal
+                return isEven ? (330 + northOffset) : (150 + northOffset);
             }}
             
             // Default (assume street)
@@ -2422,56 +2471,71 @@ for i, row in scoring.iterrows():
         }};
     }});
     
-    // Aerial Video Loading
-    const API_KEY = '{CLIENT_API_KEY}';
-
-    async function loadAerialVideo(bbl, videoId) {{
-        console.log('Loading aerial video for BBL:', bbl, 'Video ID:', videoId);
-        const container = document.getElementById(`aerial-video-${{bbl}}`);
-        if (!container) {{
-            console.error('Container not found for aerial-video-' + bbl);
-            return;
-        }}
+    // Tenant table sorting
+    let tenantSortDir = {{}};
+    function sortTenantTable(col) {{
+        // Find the tenant table (there should only be one per page)
+        const table = document.querySelector('[id^="tenantTable-"]');
+        if (!table) return;
         
-        // Check if video already exists and is playing
-        const existingVideo = container.querySelector('video');
-        if (existingVideo && existingVideo.readyState >= 2) {{
-            console.log('Video already loaded and ready for', bbl);
-            return;
-        }}
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
         
-        try {{
-            // Fetch video URLs from Google Aerial View API
-            const response = await fetch(`https://aerialview.googleapis.com/v1/videos:lookupVideo?key=${{API_KEY}}&videoId=${{videoId}}`);
-            console.log('Aerial API Response Status:', response.status);
-            const data = await response.json();
-            console.log('Aerial API Response Data:', JSON.stringify(data, null, 2));
+        // Toggle sort direction
+        tenantSortDir[col] = !tenantSortDir[col];
+        
+        rows.sort((a, b) => {{
+            let aVal, bVal;
             
-            if (data.state === 'ACTIVE' && data.uris) {{
-                // Use landscape MP4 video
-                const videoUri = data.uris.MP4_HIGH?.landscapeUri || data.uris.MP4_HIGH?.portraitUri || data.uris.MP4_MEDIUM?.landscapeUri;
-                
-                if (videoUri) {{
-                    container.innerHTML = `
-                        <video controls autoplay loop muted style="width: 100%; height: 100%; object-fit: contain;">
-                            <source src="${{videoUri}}" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    `;
-                }} else {{
-                    container.innerHTML = '<div style="color: white; text-align: center; padding: 20px;">Video format not available</div>';
+            if (col === 3) {{
+                // SF Occupied - parse number from formatted string
+                aVal = parseInt(a.cells[col].textContent.replace(/,/g, '') || '0');
+                bVal = parseInt(b.cells[col].textContent.replace(/,/g, '') || '0');
+            }} else if (col === 4 || col === 5) {{
+                // Dates - convert to sortable format
+                aVal = a.cells[col].textContent.trim();
+                bVal = b.cells[col].textContent.trim();
+                // Handle N/A values
+                if (aVal === 'N/A') aVal = '';
+                if (bVal === 'N/A') bVal = '';
+                // Convert Mon-YY to YYYY-MM for sorting
+                if (aVal && aVal !== 'N/A') {{
+                    const [month, year] = aVal.split('-');
+                    const monthNum = new Date(month + ' 1, 2000').getMonth() + 1;
+                    aVal = `20${{year}}-${{monthNum.toString().padStart(2, '0')}}`;
+                }}
+                if (bVal && bVal !== 'N/A') {{
+                    const [month, year] = bVal.split('-');
+                    const monthNum = new Date(month + ' 1, 2000').getMonth() + 1;
+                    bVal = `20${{year}}-${{monthNum.toString().padStart(2, '0')}}`;
                 }}
             }} else {{
-                container.innerHTML = '<div style="color: white; text-align: center; padding: 20px;">Video still processing. Retrying...</div>';
-                // Retry after 3 seconds if video is still processing
-                setTimeout(() => loadAerialVideo(bbl, videoId), 3000);
+                // Text columns (Tenant, Industry, Floor)
+                aVal = a.cells[col].textContent.toLowerCase().trim();
+                bVal = b.cells[col].textContent.toLowerCase().trim();
             }}
-        }} catch (error) {{
-            console.error('Error loading aerial video:', error);
-            console.error('Error details:', error.message);
-            container.innerHTML = `<div style="color: white; text-align: center; padding: 20px;">Error loading video. <button onclick="loadAerialVideo('${{bbl}}', '${{videoId}}')" style="margin-top: 10px; padding: 5px 10px; background: white; color: black; border: none; border-radius: 4px; cursor: pointer;">Retry</button></div>`;
-        }}
+            
+            if (tenantSortDir[col]) {{
+                return aVal > bVal ? 1 : -1;
+            }} else {{
+                return aVal < bVal ? 1 : -1;
+            }}
+        }});
+        
+        // Clear and rebuild tbody
+        tbody.innerHTML = '';
+        rows.forEach(row => tbody.appendChild(row));
+        
+        // Update sort indicators
+        const headers = table.querySelectorAll('th');
+        headers.forEach((th, idx) => {{
+            const indicator = th.querySelector('.sort-indicator');
+            if (indicator) {{
+                indicator.textContent = idx === col ? (tenantSortDir[col] ? '↑' : '↓') : '↕';
+            }}
+        }});
     }}
+    
     </script>
     </div>
     

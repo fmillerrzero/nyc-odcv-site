@@ -84,7 +84,7 @@ bas_yes = len(system[system['Has Building Automation'] == 'yes'])
 html = f"""<!DOCTYPE html>
 <html>
 <head>
-    <title>NYC ODCV Opportunity Rankings | R-Zero</title>
+    <title>NYC ODCV Opportunities | R-Zero</title>
     <link rel="icon" type="image/png" href="https://rzero.com/wp-content/themes/rzero/build/images/favicons/favicon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -363,7 +363,7 @@ html = f"""<!DOCTYPE html>
                 </a>
             </div>
             <h1>Prospector: NYC</h1>
-            <p class="subtitle">ODCV Opportunity Rankings</p>
+            <p class="subtitle">ODCV Opportunities</p>
         </div>
         
         <div class="stats">
@@ -373,7 +373,7 @@ html = f"""<!DOCTYPE html>
             </div>
             <div class="stat-card">
                 <div class="stat-value" style="color: #c41e3a;">{urgent}</div>
-                <div class="stat-label">Buildings facing ${total_penalties_2026/1000000:.1f}M 2026 LL97 Penalties</div>
+                <div class="stat-label">Buildings facing 2026 LL97 Penalties</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">{bas_yes}</div>
@@ -579,12 +579,9 @@ for i, row in scoring.iterrows():
     else:
         savings_class = 'savings-low'
     
-    # Add rank badge for top 10
+    # Add rank badge for all ranks
     rank = int(row['final_rank'])
-    if rank <= 10:
-        rank_display = f'<span class="rzero-badge">#{rank}</span>'
-    else:
-        rank_display = str(rank)
+    rank_display = f'<span class="rzero-badge">#{rank}</span>'
     
     html += f"""
         <tr data-search="{search_text.replace('"', '&quot;')}" data-occupancy="70" class="clickable-row" onclick="if (!event.target.closest('a')) window.location.href='{bbl}.html'">
@@ -964,11 +961,10 @@ html += """
     
     
     // Fetch ALL aerial video URLs and store in sessionStorage
-    async function fetchAllAerialVideos() {
-        const API_KEY = 'AIzaSyDQdR4xY0a_qmEsYairsp6r6tXwh5qx_ho';
-        console.log('Fetching all aerial video URLs...');
+    function fetchAllAerialVideos() {
+        console.log('Building AWS S3 video URLs...');
         
-        // Complete mapping from aerial_videos.csv
+        // Complete mapping from aerial_videos.csv for AWS S3 videos
         const aerialVideos = {"""
 
 # Add all the aerial videos from the Python data
@@ -980,49 +976,27 @@ html = html.rstrip(',')  # Remove trailing comma
 html += """
         };
         
+        // Build AWS S3 URLs for all videos
         const videoUrls = {};
-        const entries = Object.entries(aerialVideos);
-        console.log(`Fetching ${entries.length} video URLs...`);
+        Object.keys(aerialVideos).forEach(bbl => {
+            videoUrls[bbl] = `https://aerial-videos-forrest.s3.us-east-2.amazonaws.com/${bbl}_aerial.mp4`;
+        });
         
-        // Process in batches to avoid overwhelming the API
-        const batchSize = 10;
-        for (let i = 0; i < entries.length; i += batchSize) {
-            const batch = entries.slice(i, i + batchSize);
-            
-            await Promise.all(batch.map(async ([bbl, videoId]) => {
-                try {
-                    const response = await fetch(`https://aerialview.googleapis.com/v1/videos:lookupVideo?key=${API_KEY}&videoId=${videoId}`);
-                    const data = await response.json();
-                    
-                    if (data.state === 'ACTIVE' && data.uris) {
-                        const videoUri = data.uris.MP4_HIGH?.landscapeUri || 
-                                       data.uris.MP4_HIGH?.portraitUri || 
-                                       data.uris.MP4_MEDIUM?.landscapeUri;
-                        
-                        if (videoUri) {
-                            videoUrls[bbl] = videoUri;
-                            console.log(`Fetched video URL for BBL ${bbl}`);
-                        }
-                    }
-                } catch (error) {
-                    console.error(`Failed to fetch video for BBL ${bbl}:`, error);
-                }
-            }));
-            
-            // Small delay between batches
-            if (i + batchSize < entries.length) {
-                await new Promise(resolve => setTimeout(resolve, 500));
-            }
-        }
+        // Log a sample for verification
+        const sampleBBLs = Object.keys(videoUrls).slice(0, 3);
+        console.log('Sample AWS video URLs:', sampleBBLs.map(bbl => ({
+            bbl: bbl,
+            url: videoUrls[bbl]
+        })));
         
-        // Store in sessionStorage
+        // Store in sessionStorage for building pages to use
         sessionStorage.setItem('aerialVideoUrls', JSON.stringify(videoUrls));
-        console.log(`Stored ${Object.keys(videoUrls).length} video URLs in sessionStorage`);
+        console.log(`Stored ${Object.keys(videoUrls).length} AWS video URLs in sessionStorage`);
     }
     
     // Call on page load
     document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(fetchAllAerialVideos, 1000);
+        setTimeout(fetchAllAerialVideos, 100);
     });
     </script>
     
