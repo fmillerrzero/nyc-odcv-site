@@ -302,6 +302,7 @@ html = f"""<!DOCTYPE html>
             text-align: left; 
             cursor: pointer; 
             font-weight: 600;
+            white-space: nowrap;
         }}
         
         th:hover {{ background: var(--rzero-primary-dark); }}
@@ -503,7 +504,7 @@ html += f"""
             <th onclick="sortTable(2)" style="cursor: pointer;">Building <span class="sort-indicator">↕</span></th>
             <th onclick="sortTable(3)" style="cursor: pointer;">Owner <span class="sort-indicator">↕</span></th>
             <th onclick="sortTable(4)" style="cursor: pointer;">Manager <span class="sort-indicator">↕</span></th>
-            <th onclick="sortTable(5)" style="cursor: pointer;">2026 ODCV Savings <span class="sort-indicator">↕</span></th>
+            <th onclick="sortTable(5)" style="cursor: pointer;">Savings <span class="sort-indicator">↕</span></th>
             <th onclick="sortTable(6)" style="cursor: pointer;">Score <span class="sort-indicator">↕</span></th>
             <th>Details</th>
         </tr>
@@ -773,7 +774,7 @@ html += """
         const table = document.getElementById('buildingTable');
         const rows = Array.from(table.querySelectorAll('tbody tr')).filter(row => row.style.display !== 'none');
         
-        let csv = 'Rank,Building,Owner,Manager,2026 ODCV Savings,Score\\n';
+        let csv = 'Rank,Building,Owner,Manager,Savings,Score\\n';
         
         rows.forEach(row => {
             const cells = row.cells;
@@ -978,31 +979,31 @@ for bbl, video_id in aerial_videos.items():
             {bbl}: '{video_id}',"""
 
 html = html.rstrip(',')  # Remove trailing comma
-html += """
-        };
+html += f"""
+        }};
         
         // Build AWS S3 URLs for all videos
-        const videoUrls = {};
-        Object.keys(aerialVideos).forEach(bbl => {
-            videoUrls[bbl] = `https://aerial-videos-forrest.s3.us-east-2.amazonaws.com/${bbl}_aerial.mp4`;
-        });
+        const videoUrls = {{}};
+        Object.keys(aerialVideos).forEach(bbl => {{
+            videoUrls[bbl] = `https://aerial-videos-forrest.s3.us-east-2.amazonaws.com/${{bbl}}_aerial.mp4`;
+        }});
         
         // Log a sample for verification
         const sampleBBLs = Object.keys(videoUrls).slice(0, 3);
-        console.log('Sample AWS video URLs:', sampleBBLs.map(bbl => ({
+        console.log('Sample AWS video URLs:', sampleBBLs.map(bbl => ({{
             bbl: bbl,
             url: videoUrls[bbl]
-        })));
+        }})));
         
         // Store in sessionStorage for building pages to use
         sessionStorage.setItem('aerialVideoUrls', JSON.stringify(videoUrls));
-        console.log(`Stored ${Object.keys(videoUrls).length} AWS video URLs in sessionStorage`);
-    }
+        console.log(`Stored ${{Object.keys(videoUrls).length}} AWS video URLs in sessionStorage`);
+    }}
     
     // Call on page load
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {{
         setTimeout(fetchAllAerialVideos, 100);
-    });
+    }});
     </script>
     
     <!-- Back to Top Button -->

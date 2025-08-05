@@ -219,6 +219,7 @@
             text-align: left; 
             cursor: pointer; 
             font-weight: 600;
+            white-space: nowrap;
         }
         
         th:hover { background: var(--rzero-primary-dark); }
@@ -398,7 +399,7 @@
             <th onclick="sortTable(2)" style="cursor: pointer;">Building <span class="sort-indicator">↕</span></th>
             <th onclick="sortTable(3)" style="cursor: pointer;">Owner <span class="sort-indicator">↕</span></th>
             <th onclick="sortTable(4)" style="cursor: pointer;">Manager <span class="sort-indicator">↕</span></th>
-            <th onclick="sortTable(5)" style="cursor: pointer;">2026 ODCV Savings <span class="sort-indicator">↕</span></th>
+            <th onclick="sortTable(5)" style="cursor: pointer;">Savings <span class="sort-indicator">↕</span></th>
             <th onclick="sortTable(6)" style="cursor: pointer;">Score <span class="sort-indicator">↕</span></th>
             <th>Details</th>
         </tr>
@@ -11140,7 +11141,7 @@
         const table = document.getElementById('buildingTable');
         const rows = Array.from(table.querySelectorAll('tbody tr')).filter(row => row.style.display !== 'none');
         
-        let csv = 'Rank,Building,Owner,Manager,2026 ODCV Savings,Score\n';
+        let csv = 'Rank,Building,Owner,Manager,Savings,Score\n';
         
         rows.forEach(row => {
             const cells = row.cells;
@@ -11862,7 +11863,7 @@
     </button>
     
     <div style="text-align: center; color: black; font-size: 14px; padding: 20px 0;">
-        Build: {datetime.now(pytz.timezone('America/Mexico_City')).strftime('%I:%M:%S %p CST')}{' | ' + sys.argv[1] if len(sys.argv) > 1 else ''}
+        Build: 12:09:11 AM CST
     </div>
 </body>
 </html>
