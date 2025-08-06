@@ -5,16 +5,30 @@ import sys
 from html import escape
 
 # Read what we need
-scoring = pd.read_csv('data/odcv_scoring.csv')
-buildings = pd.read_csv('data/buildings_BIG.csv')
-ll97 = pd.read_csv('data/LL97_BIG.csv')
-addresses = pd.read_csv('data/all_building_addresses.csv')
-system = pd.read_csv('data/system_BIG.csv')
+scoring = pd.read_csv('../data/odcv_scoring.csv')
+buildings = pd.read_csv('../data/buildings_BIG.csv')
+ll97 = pd.read_csv('../data/LL97_BIG.csv')
+addresses = pd.read_csv('../data/all_building_addresses.csv')
+system = pd.read_csv('../data/system_BIG.csv')
+
+# Read Wikipedia links data
+wikipedia_links = {}
+try:
+    wiki_df = pd.read_csv('../data/NYC_Wiki_Pages_Buildings_with_BBL_verified.csv')
+    for _, row in wiki_df.iterrows():
+        if pd.notna(row['Wikipedia_Link']):
+            # Convert BBL to int to match the format in other dataframes
+            bbl = int(float(row['BBL']))
+            wikipedia_links[bbl] = row['Wikipedia_Link']
+    print(f"Loaded {len(wikipedia_links)} Wikipedia links")
+except:
+    print("No Wikipedia links file found")
+    wikipedia_links = {}
 
 # Read aerial videos data
 aerial_videos = {}
 try:
-    aerial_df = pd.read_csv('data/aerial_videos.csv')
+    aerial_df = pd.read_csv('../data/aerial_videos.csv')
     for _, row in aerial_df.iterrows():
         if row['status'] == 'active' and pd.notna(row['video_id']):
             aerial_videos[int(row['bbl'])] = row['video_id']
@@ -211,13 +225,13 @@ html = f"""<!DOCTYPE html>
         }}
         
         .savings-medium {{
-            color: #f57c00;
+            color: #1b5e20;
             font-weight: 700;
             position: relative;
         }}
         
         .savings-low {{
-            color: #616161;
+            color: #1b5e20;
             font-weight: 700;
             position: relative;
         }}
@@ -307,7 +321,7 @@ html = f"""<!DOCTYPE html>
         thead {{
             position: sticky;
             top: 0;
-            z-index: 1000;
+            z-index: 100;
             background: var(--rzero-primary);
         }}
         
@@ -362,9 +376,78 @@ html = f"""<!DOCTYPE html>
         .urgent {{ color: #c41e3a; font-weight: bold; }}
         .bas {{ color: #38a169; font-weight: 600; }}
         .no-bas {{ color: #c41e3a; font-weight: 600; }}
+        
+        /* Style the new PlaceAutocompleteElement */
+        gmp-place-autocomplete {{
+            --gmpx-color-surface: #ffffff;
+            --gmpx-color-on-surface: #212121;
+            --gmpx-color-primary: var(--rzero-primary);
+            --gmpx-font-family: 'Inter', sans-serif;
+            width: 100%;
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            z-index: 1001 !important;
+        }}
+        
+        gmp-place-autocomplete input {{
+            padding: 10px !important;
+            border: 1px solid #ddd !important;
+            border-radius: 4px !important;
+            font-size: 14px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }}
+        
+        /* Fix dropdown z-index */
+        .gmpx-autocomplete-dropdown {{
+            z-index: 10000 !important;
+        }}
+        
+        gmp-place-autocomplete::part(dropdown) {{
+            z-index: 10000 !important;
+        }}
+        .autocomplete-item {{
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }}
+        .autocomplete-item:hover {{
+            background: #f8f9fa;
+        }}
+        .autocomplete-item.selected {{
+            background: #e3f2fd;
+        }}
+        .autocomplete-item-type {{
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            background: #e3f2fd;
+            color: #1976d2;
+            font-weight: 600;
+        }}
+        .autocomplete-item-type.google {{
+            background: #fff3e0;
+            color: #f57c00;
+        }}
+        .search-container {{
+            position: relative;
+            flex: 1;
+        }}
+        
+        /* Make Google Places dropdown appear OVER sticky table headers */
+        .pac-container {{
+            z-index: 10001 !important;  /* Higher than sticky headers (z-index: 100) */
+            background: white !important;
+            border: 1px solid #ccc !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2) !important;
+        }}
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
+    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAZfwYEVShfBun2dg5QELXS4r4WRKjVb2c&libraries=places&callback=initGooglePlaces&loading=async"></script>
 </head>
 <body>
     <div class="container">
@@ -488,7 +571,9 @@ html += f"""
         </div>
         
         <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center;">
-            <input type="text" id="search" onkeyup="filterTable()" placeholder="Search by address, owner, property manager" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <div class="search-container" style="position: relative;">
+                <input type="text" id="search" placeholder="Search by address, owner, property manager" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" autocomplete="off">
+            </div>
             <button id="clearFilterBtn" onclick="clearAllFilters()" style="background: #e0e0e0; color: #999; border: none; padding: 10px 25px; border-radius: 8px; cursor: not-allowed; font-size: 16px; font-weight: 600; transition: all 0.2s;" disabled>
                 Clear Filter
             </button>
@@ -503,7 +588,7 @@ html += f"""
         
         <div class="table-wrapper" style="overflow-x: auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 118, 157, 0.08); position: relative; max-height: calc(100vh - 200px); overflow-y: auto;">
         <table id="buildingTable" style="width: 100%; background: white; border-collapse: collapse; min-width: 900px;">
-        <thead style="position: sticky; top: 0; z-index: 1000; background: var(--rzero-primary); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+        <thead style="position: sticky; top: 0; z-index: 100; background: var(--rzero-primary); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
         <tr>
             <th class="thumb-cell">Image</th>
             <th onclick="sortTable(1)" style="cursor: pointer;">Rank <span class="sort-indicator">↕</span></th>
@@ -603,11 +688,21 @@ for i, row in scoring.iterrows():
     rank = int(row['final_rank'])
     rank_display = f'<span class="rzero-badge">#{rank}</span>'
     
+    # Check if this building has a Wikipedia link
+    address_display = address.split(',')[0]
+    if bbl in wikipedia_links:
+        # Add Wikipedia link with blue color
+        address_cell = f'''<a href="{wikipedia_links[bbl]}" target="_blank" onclick="event.stopPropagation();" style="color: var(--rzero-primary); text-decoration: none;">
+            {address_display}
+        </a>'''
+    else:
+        address_cell = address_display
+    
     html += f"""
         <tr data-search="{search_text.replace('"', '&quot;')}" data-occupancy="70" class="clickable-row" onclick="if (!event.target.closest('a')) window.location.href='{bbl}.html'">
             <td>{thumb}</td>
             <td>{rank_display}</td>
-            <td>{address.split(',')[0]}</td>
+            <td>{address_cell}</td>
             <td><a href="javascript:void(0)" onclick="event.stopPropagation(); filterByOwner('{owner.replace('\\', '\\\\').replace("'", "\\'").replace('"', '\\"')}')" class="clickable-link">{owner}</a></td>
             <td><a href="javascript:void(0)" onclick="event.stopPropagation(); filterByManager('{manager.replace('\\', '\\\\').replace("'", "\\'").replace('"', '\\"')}')" class="clickable-link">{manager}</a></td>
             <td class="{savings_class}" data-value="{savings}">${savings:,.0f}</td>
@@ -628,6 +723,353 @@ html += """
     // Global variable to track filter state
     var activeOwnerFilter = null;
     
+    // Local address database from CSV
+    const localAddresses = ["""
+
+# Add all unique addresses from the CSV
+unique_addresses = set()
+for _, row in addresses.iterrows():
+    # Add main address
+    if pd.notna(row['main_address']):
+        unique_addresses.add(row['main_address'])
+    # Add alternative building names
+    for col in ['primary_building_name', 'alternative_name_1', 'alternative_name_2', 'alternative_name_3']:
+        if col in row and pd.notna(row[col]) and row[col]:
+            unique_addresses.add(row[col])
+    # Add some alternate addresses
+    for i in range(5):  # Just first 5 alternate addresses
+        col = f'alternate_address_{i}'
+        if col in row and pd.notna(row[col]) and row[col]:
+            unique_addresses.add(row[col])
+
+# Convert to JavaScript array
+for addr in sorted(unique_addresses):
+    if addr and str(addr) != 'nan':
+        html += f"""
+        '{attr_escape(str(addr))}',"""
+
+html = html.rstrip(',')
+html += """
+    ];
+    
+    // NYC Address Normalization Function
+    // Based on address_normalization.json mapping
+    function normalizeAddress(address) {
+        if (!address) return '';
+        
+        let normalized = address.trim();
+        
+        // First, create a lowercase version for matching while preserving original for numbers
+        const lowerAddress = normalized.toLowerCase();
+        
+        // Step 1: Normalize directions (must come before title case)
+        normalized = normalized.replace(/\\b(west|W\\.)\\b/gi, 'W');
+        normalized = normalized.replace(/\\b(east|E\\.)\\b/gi, 'E');
+        normalized = normalized.replace(/\\b(north|N\\.)\\b/gi, 'N');
+        normalized = normalized.replace(/\\b(south|S\\.)\\b/gi, 'S');
+        
+        // Step 2: Handle numbered avenues FIRST (before general Ave normalization)
+        // Format: "8th Avenue" → "8 Ave" (no ordinal suffix for avenues)
+        normalized = normalized.replace(/\\b(first|1st|1)\\s+(avenue|ave\\.?|av)\\b/gi, '1 Ave');
+        normalized = normalized.replace(/\\b(second|2nd|2)\\s+(avenue|ave\\.?|av)\\b/gi, '2 Ave');
+        normalized = normalized.replace(/\\b(third|3rd|3)\\s+(avenue|ave\\.?|av)\\b/gi, '3 Ave');
+        normalized = normalized.replace(/\\b(fourth|4th|4)\\s+(avenue|ave\\.?|av)\\b/gi, '4 Ave');
+        normalized = normalized.replace(/\\b(fifth|5th|5)\\s+(avenue|ave\\.?|av)\\b/gi, '5 Ave');
+        // 6th Avenue is special - becomes Ave Of The Americas
+        normalized = normalized.replace(/\\b(sixth|6th|6)\\s+(avenue|ave\\.?|av)\\b/gi, 'Ave Of The Americas');
+        normalized = normalized.replace(/\\b(seventh|7th|7)\\s+(avenue|ave\\.?|av)\\b/gi, '7 Ave');
+        normalized = normalized.replace(/\\b(eighth|8th|8)\\s+(avenue|ave\\.?|av)\\b/gi, '8 Ave');
+        normalized = normalized.replace(/\\b(ninth|9th|9)\\s+(avenue|ave\\.?|av)\\b/gi, '9 Ave');
+        normalized = normalized.replace(/\\b(tenth|10th|10)\\s+(avenue|ave\\.?|av)\\b/gi, '10 Ave');
+        normalized = normalized.replace(/\\b(eleventh|11th|11)\\s+(avenue|ave\\.?|av)\\b/gi, '11 Ave');
+        normalized = normalized.replace(/\\b(twelfth|12th|12)\\s+(avenue|ave\\.?|av)\\b/gi, '12 Ave');
+        
+        // Step 3: Handle numbered streets (WITH ordinal suffixes)
+        // Format: "4 Street" → "4th St"
+        normalized = normalized.replace(/\\b(first|1)\\s+(street|st\\.?)\\b/gi, '1st St');
+        normalized = normalized.replace(/\\b(second|2)\\s+(street|st\\.?)\\b/gi, '2nd St');
+        normalized = normalized.replace(/\\b(third|3)\\s+(street|st\\.?)\\b/gi, '3rd St');
+        normalized = normalized.replace(/\\b(fourth|4)\\s+(street|st\\.?)\\b/gi, '4th St');
+        normalized = normalized.replace(/\\b(fifth|5)\\s+(street|st\\.?)\\b/gi, '5th St');
+        normalized = normalized.replace(/\\b(sixth|6)\\s+(street|st\\.?)\\b/gi, '6th St');
+        normalized = normalized.replace(/\\b(seventh|7)\\s+(street|st\\.?)\\b/gi, '7th St');
+        normalized = normalized.replace(/\\b(eighth|8)\\s+(street|st\\.?)\\b/gi, '8th St');
+        normalized = normalized.replace(/\\b(ninth|9)\\s+(street|st\\.?)\\b/gi, '9th St');
+        normalized = normalized.replace(/\\b(tenth|10)\\s+(street|st\\.?)\\b/gi, '10th St');
+        normalized = normalized.replace(/\\b(eleventh|11)\\s+(street|st\\.?)\\b/gi, '11th St');
+        normalized = normalized.replace(/\\b(twelfth|12)\\s+(street|st\\.?)\\b/gi, '12th St');
+        
+        // Handle higher numbered streets (13+)
+        normalized = normalized.replace(/\\b(\\d+)\\s+(street|st\\.?)\\b/gi, function(match, num) {
+            const n = parseInt(num);
+            if (n >= 13) {
+                let suffix = 'th';
+                if (n % 100 !== 11 && n % 100 !== 12 && n % 100 !== 13) {
+                    if (n % 10 === 1) suffix = 'st';
+                    else if (n % 10 === 2) suffix = 'nd';
+                    else if (n % 10 === 3) suffix = 'rd';
+                }
+                return num + suffix + ' St';
+            }
+            return match;
+        });
+        
+        // Step 4: Handle famous streets (these keep full names)
+        normalized = normalized.replace(/\\b(lexington|lex)\\b/gi, 'Lexington Ave');
+        normalized = normalized.replace(/\\b(madison|mad)\\b/gi, 'Madison Ave');
+        normalized = normalized.replace(/\\b(columbus|col)\\b/gi, 'Columbus Ave');
+        normalized = normalized.replace(/\\b(amsterdam)\\b/gi, 'Amsterdam Ave');
+        normalized = normalized.replace(/\\bpark\\s+avenue\\s+south\\b/gi, 'Park Ave S');
+        normalized = normalized.replace(/\\bpark\\s+ave\\s+south\\b/gi, 'Park Ave S');
+        normalized = normalized.replace(/\\bcentral\\s+park\\s+west\\b/gi, 'Central Park W');
+        normalized = normalized.replace(/\\bCPW\\b/gi, 'Central Park W');
+        normalized = normalized.replace(/\\briverside\\s+drive\\b/gi, 'Riverside Dr');
+        normalized = normalized.replace(/\\bRSD\\b/gi, 'Riverside Dr');
+        normalized = normalized.replace(/\\bFDR\\s+drive\\b/gi, 'FDR Dr');
+        normalized = normalized.replace(/\\bFDR\\b/gi, 'FDR Dr');
+        
+        // Special handling for Avenue of the Americas (match CSV format exactly)
+        normalized = normalized.replace(/\\bavenue\\s+of\\s+the\\s+americas\\b/gi, 'Ave Of The Americas');
+        normalized = normalized.replace(/\\bave\\s+of\\s+the\\s+americas\\b/gi, 'Ave Of The Americas');
+        normalized = normalized.replace(/\\bAve\\s+of\\s+Americas\\b/gi, 'Ave Of The Americas');
+        normalized = normalized.replace(/\\bave\\s+of\\s+americas\\b/gi, 'Ave Of The Americas');
+        // Also handle "6th Avenue" specifically
+        normalized = normalized.replace(/\\b6\\s+Ave\\b/gi, 'Ave Of The Americas');
+        
+        // Step 5: General street type normalization (after numbered streets/avenues)
+        normalized = normalized.replace(/\\b(street|st\\.|str)\\b/gi, 'St');
+        normalized = normalized.replace(/\\b(avenue|ave\\.|av)\\b/gi, 'Ave');
+        normalized = normalized.replace(/\\b(place|pl\\.|plc)\\b/gi, 'Pl');
+        normalized = normalized.replace(/\\b(lane|ln)\\b/gi, 'Lane');
+        normalized = normalized.replace(/\\b(boulevard|blvd\\.)\\b/gi, 'Blvd');
+        normalized = normalized.replace(/\\b(plaza|plz)\\b/gi, 'Plaza');
+        normalized = normalized.replace(/\\b(square|sq)\\b/gi, 'Square');
+        normalized = normalized.replace(/\\b(broadway|bway|bdwy)\\b/gi, 'Broadway');
+        normalized = normalized.replace(/\\b(road|rd\\.)\\b/gi, 'Rd');
+        normalized = normalized.replace(/\\b(drive|dr\\.)\\b/gi, 'Dr');
+        normalized = normalized.replace(/\\b(court|ct\\.)\\b/gi, 'Ct');
+        normalized = normalized.replace(/\\b(terrace|ter\\.)\\b/gi, 'Ter');
+        normalized = normalized.replace(/\\b(parkway|pkwy\\.)\\b/gi, 'Pkwy');
+        normalized = normalized.replace(/\\b(circle|cir\\.)\\b/gi, 'Cir');
+        normalized = normalized.replace(/\\b(highway|hwy\\.)\\b/gi, 'Hwy');
+        normalized = normalized.replace(/\\b(way|wy)\\b/gi, 'Way');
+        normalized = normalized.replace(/\\b(alley|aly)\\b/gi, 'Alley');
+        
+        // Step 6: Fix capitalization for proper names and remaining words
+        normalized = normalized.replace(/\\b([a-z])/g, function(match) {
+            return match.toUpperCase();
+        });
+        
+        // Step 7: Ensure NYC, NY format
+        if (!normalized.includes(', NY') && !normalized.includes('New York')) {
+            normalized += ', New York, NY';
+        } else if (normalized.includes('New York') && !normalized.includes(', NY')) {
+            normalized += ', NY';
+        }
+        
+        return normalized;
+    }
+    
+    // Autocomplete functionality
+    
+    // Callback function for Google Maps API - EXACTLY like working example
+    function initGooglePlaces() {
+        if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+            const searchInput = document.getElementById('search');
+            if (!searchInput) return;
+            
+            // Use native Autocomplete EXACTLY like working example
+            const autocomplete = new google.maps.places.Autocomplete(searchInput, {
+                types: ['address'],
+                componentRestrictions: { country: 'us' },
+                bounds: new google.maps.LatLngBounds(
+                    new google.maps.LatLng(40.70, -74.02),  // Lower Manhattan
+                    new google.maps.LatLng(40.88, -73.93)   // Upper Manhattan
+                ),
+                strictBounds: true  // STRICT Manhattan bounds
+            });
+            
+            // Listen for place selection
+            autocomplete.addListener('place_changed', function() {
+                const place = autocomplete.getPlace();
+                if (place && place.formatted_address) {
+                    // Extract street address and normalize
+                    const streetAddress = place.formatted_address.split(',')[0].trim();
+                    const normalized = normalizeAddress(streetAddress);
+                    
+                    // Update search box with normalized address
+                    searchInput.value = normalized;
+                    
+                    // Filter the table with ALL addresses
+                    filterTableWithValue(normalized);
+                    updateClearButtonState();
+                }
+            });
+            
+            console.log('Google Places Autocomplete initialized');
+        }
+    }
+    
+    // Also setup when window loads as backup
+    window.initMap = function() {
+        initGooglePlaces();
+    }
+    
+    function initAutocomplete() {
+        const searchInput = document.getElementById('search');
+        
+        // For manual typing - just filter as typed, NO normalization
+        if (searchInput) {
+            // Handle direct input events
+            searchInput.addEventListener('input', debounce(() => {
+                const currentValue = searchInput.value || '';
+                filterTableWithValue(currentValue);
+                updateClearButtonState();
+            }, 300));
+        }
+    }
+    
+    function filterTableWithValue(searchValue) {
+        // SIMPLIFIED: Just check if search value is contained in the data
+        const searchTerm = searchValue.toLowerCase().trim();
+        const rows = document.querySelectorAll('#buildingTable tbody tr');
+        let visibleCount = 0;
+        
+        if (!searchTerm) {
+            // If empty search, show all
+            rows.forEach(row => {
+                row.style.display = '';
+                visibleCount++;
+            });
+        } else {
+            // Special handling for NYC-specific cases
+            let searchTerms = [searchTerm];
+            
+            // CRITICAL: 6th Avenue → Ave of the Americas (NYC special case)
+            // Handle all variations: "6th", "6th ave", "6th avenue", "sixth ave", etc.
+            if (searchTerm.includes('6th')) {
+                // Replace all variations of 6th with Ave of the Americas
+                searchTerms.push(searchTerm.replace(/6th/gi, 'ave of the americas'));
+            }
+            if (searchTerm.match(/\\b6th\\s+(ave|avenue)\\b/i)) {
+                searchTerms.push(searchTerm.replace(/\\b6th\\s+(ave|avenue)\\b/gi, 'ave of the americas'));
+            }
+            if (searchTerm.match(/\\bsixth\\s+(ave|avenue)\\b/i)) {
+                searchTerms.push(searchTerm.replace(/\\bsixth\\s+(ave|avenue)\\b/gi, 'ave of the americas'));
+            }
+            // Also handle "6 ave" or "6 avenue" (without "th")
+            if (searchTerm.match(/\\b6\\s+(ave|avenue)\\b/i)) {
+                searchTerms.push(searchTerm.replace(/\\b6\\s+(ave|avenue)\\b/gi, 'ave of the americas'));
+            }
+            
+            // Apply ALL special case expansions using word boundary aware replacements
+            const expansions = [
+                // Directions
+                [/\\bw\\b/gi, 'west'], [/\\bwest\\b/gi, 'w'],
+                [/\\be\\b/gi, 'east'], [/\\beast\\b/gi, 'e'],
+                [/\\bn\\b/gi, 'north'], [/\\bnorth\\b/gi, 'n'],
+                [/\\bs\\b/gi, 'south'], [/\\bsouth\\b/gi, 's'],
+                
+                // Street types
+                [/\\bave\\b/gi, 'avenue'], [/\\bavenue\\b/gi, 'ave'],
+                [/\\bav\\b/gi, 'avenue'],
+                [/\\bst\\b/gi, 'street'], [/\\bstreet\\b/gi, 'st'],
+                [/\\bstr\\b/gi, 'street'],
+                [/\\brd\\b/gi, 'road'], [/\\broad\\b/gi, 'rd'],
+                [/\\bpl\\b/gi, 'place'], [/\\bplace\\b/gi, 'pl'],
+                [/\\bplz\\b/gi, 'plaza'], [/\\bplaza\\b/gi, 'plz'],
+                [/\\bsq\\b/gi, 'square'], [/\\bsquare\\b/gi, 'sq'],
+                [/\\bct\\b/gi, 'court'], [/\\bcourt\\b/gi, 'ct'],
+                [/\\bln\\b/gi, 'lane'], [/\\blane\\b/gi, 'ln'],
+                [/\\bpkwy\\b/gi, 'parkway'], [/\\bparkway\\b/gi, 'pkwy'],
+                [/\\bcir\\b/gi, 'circle'], [/\\bcircle\\b/gi, 'cir'],
+                [/\\bblvd\\b/gi, 'boulevard'], [/\\bboulevard\\b/gi, 'blvd'],
+                [/\\bdr\\b/gi, 'drive'], [/\\bdrive\\b/gi, 'dr'],
+                [/\\bhwy\\b/gi, 'highway'], [/\\bhighway\\b/gi, 'hwy'],
+                [/\\bter\\b/gi, 'terrace'], [/\\bterrace\\b/gi, 'ter'],
+                [/\\bmt\\b/gi, 'mount'], [/\\bmount\\b/gi, 'mt'],
+                [/\\bft\\b/gi, 'fort'], [/\\bfort\\b/gi, 'ft'],
+                
+                // Ordinals to words
+                [/\\b1st\\b/gi, 'first'], [/\\bfirst\\b/gi, '1st'],
+                [/\\b2nd\\b/gi, 'second'], [/\\bsecond\\b/gi, '2nd'],
+                [/\\b3rd\\b/gi, 'third'], [/\\bthird\\b/gi, '3rd'],
+                [/\\b4th\\b/gi, 'fourth'], [/\\bfourth\\b/gi, '4th'],
+                [/\\b5th\\b/gi, 'fifth'], [/\\bfifth\\b/gi, '5th'],
+                [/\\b6th\\b/gi, 'sixth'], [/\\bsixth\\b/gi, '6th'],
+                [/\\b7th\\b/gi, 'seventh'], [/\\bseventh\\b/gi, '7th'],
+                [/\\b8th\\b/gi, 'eighth'], [/\\beighth\\b/gi, '8th'],
+                [/\\b9th\\b/gi, 'ninth'], [/\\bninth\\b/gi, '9th'],
+                [/\\b10th\\b/gi, 'tenth'], [/\\btenth\\b/gi, '10th'],
+                [/\\b11th\\b/gi, 'eleventh'], [/\\beleventh\\b/gi, '11th'],
+                [/\\b12th\\b/gi, 'twelfth'], [/\\btwelfth\\b/gi, '12th'],
+                
+                // NYC specific
+                // 6th Avenue special handling (must come before general "6th" → "sixth")
+                [/\\b6th\\s+ave\\b/gi, 'ave of the americas'],
+                [/\\b6th\\s+avenue\\b/gi, 'ave of the americas'],
+                [/\\bsixth\\s+ave\\b/gi, 'ave of the americas'],
+                [/\\bsixth\\s+avenue\\b/gi, 'ave of the americas'],
+                [/\\bavenue of the americas\\b/gi, '6th ave'],
+                [/\\bave of the americas\\b/gi, '6th avenue'],
+                
+                [/\\bpark ave s\\b/gi, 'park avenue south'],
+                [/\\bpark avenue south\\b/gi, 'park ave s'],
+                [/\\blex\\b/gi, 'lexington'], [/\\blexington\\b/gi, 'lex'],
+                [/\\bmad\\b/gi, 'madison'], [/\\bmadison\\b/gi, 'mad'],
+                [/\\bbway\\b/gi, 'broadway'], [/\\bbroadway\\b/gi, 'bway'],
+                [/\\bcol\\b/gi, 'columbus'], [/\\bcolumbus\\b/gi, 'col'],
+                [/\\bcpw\\b/gi, 'central park west'],
+                [/\\bcentral park west\\b/gi, 'cpw'],
+                [/\\brsd\\b/gi, 'riverside drive'],
+                [/\\briverside drive\\b/gi, 'rsd'],
+                [/\\bfdr\\b/gi, 'fdr drive']
+            ];
+            
+            // Apply each expansion to generate variations
+            expansions.forEach(([pattern, replacement]) => {
+                if (searchTerm.match(pattern)) {
+                    searchTerms.push(searchTerm.replace(pattern, replacement));
+                }
+            })
+            
+            rows.forEach(row => {
+                const searchText = (row.getAttribute('data-search') || '').toLowerCase();
+                // Show row if ANY search term is contained in the data
+                const matchesSearch = searchTerms.some(term => searchText.includes(term));
+                row.style.display = matchesSearch ? '' : 'none';
+                if (matchesSearch) visibleCount++;
+            });
+        }
+        
+        updateResultCounter(visibleCount);
+        updateClearButtonState();
+    }
+    
+    // Debounce helper
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    // Helper functions for escaping
+    function escape(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    function attr_escape(text) {
+        return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    
     // Define filter functions early so they're available for onclick handlers
     function filterByOwner(ownerName) {
         // Check if this owner is already selected
@@ -638,7 +1080,8 @@ html += """
             activeOwnerFilter = null;
             
             // Clear search bar
-            document.getElementById('search').value = '';
+            const searchBox = document.getElementById('search');
+            if (searchBox) searchBox.value = '';
             
             // Remove selection styling
             document.querySelectorAll('.portfolio-tile').forEach(tile => {
@@ -656,7 +1099,8 @@ html += """
             activeOwnerFilter = ownerName;
             
             // Populate search bar with owner name
-            document.getElementById('search').value = ownerName;
+            const searchBox = document.getElementById('search');
+            if (searchBox) searchBox.value = ownerName;
             
             // Remove previous selection styling
             document.querySelectorAll('.portfolio-tile').forEach(tile => {
@@ -690,7 +1134,8 @@ html += """
         activeOwnerFilter = managerName;
         
         // Populate search bar with manager name
-        document.getElementById('search').value = managerName;
+        const searchBox = document.getElementById('search');
+        if (searchBox) searchBox.value = managerName;
         
         // Remove active styling from portfolio tiles
         document.querySelectorAll('.portfolio-tile').forEach(tile => {
@@ -709,21 +1154,20 @@ html += """
         updateClearButtonState();
     }
     
+    // Removed complex generateSearchVariations function - now using simple substring matching
+    
+    // Helper to normalize for comparison (removes case/spacing differences)
+    function normalizeForComparison(text) {
+        if (!text) return '';
+        // SIMPLE: Just lowercase and normalize spaces
+        return text.toLowerCase().replace(/\\s+/g, ' ').trim();
+    }
+    
     // Search functionality
     function filterTable() {
-        const input = document.getElementById('search').value.toLowerCase();
-        const rows = document.querySelectorAll('#buildingTable tbody tr');
-        let visibleCount = 0;
-        
-        rows.forEach(row => {
-            const searchText = row.getAttribute('data-search');
-            const matchesSearch = searchText && searchText.includes(input);
-            row.style.display = matchesSearch ? '' : 'none';
-            if (matchesSearch) visibleCount++;
-        });
-        
-        updateResultCounter(visibleCount);
-        updateClearButtonState();
+        const searchElement = document.getElementById('search');
+        const searchValue = searchElement ? (searchElement.value || '') : '';
+        filterTableWithValue(searchValue);
     }
     
     // Update result counter
@@ -734,7 +1178,8 @@ html += """
     function updateClearButtonState() {
         const btn = document.getElementById('clearFilterBtn');
         const searchBox = document.getElementById('search');
-        const hasActiveFilter = (searchBox.value.trim() !== '') || (activeOwnerFilter !== null);
+        const searchValue = searchBox ? (searchBox.value || '').trim() : '';
+        const hasActiveFilter = (searchValue !== '') || (activeOwnerFilter !== null);
         
         if (hasActiveFilter) {
             btn.disabled = false;
@@ -755,7 +1200,10 @@ html += """
     
     function clearAllFilters() {
         // Clear search box
-        document.getElementById('search').value = '';
+        const searchBox = document.getElementById('search');
+        if (searchBox) {
+            searchBox.value = '';
+        }
         
         // Reset active filter
         activeOwnerFilter = null;
@@ -858,6 +1306,9 @@ html += """
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
         updateClearButtonState();
+        
+        // Initialize search functionality
+        initAutocomplete();
         
         // Initialize any portfolio tiles that might be pre-selected
         const urlParams = new URLSearchParams(window.location.search);
@@ -1034,7 +1485,7 @@ html += f"""
         font-size: 20px;
         cursor: pointer;
         box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        z-index: 1000;
+        z-index: 100;
         display: none;
     ">
         <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
@@ -1043,7 +1494,12 @@ html += f"""
     </button>
     
     <div style="text-align: center; color: black; font-size: 14px; padding: 20px 0;">
-        Build: {datetime.now(pytz.timezone('America/Mexico_City')).strftime('%I:%M:%S %p CST')}{' | ' + sys.argv[1] if len(sys.argv) > 1 else ''} | STICKY FIX
+        Build: {datetime.now(pytz.timezone('America/Mexico_City')).strftime('%-d %b %Y %I:%M:%S %p CST')}{' | ' + sys.argv[1] if len(sys.argv) > 1 else ''}
+        <div style="margin-top: 10px;">
+            <a href="https://docs.google.com/spreadsheets/d/1efvF54Fy_155wnrN0lcAUJhCPoosX9bAHzt-W1HDRBI/edit?gid=0#gid=0" target="_blank" style="color: #0066cc; text-decoration: none; margin: 0 10px;">Report an issue</a> |
+            <a href="https://docs.google.com/spreadsheets/d/1efvF54Fy_155wnrN0lcAUJhCPoosX9bAHzt-W1HDRBI/edit?gid=2092445270#gid=2092445270" target="_blank" style="color: #0066cc; text-decoration: none; margin: 0 10px;">Request a feature</a> |
+            <a href="https://drive.google.com/drive/folders/1ikLvk6LeRrR3OUj9Z68JIMsqQdGRR6NR?usp=sharing" target="_blank" style="color: #0066cc; text-decoration: none; margin: 0 10px;">Download source data</a>
+        </div>
     </div>
 </body>
 </html>
@@ -1059,7 +1515,7 @@ print(f"✓ Buildings with BMS: {bas_yes}")
 print(f"✓ Homepage done!")
 
 # Save it
-with open('index.html', 'w', encoding='utf-8') as f:
+with open('../index.html', 'w', encoding='utf-8') as f:
     f.write(html)
 
 print(f"✓ Homepage saved to index.html")

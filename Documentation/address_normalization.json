@@ -1,0 +1,316 @@
+{
+  "description": "NYC Address Normalization Rules - Maps various forms to the normalized format used in the database",
+  "rules": {
+    "street_types": {
+      "Street": "St",
+      "street": "St",
+      "St.": "St",
+      "st.": "St",
+      "Str": "St",
+      "str": "St",
+      
+      "Avenue": "Ave",
+      "avenue": "Ave",
+      "Ave.": "Ave",
+      "ave.": "Ave",
+      "Av": "Ave",
+      "av": "Ave",
+      
+      "Place": "Pl",
+      "place": "Pl",
+      "Pl.": "Pl",
+      "pl.": "Pl",
+      "Plc": "Pl",
+      "plc": "Pl",
+      
+      "Lane": "Lane",
+      "lane": "Lane",
+      "Ln": "Lane",
+      "ln": "Lane",
+      
+      "Boulevard": "Blvd",
+      "boulevard": "Blvd",
+      "Blvd.": "Blvd",
+      "blvd.": "Blvd",
+      
+      "Plaza": "Plaza",
+      "plaza": "Plaza",
+      "Plz": "Plaza",
+      "plz": "Plaza",
+      
+      "Square": "Square",
+      "square": "Square",
+      "Sq": "Square",
+      "sq": "Square",
+      
+      "Broadway": "Broadway",
+      "broadway": "Broadway",
+      "Bway": "Broadway",
+      "bway": "Broadway",
+      "Bdwy": "Broadway",
+      "bdwy": "Broadway",
+      
+      "Road": "Rd",
+      "road": "Rd",
+      "Rd.": "Rd",
+      "rd.": "Rd",
+      
+      "Drive": "Dr",
+      "drive": "Dr",
+      "Dr.": "Dr",
+      "dr.": "Dr",
+      
+      "Court": "Ct",
+      "court": "Ct",
+      "Ct.": "Ct",
+      "ct.": "Ct",
+      
+      "Terrace": "Ter",
+      "terrace": "Ter",
+      "Ter.": "Ter",
+      "ter.": "Ter",
+      
+      "Parkway": "Pkwy",
+      "parkway": "Pkwy",
+      "Pkwy.": "Pkwy",
+      "pkwy.": "Pkwy",
+      
+      "Circle": "Cir",
+      "circle": "Cir",
+      "Cir.": "Cir",
+      "cir.": "Cir",
+      
+      "Highway": "Hwy",
+      "highway": "Hwy",
+      "Hwy.": "Hwy",
+      "hwy.": "Hwy",
+      
+      "Way": "Way",
+      "way": "Way",
+      "Wy": "Way",
+      "wy": "Way",
+      
+      "Alley": "Alley",
+      "alley": "Alley",
+      "Aly": "Alley",
+      "aly": "Alley"
+    },
+    
+    "directions": {
+      "West": "W",
+      "west": "W",
+      "W.": "W",
+      "w.": "W",
+      
+      "East": "E",
+      "east": "E",
+      "E.": "E",
+      "e.": "E",
+      
+      "North": "N",
+      "north": "N",
+      "N.": "N",
+      "n.": "N",
+      
+      "South": "S",
+      "south": "S",
+      "S.": "S",
+      "s.": "S"
+    },
+    
+    "numbered_avenues": {
+      "comment": "Numbered avenues in NYC are formatted as just the number + Ave (e.g., '111 8 Ave')",
+      "First Avenue": "1 Ave",
+      "first avenue": "1 Ave",
+      "1st Avenue": "1 Ave",
+      "1st Ave": "1 Ave",
+      "1 Avenue": "1 Ave",
+      
+      "Second Avenue": "2 Ave",
+      "second avenue": "2 Ave",
+      "2nd Avenue": "2 Ave",
+      "2nd Ave": "2 Ave",
+      "2 Avenue": "2 Ave",
+      
+      "Third Avenue": "3 Ave",
+      "third avenue": "3 Ave",
+      "3rd Avenue": "3 Ave",
+      "3rd Ave": "3 Ave",
+      "3 Avenue": "3 Ave",
+      
+      "Fourth Avenue": "4 Ave",
+      "fourth avenue": "4 Ave",
+      "4th Avenue": "4 Ave",
+      "4th Ave": "4 Ave",
+      "4 Avenue": "4 Ave",
+      
+      "Fifth Avenue": "5 Ave",
+      "fifth avenue": "5 Ave",
+      "5th Avenue": "5 Ave",
+      "5th Ave": "5 Ave",
+      "5 Avenue": "5 Ave",
+      
+      "Sixth Avenue": "Ave Of The Americas",
+      "sixth avenue": "Ave Of The Americas",
+      "6th Avenue": "Ave Of The Americas",
+      "6th Ave": "Ave Of The Americas",
+      "6 Avenue": "Ave Of The Americas",
+      "6 Ave": "Ave Of The Americas",
+      "Avenue of the Americas": "Ave Of The Americas",
+      
+      "Seventh Avenue": "7 Ave",
+      "seventh avenue": "7 Ave",
+      "7th Avenue": "7 Ave",
+      "7th Ave": "7 Ave",
+      "7 Avenue": "7 Ave",
+      
+      "Eighth Avenue": "8 Ave",
+      "eighth avenue": "8 Ave",
+      "8th Avenue": "8 Ave",
+      "8th Ave": "8 Ave",
+      "8 Avenue": "8 Ave",
+      
+      "Ninth Avenue": "9 Ave",
+      "ninth avenue": "9 Ave",
+      "9th Avenue": "9 Ave",
+      "9th Ave": "9 Ave",
+      "9 Avenue": "9 Ave",
+      
+      "Tenth Avenue": "10 Ave",
+      "tenth avenue": "10 Ave",
+      "10th Avenue": "10 Ave",
+      "10th Ave": "10 Ave",
+      "10 Avenue": "10 Ave",
+      
+      "Eleventh Avenue": "11 Ave",
+      "eleventh avenue": "11 Ave",
+      "11th Avenue": "11 Ave",
+      "11th Ave": "11 Ave",
+      "11 Avenue": "11 Ave",
+      
+      "Twelfth Avenue": "12 Ave",
+      "twelfth avenue": "12 Ave",
+      "12th Avenue": "12 Ave",
+      "12th Ave": "12 Ave",
+      "12 Avenue": "12 Ave"
+    },
+    
+    "numbered_streets": {
+      "comment": "Numbered streets use ordinal suffixes (e.g., '19 W 4th St')",
+      "First Street": "1st St",
+      "first street": "1st St",
+      "1 Street": "1st St",
+      "1 St": "1st St",
+      
+      "Second Street": "2nd St",
+      "second street": "2nd St",
+      "2 Street": "2nd St",
+      "2 St": "2nd St",
+      
+      "Third Street": "3rd St",
+      "third street": "3rd St",
+      "3 Street": "3rd St",
+      "3 St": "3rd St",
+      
+      "Fourth Street": "4th St",
+      "fourth street": "4th St",
+      "4 Street": "4th St",
+      "4 St": "4th St",
+      
+      "Fifth Street": "5th St",
+      "fifth street": "5th St",
+      "5 Street": "5th St",
+      "5 St": "5th St",
+      
+      "Sixth Street": "6th St",
+      "sixth street": "6th St",
+      "6 Street": "6th St",
+      "6 St": "6th St",
+      
+      "Seventh Street": "7th St",
+      "seventh street": "7th St",
+      "7 Street": "7th St",
+      "7 St": "7th St",
+      
+      "Eighth Street": "8th St",
+      "eighth street": "8th St",
+      "8 Street": "8th St",
+      "8 St": "8th St",
+      
+      "Ninth Street": "9th St",
+      "ninth street": "9th St",
+      "9 Street": "9th St",
+      "9 St": "9th St",
+      
+      "Tenth Street": "10th St",
+      "tenth street": "10th St",
+      "10 Street": "10th St",
+      "10 St": "10th St",
+      
+      "Eleventh Street": "11th St",
+      "eleventh street": "11th St",
+      "11 Street": "11th St",
+      "11 St": "11th St",
+      
+      "Twelfth Street": "12th St",
+      "twelfth street": "12th St",
+      "12 Street": "12th St",
+      "12 St": "12th St"
+    },
+    
+    "famous_streets": {
+      "comment": "Famous NYC streets that keep their full names",
+      "Lexington": "Lexington Ave",
+      "lexington": "Lexington Ave",
+      "Lex": "Lexington Ave",
+      "lex": "Lexington Ave",
+      "Lexington Avenue": "Lexington Ave",
+      
+      "Madison": "Madison Ave",
+      "madison": "Madison Ave",
+      "Mad": "Madison Ave",
+      "mad": "Madison Ave",
+      "Madison Avenue": "Madison Ave",
+      
+      "Park Avenue South": "Park Ave S",
+      "park avenue south": "Park Ave S",
+      "Park Ave South": "Park Ave S",
+      "park ave south": "Park Ave S",
+      
+      "Central Park West": "Central Park W",
+      "central park west": "Central Park W",
+      "CPW": "Central Park W",
+      
+      "Riverside Drive": "Riverside Dr",
+      "riverside drive": "Riverside Dr",
+      "RSD": "Riverside Dr",
+      
+      "FDR Drive": "FDR Dr",
+      "fdr drive": "FDR Dr",
+      "FDR": "FDR Dr",
+      
+      "Columbus": "Columbus Ave",
+      "columbus": "Columbus Ave",
+      "Col": "Columbus Ave",
+      "Columbus Avenue": "Columbus Ave",
+      
+      "Amsterdam": "Amsterdam Ave",
+      "amsterdam": "Amsterdam Ave",
+      "Amsterdam Avenue": "Amsterdam Ave"
+    }
+  },
+  
+  "examples": {
+    "input_to_normalized": [
+      {"input": "111 eighth avenue", "output": "111 8 Ave"},
+      {"input": "19 west 4 street", "output": "19 W 4th St"},
+      {"input": "sixth avenue", "output": "Ave Of The Americas"},
+      {"input": "lexington", "output": "Lexington Ave"},
+      {"input": "park avenue south", "output": "Park Ave S"},
+      {"input": "5th street", "output": "5th St"},
+      {"input": "5 avenue", "output": "5 Ave"},
+      {"input": "broadway", "output": "Broadway"},
+      {"input": "110 maiden lane", "output": "110 Maiden Lane"}
+    ]
+  }
+}

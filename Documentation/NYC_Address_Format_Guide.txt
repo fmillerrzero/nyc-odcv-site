@@ -1,0 +1,67 @@
+NYC ADDRESS FORMAT GUIDE
+========================
+
+This document outlines the standard address formatting conventions used in NYC building data,
+based on analysis of the all_building_addresses.csv file.
+
+STREET TYPE ABBREVIATIONS
+-------------------------
+• St     - Street (e.g., "17 State St", "200 W St", "111 John St")
+• Ave    - Avenue (e.g., "300 Park Ave", "1010 Ave of the Americas")  
+• Pl     - Place (e.g., "1 Battery Pl", "68 Trinity Pl", "4 Liberty Pl")
+• Lane   - Spelled out in full (e.g., "110 Maiden Lane", "75 Maiden Lane")
+• Broadway - Never abbreviated
+• Plaza  - Spelled out (e.g., "1 Exchange Plaza", "1 Wall St Plaza")
+• Way    - Spelled out (e.g., "220 N End Way")
+• Alley  - Spelled out (e.g., "4 Exchange Alley")
+
+NUMBERED STREETS
+----------------
+• Use plain numbers without ordinal suffixes (th/st/nd/rd)
+• Examples:
+  - "5 Greenwich St" (not "5th Greenwich St")
+  - "7 Pine St" (not "7th Pine St")  
+  - "9 Gold St" (not "9th Gold St")
+
+DIRECTION INDICATORS
+--------------------
+• Use single letter abbreviations:
+  - W = West (e.g., "200 W St")
+  - E = East
+  - N = North (e.g., "220 N End Way")
+  - S = South (e.g., "1 S William St")
+
+STANDARD FORMAT PATTERN
+-----------------------
+[Number] [Direction] [Street Name] [Type], New York, NY [ZIP]
+
+Examples:
+• "17 State St, New York, NY 10004"
+• "110 Maiden Lane, New York, NY 10005"
+• "111 John St, New York, NY 10038"
+• "200 W St, New York, NY 10282"
+• "1 S William St, New York, NY 10004"
+
+SPECIAL CASES
+-------------
+• Building ranges use hyphens: "1-3 Greenwich St", "52-66 New St"
+• Some addresses include building names but follow the same format
+• Multiple addresses per building are common (corner buildings)
+
+KEY RULES
+---------
+1. Always use "St" not "Street"
+2. Always use "Ave" not "Avenue"  
+3. Always use "Pl" not "Place"
+4. Keep "Lane", "Broadway", "Plaza", "Way" unabbreviated
+5. Use single letters for directions (W, E, N, S)
+6. Don't use ordinal suffixes on numbered streets
+7. Include comma before city: ", New York, NY"
+8. Use 5-digit ZIP codes
+
+COMMON PATTERNS IN DATABASE
+---------------------------
+• Main address field: Primary entrance address
+• Alternate addresses: Additional entrances, corner addresses
+• Address ranges: Buildings spanning multiple numbers
+• Building names: Stored separately from addresses

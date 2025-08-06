@@ -1,0 +1,37 @@
+Processing Analysis Methodology for the NYC ODCV Prospector Project
+
+1. Introduction
+
+This document outlines the methodology used in the processing analysis for the New York City Office of Data Collection and Visualization (ODCV) Prospector project. The analysis involves the disaggregation of Heating, Ventilation, and Air Conditioning (HVAC) data, calculation of office percentages, estimation of occupancy rates, and computation of energy costs. The methodology also includes data cleaning and normalization procedures, as well as the statistical methods used.
+
+2. HVAC Disaggregation
+
+The HVAC disaggregation was performed using the formula: baseline = min_daily × days × 0.85. This formula assumes a minimum HVAC usage of 15% in the lowest consumption month. The average HVAC usage across all buildings was found to be 28.3%. The minimum HVAC usage was exactly 15.0%, with 657 month-building combinations falling between 14.9% and 15.1%.
+
+3. Office Percentage Calculation
+
+The office percentage was calculated by dividing the CoStar tenant data by the total building area. This calculation was performed for each building in the dataset.
+
+4. Occupancy Rate Estimation
+
+The occupancy rates were estimated using the Q2 2025 market data. The rates were 76% for Midtown and 73% for Downtown.
+
+5. Energy Cost Computation
+
+The energy costs were computed using the Genability API for electricity and fixed tariffs for gas and steam. The SC-9 Rate I and SC-9 Rate II (Time-of-Use) were used for electricity, while the SC-2, SC-3, and SC-4 rates were used for gas, and the SC-1 and SC-2 rates were used for steam. 
+
+6. Data Cleaning and Normalization
+
+The data cleaning and normalization procedures involved removing outliers, handling missing data, and normalizing the data to ensure comparability across different buildings. The data was linked by the BBL identifier, and a conversion factor of 1 kWh = 3.412 kBtu was used.
+
+7. Statistical Methods
+
+The statistical methods used in the analysis included descriptive statistics, correlation analysis, and regression analysis. These methods were used to examine the relationships between different variables and to predict future trends.
+
+8. Technical Details
+
+The analysis resulted in the creation of 48 new columns in the energy_BIG_disaggregated.csv file. These columns included Elec_HVAC_[Month]_2023_kBtu, Elec_NonHVAC_[Month]_2023_kBtu, Elec_HVAC_[Month]_2023_Cost_USD, and Elec_NonHVAC_[Month]_2023_Cost_USD.
+
+9. Conclusion
+
+This methodology was applied to a dataset of 585 buildings, of which 470 had Building Automation Systems (BAS). The results of the analysis provide valuable insights into the energy usage and costs of office buildings in New York City, and can be used to inform energy efficiency strategies and policies.

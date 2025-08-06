@@ -1,0 +1,132 @@
+#!/bin/bash
+
+# NYC ODCV Site Universal Deploy Script
+# Deploy to either test site or main site
+
+set -e  # Exit on any error
+
+echo "🚀 NYC ODCV Site Deployment"
+echo "==========================="
+echo ""
+echo "Select target site:"
+echo "  1) Test site (NYC Test) - Deploys everything automatically"
+echo "  2) Main site (New) - Choose what to deploy"
+echo ""
+echo "Quick tips:"
+echo "  • Test site: Always deploys homepage + all reports"
+echo "  • Main site: 1=Homepage only | 2=Homepage+Reports | 3=Reports only"
+echo ""
+read -p "Enter choice (1-2): " site_choice
+
+case $site_choice in
+    1)
+        # TEST SITE - Uses testmode.py script which handles EVERYTHING
+        echo ""
+        echo "🧪 Deploying to TEST SITE (5 buildings only)..."
+        cd "/Users/forrestmiller/Desktop/NYC Test"
+        
+        # testmode.py handles:
+        # - Creating modified scripts
+        # - Generating homepage + 5 building reports  
+        # - Git add, commit, push
+        # - Cleanup
+        
+        # Auto-answer the prompts: version="Test Build", confirm="y"
+        printf "Test Build\ny\n" | python3 testmode.py
+        ;;
+        
+    2)
+        # MAIN SITE
+        echo ""
+        echo "🏢 Deploying to MAIN SITE..."
+        cd /Users/forrestmiller/Desktop/New
+        
+        echo ""
+        echo "Select deployment option:"
+        echo "  1) Homepage only (quick - just search/filter updates)"
+        echo "  2) Homepage + Building reports (full update)"
+        echo "  3) Building reports only (skip homepage)"
+        echo ""
+        echo "Note: Images & CSVs are always pushed if updated"
+        echo ""
+        read -p "Enter choice (1-3): " deploy_choice
+        
+        case $deploy_choice in
+            1)
+                echo "📝 Generating homepage only..."
+                (cd Scripts && python3 homepage.py)
+                git add index.html
+                ;;
+                
+            2)
+                echo "📝 Generating homepage..."
+                (cd Scripts && python3 homepage.py)
+                
+                echo "📋 Generating building reports (this may take a few minutes)..."
+                (cd Scripts && python3 building.py)
+                
+                # Copy reports from Building reports folder
+                cp "Building reports/"*.html .
+                
+                # Add all HTML files
+                git add *.html
+                ;;
+                
+            3)
+                echo "📋 Generating building reports only..."
+                (cd Scripts && python3 building.py)
+                
+                # Copy reports from Building reports folder
+                cp "Building reports/"*.html .
+                
+                # Add only building report HTMLs (not index.html)
+                git add [0-9]*.html
+                ;;
+        esac
+        
+        # ALWAYS add updated images and CSVs automatically
+        echo "🖼️ Adding updated images..."
+        git add images/
+        
+        echo "📊 Adding updated CSVs..."
+        git add data/*.csv
+        
+        echo "🎨 Adding updated logos..."
+        git add Logos/
+        
+        # Show what will be committed
+        echo ""
+        echo "📋 Files to be committed:"
+        git status --short
+        
+        if git diff --cached --quiet; then
+            echo "✅ No changes to deploy"
+        else
+            # Get counts
+            html_changes=$(git diff --cached --name-only | grep -c '\.html$' || true)
+            image_changes=$(git diff --cached --name-only | grep -c '^images/' || true)
+            csv_changes=$(git diff --cached --name-only | grep -c '\.csv$' || true)
+            
+            git commit -m "Update main site
+
+- HTML files: $html_changes changes
+- Images: $image_changes changes  
+- CSV data: $csv_changes changes
+
+🤖 Generated with Claude Code
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+            
+            git push origin main
+            echo "✨ Main site deployed!"
+            echo "🌐 URL: https://fmillerrzero.github.io/nyc-odcv-site/"
+        fi
+        ;;
+        
+    *)
+        echo "❌ Invalid choice. Exiting."
+        exit 1
+        ;;
+esac
+
+echo ""

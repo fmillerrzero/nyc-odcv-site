@@ -1,0 +1,49 @@
+Calculations Justifications Methodology for the NYC ODCV Prospector Project
+
+1. Introduction
+
+This document outlines the methodology employed in the NYC ODCV Prospector project to calculate potential savings and evaluate buildings based on a 110-point scoring system. The methodology is designed to ensure a comprehensive and accurate assessment of each building's potential for ODCV implementation and savings.
+
+2. ODCV Savings Calculation
+
+2.1 Core Formula
+
+The core formula used for calculating ODCV savings is: Savings = HVAC Energy × 30% unoccupied time × 30% savings rate. This formula is applied to three energy types: electricity (direct), gas (90% HVAC × 30% × 30%), and steam (90% HVAC × 30% × 30%).
+
+2.2 Occupancy Rates
+
+Occupancy rates are derived from Q2 2025 market data, with Midtown and Downtown rates standing at 76% and 73% respectively. It is assumed that ODCV savings occur during the 30% unoccupied time.
+
+2.3 Assumptions
+
+The assumption of 30% ODCV savings aligns with industry standards. The minimum HVAC justification of 15% is based on the requirements of 24/7 ventilation pumps and controls.
+
+3. 110-Point Scoring System Details
+
+3.1 Financial Impact
+
+The financial impact is calculated using the formula: 40 × ((586 - rank) / 585). The highest ranked building receives 40 points, while the lowest ranked building receives nearly 0 points.
+
+3.2 BAS Infrastructure
+
+The presence of a Building Automation System (BAS) is a binary gate in the scoring system. Buildings without a BAS receive 0 points as ODCV implementation is not possible. Buildings with a BAS receive 15 base points, with additional points awarded for heating and cooling automation, and the year the system was altered.
+
+3.3 Owner Portfolio
+
+Points are awarded based on the size of the owner's portfolio, with more points given to owners with more buildings.
+
+3.4 Implementation Ease
+
+Points are awarded based on the number of units in the building, with fewer units receiving more points.
+
+3.5 Prestige Bonuses
+
+Additional points are awarded for buildings with LEED certification, Energy Star rating, and Class A status.
+
+4. Key Facts
+
+The methodology was applied to 585 buildings, of which 470 have a BAS. The total annual savings identified amount to $75.3M. The methodology prioritizes sales readiness over pure savings.
+
+5. Conclusion
+
+The methodology outlined in this document provides a robust and comprehensive approach to calculating potential ODCV savings and evaluating buildings for ODCV implementation. The use of a 110-point scoring system allows for a nuanced assessment of each building's potential, taking into account a range of factors from financial impact to implementation ease. The methodology is designed to be replicable, ensuring consistency and accuracy in the evaluation process.

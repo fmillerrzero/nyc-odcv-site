@@ -1,0 +1,1 @@
+# 1. First, add this to your <head> section in the building_template (around line 500) # Find where it says <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> # Add this line BEFORE it: <script type="module" src="https://unpkg.com/@goog

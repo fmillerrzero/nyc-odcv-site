@@ -1,0 +1,1 @@
+import pandas as pd import numpy as np # File paths systems_file = '/Users/forrestmiller/Desktop/FINAL NYC/BIG/system_BIG.csv' ll87_2019_2024 = '/Users/forrestmiller/Desktop/LL87_2019-2024.xlsx' ll87_through_2018 = '/Users/forrestmiller/Desktop/LL87

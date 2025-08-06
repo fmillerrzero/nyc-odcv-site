@@ -1,0 +1,1 @@
+# Load building data CSV - filter to only buildings in the JSON df = pd.read_csv(BUILDINGS_CSV) # Filter to only buildings that have footprints in the building JSON df = df[df['bin'].isin(building_polygons.keys())] print(f"Processing {len(df)} buildi

@@ -1,0 +1,1 @@
+#!/usr/bin/env python3 """ NYC BUILDING SATELLITE IMAGE CAPTURE - FAST GOOGLE ONLY VERSION Captures HIGH RESOLUTION satellite images using Google geocoded addresses only. Optimized for speed while maintaining maximum image quality. """ import math i

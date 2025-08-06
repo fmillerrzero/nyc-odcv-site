@@ -1,0 +1,1 @@
+import pandas as pd # File paths building_file = '/Users/forrestmiller/Desktop/FINAL NYC/BIG/IAQ/IAQ_building_info_BIG_filtered.csv' pm25_file = '/Users/forrestmiller/Desktop/FINAL NYC/BIG/IAQ/5_IAQ_pm25_filtered.csv' output_file = '/Users/forrestmi

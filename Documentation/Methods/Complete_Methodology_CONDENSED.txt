@@ -1,0 +1,72 @@
+# NYC ODCV PROSPECTOR - COMPLETE CONDENSED METHODOLOGY
+
+## CORE CALCULATIONS
+
+### HVAC Electricity Disaggregation
+**Formula:** `baseline = min_daily × days × 0.85`
+- 15% minimum HVAC for 24/7 operations (ventilation, pumps, controls)
+- Result: 28.3% average HVAC across 585 buildings
+- Validation: No buildings below 15%, only 2.6% had February minimum (avoided bias)
+- Output: 48 columns in energy_BIG_disaggregated.csv
+
+### ODCV Savings 
+**Formula:** Savings = HVAC Energy × Unoccupied% × 30% savings rate
+- Electricity: Direct calculation
+- Gas/Steam: 90% HVAC portion × Unoccupied% × 30%
+- Total: $75.3M annually (585 buildings)
+
+### Office Percentage
+**Formula:** Office% = Office Square Footage / Total Building Square Footage
+- Source: CoStar tenant data (July 31, 2025 pull)
+- Purpose: Apply ODCV only to office portions
+
+### Neighborhood Occupancy
+- Midtown: 76% occupied (24% savings window)
+- Downtown: 73% occupied (27% savings window)
+- Source: Q2 2025 market data
+
+## 110-POINT SCORING SYSTEM
+
+**Financial (40 pts):** 40 × ((586 - rank) / 585)
+
+**BAS Infrastructure (30 pts):** Binary gate
+- No BAS = 0 (deal breaker)
+- Has BAS = 15 base + heating/cooling bonuses + age factor
+
+**Portfolio (20 pts):** Owner size (3-15) + Manager (1-5)
+
+**Implementation (10 pts):** Inverse tenant count (5 pts for 1-5 units → 0 for 51+)
+
+**Prestige (10 pts):** LEED (3) + Energy Star (3) + Class A (4)
+
+**Philosophy:** Sales readiness > pure savings ($1.4M no-BAS ranks below $500K with-BAS)
+
+## ENERGY COSTS
+
+### Electricity (SC-9)
+**Rate I:** $71/mo + demand ($42.80 summer/$33.50 winter per kW) + 1.66¢/kWh
+**Rate II:** $500/mo + time-of-use demand + 0.79¢/kWh
+
+### Gas: SC-2 $2.23/therm, SC-3 $2.00/therm, SC-4 $1.75/therm
+### Steam: SC-1 $72.86/Mlb, SC-2 $48.51/Mlb
+### Conversion: 1 kWh = 3.412 kBtu
+
+## DATA ARCHITECTURE
+
+**14 CSV Files** linked by BBL:
+1. odcv_scoring.csv - Rankings
+2. buildings_BIG.csv - Characteristics
+3. all_building_addresses.csv - 152 address variations
+4. hvac_office_energy_BIG.csv - HVAC patterns
+5. office_energy_BIG.csv - Monthly consumption
+6. system_BIG.csv - BAS presence
+7. LL97_BIG.csv - Carbon penalties ($268/ton starting 2026)
+8. energy_BIG.csv - Raw energy (91 columns)
+9-10. CoStar files - Real estate/tenant data
+11-14. Supporting files (heights, equipment, videos, Wikipedia)
+
+## KEY METRICS
+- Buildings: 585 analyzed, 470 with BAS, 32 facing 2026 penalties
+- HVAC: 28.3% average of electricity
+- Savings: $75.3M year one
+- LL97: $268/ton CO2 penalty (2026)

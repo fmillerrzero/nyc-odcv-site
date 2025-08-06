@@ -9,6 +9,7 @@ import sys
 import json
 import re
 import time
+import math
 
 # Load environment variables from .env file
 load_dotenv()
@@ -17,6 +18,30 @@ load_dotenv()
 SERVER_API_KEY = "AIzaSyCZU0mRkd5VlOXgsLFyH_tzWT3nT6MUZlI"
 # OpenWeatherMap API key for air pollution data (30 days historical)
 OPENWEATHER_API_KEY = "9e666d3512bac2a16c6b9c3c029dcef6"
+
+# PM2.5 cache for proximity-based reuse
+PM25_CACHE = {}  # (lat, lon) -> (data, chart_dates, chart_values, chart_labels, avg_pm25, max_pm25)
+PROXIMITY_THRESHOLD = 0.002  # ~200 meters in NYC latitude
+
+def haversine_distance(lat1, lon1, lat2, lon2):
+    """Calculate distance between two points in km"""
+    R = 6371  # Earth's radius in km
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    delta_phi = math.radians(lat2 - lat1)
+    delta_lambda = math.radians(lon2 - lon1)
+    
+    a = math.sin(delta_phi/2)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda/2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    return R * c
+
+def find_cached_pm25(lat, lon):
+    """Find cached PM2.5 data for a nearby location"""
+    for (cached_lat, cached_lon), cached_data in PM25_CACHE.items():
+        distance = haversine_distance(lat, lon, cached_lat, cached_lon)
+        if distance < 0.4:  # Within 400 meters
+            return cached_data
+    return None
 
 # Client key for aerial videos (domain-restricted to test and main sites)
 # CLIENT_API_KEY = "AIzaSyDQdR4xY0a_qmEsYairsp6r6tXwh5qx_ho"
@@ -92,28 +117,28 @@ def safe_val(df, bbl, column, default='N/A'):
     return val
 
 # Read ALL the CSVs we need
-scoring = pd.read_csv('data/odcv_scoring.csv')
-buildings = pd.read_csv('data/buildings_BIG.csv')
-ll97 = pd.read_csv('data/LL97_BIG.csv')
-system = pd.read_csv('data/system_BIG.csv')
-energy = pd.read_csv('data/energy_BIG.csv')
-addresses = pd.read_csv('data/all_building_addresses.csv')
-hvac = pd.read_csv('data/hvac_office_energy_BIG.csv')
-office = pd.read_csv('data/office_energy_BIG.csv')
+scoring = pd.read_csv('../data/odcv_scoring.csv')
+buildings = pd.read_csv('../data/buildings_BIG.csv')
+ll97 = pd.read_csv('../data/LL97_BIG.csv')
+system = pd.read_csv('../data/system_BIG.csv')
+energy = pd.read_csv('../data/energy_BIG.csv')
+addresses = pd.read_csv('../data/all_building_addresses.csv')
+hvac = pd.read_csv('../data/hvac_office_energy_BIG.csv')
+office = pd.read_csv('../data/office_energy_BIG.csv')
 
 # Read building heights
-heights = pd.read_csv('data/building_heights.csv')
+heights = pd.read_csv('../data/building_heights.csv')
 
 # Read equipment counts
 try:
-    equipment_counts = pd.read_csv('data/equipment_counts.csv')
+    equipment_counts = pd.read_csv('../data/equipment_counts.csv')
 except:
     equipment_counts = pd.DataFrame()  # Empty dataframe if file not found
 
 # Check which aerial videos exist in S3
 aerial_videos_available = set()
 try:
-    aerial_df = pd.read_csv('data/aerial_videos.csv')
+    aerial_df = pd.read_csv('../data/aerial_videos.csv')
     for _, row in aerial_df.iterrows():
         if row['status'] == 'active' and pd.notna(row['video_id']):
             aerial_videos_available.add(int(row['bbl']))
@@ -123,13 +148,13 @@ except:
 
 # Read CostarExport data for owner phone information
 try:
-    costar_df = pd.read_csv('data/CostarExport_Master_with_BBL_filtered.csv')
+    costar_df = pd.read_csv('../data/CostarExport_Master_with_BBL_filtered.csv')
 except:
     pass  # No CostarExport file
 
 # Read tenant data
 try:
-    tenants_df = pd.read_csv('data/Costar_Tenants_2025_07_31_17_56.csv')
+    tenants_df = pd.read_csv('../data/Costar_Tenants_2025_07_31_17_56.csv')
     # PropertyID extraction removed - using BBL directly
     # Clean SF Occupied - remove commas and convert to numeric
     tenants_df['SF_Occupied_Clean'] = tenants_df['SF Occupied'].str.replace(',', '').str.replace('"', '')
@@ -549,73 +574,121 @@ for i, row in scoring.iterrows():
                 lat, lon = 40.7580, -73.9855
                 print(f"Invalid coordinates for {main_address}, using Manhattan center")
 
-            # Get 30-day PM2.5 with proper error handling - DAILY AVERAGES
-            daily_pm25 = {}  # Date -> list of values
-            chart_dates = []
-            chart_values = []
-            try:
-                # Calculate timestamps for 30 days ago and now
-                end_timestamp = int(time.time())
-                start_timestamp = end_timestamp - (30 * 24 * 60 * 60)  # 30 days ago
-                
-                air_response = requests.get(
-                    f"http://api.openweathermap.org/data/2.5/air_pollution/history",
-                    params={
-                        "lat": lat,
-                        "lon": lon,
-                        "start": start_timestamp,
-                        "end": end_timestamp,
-                        "appid": OPENWEATHER_API_KEY
-                    }
-                )
-                
-                if air_response.status_code == 200:
-                    data = air_response.json()
-                    if 'list' in data:
-                        print(f"OpenWeatherMap API returned {len(data.get('list', []))} hours of data for BBL {bbl}")
-                        
-                        for hour_data in data.get('list', []):
-                            # Get timestamp and convert to date
-                            timestamp = hour_data.get('dt', 0)
-                            if timestamp:
-                                dt = datetime.fromtimestamp(timestamp, tz=pytz.UTC)
-                                dt_local = dt.astimezone(pytz.timezone('America/New_York'))
-                                date_key = dt_local.strftime('%Y-%m-%d')
-                                
-                                # Get PM2.5 value from components
-                                pm25_value = hour_data.get('components', {}).get('pm2_5', 0)
-                                
-                                # Add to daily collection
-                                if date_key not in daily_pm25:
-                                    daily_pm25[date_key] = []
-                                daily_pm25[date_key].append(pm25_value)
-                    else:
-                        print(f"OpenWeatherMap API response missing 'list' for BBL {bbl}")
-                else:
-                    print(f"OpenWeatherMap API error {air_response.status_code} for BBL {bbl}")
-                                
-            except Exception as e:
-                print(f"OpenWeatherMap API error for {bbl}: {e}")
+            # Get 12-month PM2.5 with proper error handling - DAILY AVERAGES for chart
+            # First, check if we have cached data for a nearby building
+            cached_pm25 = find_cached_pm25(lat, lon)
             
-            # Calculate daily averages
-            for date_key in sorted(daily_pm25.keys()):
-                daily_values = daily_pm25[date_key]
-                if daily_values:
-                    daily_avg = sum(daily_values) / len(daily_values)
-                    chart_dates.append(date_key)
-                    chart_values.append(daily_avg)
-            
-            print(f"PM2.5 processed {len(chart_dates)} days of data for BBL {bbl}")
-            if len(chart_dates) > 0:
-                print(f"Date range: {chart_dates[0]} to {chart_dates[-1]}")
-            
-            # Calculate overall statistics
-            if chart_values:
-                avg_pm25 = sum(chart_values) / len(chart_values)
-                max_pm25 = max(chart_values)
+            if cached_pm25:
+                # Use cached data from nearby building
+                chart_dates = cached_pm25['chart_dates']
+                chart_values = cached_pm25['chart_values']
+                chart_labels = cached_pm25['chart_labels']
+                avg_pm25 = cached_pm25['avg_pm25']
+                max_pm25 = cached_pm25['max_pm25']
+                print(f"Reusing PM2.5 data from nearby building for BBL {bbl} (within 400m)")
             else:
-                avg_pm25 = 0
-                max_pm25 = 0
+                # Fetch new data and cache it
+                daily_pm25 = {}  # Day -> list of values
+                chart_dates = []
+                chart_values = []
+                chart_labels = []  # Month labels for x-axis
+                try:
+                    # Calculate timestamps for 365 days ago and now (12 months of data)
+                    end_timestamp = int(time.time())
+                    start_timestamp = end_timestamp - (365 * 24 * 60 * 60)  # 365 days ago for 12 months
+                    
+                    air_response = requests.get(
+                        f"http://api.openweathermap.org/data/2.5/air_pollution/history",
+                        params={
+                            "lat": lat,
+                            "lon": lon,
+                            "start": start_timestamp,
+                            "end": end_timestamp,
+                            "appid": OPENWEATHER_API_KEY
+                        }
+                    )
+                    
+                    if air_response.status_code == 200:
+                        data = air_response.json()
+                        if 'list' in data:
+                            print(f"OpenWeatherMap API returned {len(data.get('list', []))} hours of data for BBL {bbl}")
+                            
+                            for hour_data in data.get('list', []):
+                                # Get timestamp and convert to date
+                                timestamp = hour_data.get('dt', 0)
+                                if timestamp:
+                                    dt = datetime.fromtimestamp(timestamp, tz=pytz.UTC)
+                                    dt_local = dt.astimezone(pytz.timezone('America/New_York'))
+                                    
+                                    # Only include weekdays (Monday=0, Friday=4) from 8am to 6pm
+                                    if dt_local.weekday() <= 4 and 8 <= dt_local.hour < 18:
+                                        # Calculate day key (year-month-day)
+                                        day_key = dt_local.strftime('%Y-%m-%d')
+                                        
+                                        # Get PM2.5 value from components
+                                        pm25_value = hour_data.get('components', {}).get('pm2_5', 0)
+                                        
+                                        # Add to daily collection
+                                        if day_key not in daily_pm25:
+                                            daily_pm25[day_key] = []
+                                        daily_pm25[day_key].append(pm25_value)
+                        else:
+                            print(f"OpenWeatherMap API response missing 'list' for BBL {bbl}")
+                    else:
+                        print(f"OpenWeatherMap API error {air_response.status_code} for BBL {bbl}")
+                                    
+                except Exception as e:
+                    print(f"OpenWeatherMap API error for {bbl}: {e}")
+                
+                # Calculate daily averages and determine month labels  
+                last_month = None
+                label_indices = []  # Track where to put month labels
+                
+                for day_key in sorted(daily_pm25.keys()):
+                    daily_values = daily_pm25[day_key]
+                    if daily_values:
+                        daily_avg = sum(daily_values) / len(daily_values)
+                        
+                        # Parse the day to get month
+                        dt = datetime.strptime(day_key, '%Y-%m-%d')
+                        current_month = dt.strftime('%b')
+                        
+                        # Only show month label at the start of each month
+                        if current_month != last_month:
+                            label_indices.append(len(chart_dates))
+                            last_month = current_month
+                        
+                        chart_dates.append(day_key)
+                        chart_values.append(daily_avg)
+                
+                # Create labels array with month names only at month boundaries
+                for i in range(len(chart_dates)):
+                    if i in label_indices:
+                        dt = datetime.strptime(chart_dates[i], '%Y-%m-%d')
+                        chart_labels.append(dt.strftime('%b'))
+                    else:
+                        chart_labels.append('')
+                
+                print(f"PM2.5 processed {len(chart_dates)} days of business hours data (M-F 8am-6pm) for BBL {bbl}")
+                if len(chart_dates) > 0:
+                    print(f"Date range: {chart_dates[0]} to {chart_dates[-1]}")
+                
+                # Calculate overall statistics
+                if chart_values:
+                    avg_pm25 = sum(chart_values) / len(chart_values)
+                    max_pm25 = max(chart_values)
+                else:
+                    avg_pm25 = 0
+                    max_pm25 = 0
+                
+                # Cache the data for nearby buildings
+                PM25_CACHE[(lat, lon)] = {
+                    'chart_dates': chart_dates,
+                    'chart_values': chart_values,
+                    'chart_labels': chart_labels,
+                    'avg_pm25': avg_pm25,
+                    'max_pm25': max_pm25
+                }
             
             # EPA AQI categories for PM2.5
             if avg_pm25 <= 12:
@@ -720,7 +793,8 @@ for i, row in scoring.iterrows():
                 green_rating_badge = f' <span class="{badge_class}">{green_rating}</span>'
             
             # Check if building has aerial video
-            if bbl in aerial_videos_available:
+            has_video = bbl in aerial_videos_available
+            if has_video:
                 aerial_content = f'''<div id="aerial-video-{bbl}" style="width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; position: relative;">
                     <video controls autoplay loop muted preload="auto" style="width: 100%; height: 100%; object-fit: contain;" 
                            onerror="this.style.display='none'; document.getElementById('video-error-{bbl}').style.display='flex';">
@@ -745,14 +819,8 @@ for i, row in scoring.iterrows():
                     </script>
                 </div>'''
             else:
-                # Video still processing
-                aerial_content = '''<div style="width: 100%; height: 100%; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
-                    <div style="text-align: center; color: #666;">
-                        <h3>Aerial View Coming Soon</h3>
-                        <p>Google is generating the aerial video for this building</p>
-                        <p style="font-size: 0.9em;">Check back in a few hours</p>
-                    </div>
-                </div>'''
+                # No video available - will skip this slide
+                aerial_content = None
             
             # Create penalty section
             penalty_section = f"""
@@ -780,12 +848,6 @@ for i, row in scoring.iterrows():
     <title>{row['address']} - ODCV Analysis (v{version})</title>
     <link rel="icon" type="image/png" href="https://rzero.com/wp-content/themes/rzero/build/images/favicons/favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Preload aerial video for faster playback -->
-    <link rel="preload" 
-          as="video" 
-          href="https://aerial-videos-forrest.s3.us-east-2.amazonaws.com/{bbl}_aerial.mp4"
-          type="video/mp4"
-          crossorigin="anonymous">
     <style>
         :root {{
             --rzero-primary: #0066cc;
@@ -1379,11 +1441,9 @@ for i, row in scoring.iterrows():
         .bas {{ color: #38a169; font-weight: 600; }}
         .no-bas {{ color: #c41e3a; font-weight: 600; }}
     </style>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
     <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
-    <!-- Preload aerial video for faster playback -->
-    <link rel="preload" as="video" href="{AWS_VIDEO_BUCKET}/{bbl}_aerial.mp4">
 </head>
 <body>
     <div class="container">
@@ -1505,12 +1565,10 @@ for i, row in scoring.iterrows():
             </div>
             
             <div class="page">
-                <h3 class="page-title" id="interactive-views-title-{bbl}">Dynamic: <span style="color: #555;">Drone Footage</span></h3>
+                {f'''<h3 class="page-title" id="interactive-views-title-{bbl}">Dynamic: <span style="color: #555;">{'Drone Footage' if has_video else '360 Panorama'}</span></h3>
                 <div class="carousel-container">
                     <div class="carousel-track" id="interactive-carousel-{bbl}">
-                        <div class="carousel-slide" data-type="video">
-                            {aerial_content}
-                        </div>
+                        {'<div class="carousel-slide" data-type="video">' + aerial_content + '</div>' if has_video else ''}
                         <div class="carousel-slide" data-type="pano">
                             <div id="panorama-{bbl}" style="width: 100%; height: 675px; background: #f0f0f0; position: relative;">
                                 <div id="viewer-{bbl}" style="width: 100%; height: 100%;"></div>
@@ -1519,17 +1577,17 @@ for i, row in scoring.iterrows():
                     </div>
                     
                     
-                    <!-- Navigation Controls -->
-                    <button class="carousel-btn carousel-prev" onclick="moveInteractiveCarousel('{bbl}', -1)" title="Previous">❮</button>
-                    <button class="carousel-btn carousel-next" onclick="moveInteractiveCarousel('{bbl}', 1)" title="Next">❯</button>
-                    
-                    <!-- Dot Navigation with Labels -->
-                    <div class="carousel-dots">
-                        <span class="dot active" onclick="goToInteractiveSlide('{bbl}', 0)" title="Aerial Video"></span>
-                        <span class="dot" onclick="goToInteractiveSlide('{bbl}', 1)" title="360° Virtual Tour"></span>
-                    </div>
+                    {('<!-- Navigation Controls -->' + 
+                    '<button class="carousel-btn carousel-prev" onclick="moveInteractiveCarousel(\'' + str(bbl) + '\', -1)" title="Previous">❮</button>' + 
+                    '<button class="carousel-btn carousel-next" onclick="moveInteractiveCarousel(\'' + str(bbl) + '\', 1)" title="Next">❯</button>' + 
+                    '<!-- Dot Navigation with Labels -->' + 
+                    '<div class="carousel-dots">' + 
+                    '<span class="dot active" onclick="goToInteractiveSlide(\'' + str(bbl) + '\', 0)" title="Aerial Video"></span>' + 
+                    '<span class="dot" onclick="goToInteractiveSlide(\'' + str(bbl) + '\', 1)" title="360° Virtual Tour"></span>' + 
+                    '</div>') if has_video else ''}
                 </div>
-                </div>
+                </div>'''
+            }
             </div>
         </div>
         
@@ -1730,14 +1788,14 @@ for i, row in scoring.iterrows():
                 <h2 class="section-header">Air Quality</h2>
                 
                 <div class="page">
-                <h3 class="page-title">Outdoor Pollution</h3>
+                <h3 class="page-title">Outdoor Pollution (Business Hours - M-F 8am-6pm)</h3>
             
             <div class="iaq-summary" style="margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
                 <div class="iaq-stat-grid" style="display: grid; grid-template-columns: repeat({3 if avg_pm25 > 12 else 2}, 1fr); gap: {40 if avg_pm25 > 12 else 80}px; text-align: center; max-width: {600 if avg_pm25 > 12 else 500}px; margin: 0 auto;">
                     <div class="iaq-stat">
                         <div class="iaq-label" style="font-size: 12px; color: #6c757d; margin-bottom: 4px;">Max</div>
                         <div class="iaq-value" style="font-size: 24px; font-weight: bold; color: #c41e3a;">{max_pm25:.1f} μg/m³</div>
-                        <div class="iaq-category" style="font-size: 11px; color: #6c757d; margin-top: 4px;">Daily Average</div>
+                        <div class="iaq-category" style="font-size: 11px; color: #6c757d; margin-top: 4px;">Monthly Average</div>
                     </div>
                     <div class="iaq-stat">
                         <div class="iaq-label" style="font-size: 12px; color: #6c757d; margin-bottom: 4px;">Average</div>
@@ -1989,7 +2047,7 @@ for i, row in scoring.iterrows():
     function moveInteractiveCarousel(bbl, direction) {{
         const carousel = document.getElementById('interactive-carousel-' + bbl);
         const dots = carousel.parentElement.querySelectorAll('.dot');
-        const totalViews = 2;
+        const totalViews = carousel.children.length;
         
         interactiveIndex += direction;
         
@@ -2513,7 +2571,7 @@ for i, row in scoring.iterrows():
     
     // EPA Good threshold line
     const goodThreshold = {{
-        x: {json.dumps(chart_dates)},
+        x: {json.dumps(list(range(len(chart_dates))))},
         y: Array({len(chart_dates)}).fill(12),
         mode: 'lines',
         line: {{color: '#00e400', dash: 'dash', width: 2}},
@@ -2522,38 +2580,87 @@ for i, row in scoring.iterrows():
     }};
 
     // Create fill traces for areas above and below threshold
-    const dates = {json.dumps(chart_dates)};
+    const dates = {json.dumps(list(range(len(chart_dates))))};  // Use indices for x-axis
     const values = {json.dumps(chart_values)};
-    const threshold = 12;
+    const labels = {json.dumps(chart_labels)};  // Month labels
+    const goodThresholdValue = 12;  // EPA Good threshold
+    const badThreshold = 35.4;  // EPA Unhealthy for Sensitive Groups threshold
     
-    // Create PM2.5 data with fill below the line
-    const pm25DataWithFill = {{
+    // Create blue fill to zero (base layer)
+    const blueFill = {{
+        x: dates.concat([...dates].reverse()),
+        y: values.concat(Array(dates.length).fill(0)),
+        fill: 'toself',
+        fillcolor: 'rgba(0, 102, 204, 0.1)',  // Very light blue
+        line: {{width: 0}},
+        showlegend: false,
+        hoverinfo: 'skip',
+        type: 'scatter'
+    }};
+    
+    // Create PM2.5 line (no fill, just the line)
+    const pm25Line = {{
         x: dates,
         y: values,
         type: 'scatter',
         mode: 'lines',
         line: {{color: '#0066cc', width: 3}},
-        fill: 'tozeroy',
-        fillcolor: 'rgba(0, 102, 204, 0.15)',  // Light blue fill below the line
-        name: 'Daily Average PM2.5',
-        hovertemplate: '%{{x|%b %d, %Y}}<br>PM2.5: %{{y:.1f}} μg/m³<extra></extra>'
+        name: 'Daily Business Hours PM2.5',
+        hovertemplate: 'Day %{{x}}<br>PM2.5: %{{y:.1f}} μg/m³<br>(M-F 8am-6pm)<extra></extra>'
     }};
     
-    // Create yellow fill for areas above threshold
-    const worseFill = {{
+    // Create very light yellow fill for areas between good and bad thresholds (but only where line is above good)
+    const moderateFill = {{
         x: dates.concat([...dates].reverse()),
-        y: values.map(v => Math.max(v, threshold)).concat(Array(dates.length).fill(threshold)),
+        y: values.map(v => {{
+            if (v <= goodThresholdValue) return goodThresholdValue;  // Don't fill below good threshold
+            if (v >= badThreshold) return badThreshold;     // Cap at bad threshold
+            return v;  // Fill between good and line value
+        }}).concat(Array(dates.length).fill(goodThresholdValue)),
         fill: 'toself',
-        fillcolor: 'rgba(255, 235, 59, 0.15)',  // Lighter yellow
+        fillcolor: 'rgba(255, 243, 59, 0.2)',  // Light yellow (visible)
+        line: {{width: 0}},
+        showlegend: false,
+        hoverinfo: 'skip',
+        type: 'scatter'
+    }};
+    
+    // Create red fill only for the area between bad threshold and the line (when line is above bad)
+    // This needs to create a shape that follows the line when above bad threshold, and the threshold line otherwise
+    const badFillY = [];
+    const badFillX = [];
+    
+    // Forward pass - follow the line when it's above bad threshold
+    for (let i = 0; i < dates.length; i++) {{
+        badFillX.push(dates[i]);
+        if (values[i] > badThreshold) {{
+            badFillY.push(values[i]);  // Follow the line when above bad threshold
+        }} else {{
+            badFillY.push(badThreshold);  // Stay at threshold when line is below
+        }}
+    }}
+    
+    // Backward pass - always follow the bad threshold line
+    for (let i = dates.length - 1; i >= 0; i--) {{
+        badFillX.push(dates[i]);
+        badFillY.push(badThreshold);  // Always at threshold for the bottom edge
+    }}
+    
+    const badFill = {{
+        x: badFillX,
+        y: badFillY,
+        fill: 'toself',
+        fillcolor: 'rgba(255, 0, 0, 0.25)',  // Red (visible)
         line: {{width: 0}},
         showlegend: false,
         hoverinfo: 'skip',
         type: 'scatter'
     }};
 
-    Plotly.newPlot('pm25_chart', [pm25DataWithFill, worseFill, goodThreshold], {{
+    // Order is important: fills first (back to front), then lines on top
+    Plotly.newPlot('pm25_chart', [blueFill, moderateFill, badFill, pm25Line, goodThreshold], {{
         title: {{
-            text: 'Neighborhood Latest',
+            text: '{neighborhood} Air Quality (12 Months)',
             y: 0.95
         }},
         yaxis: {{
@@ -2565,12 +2672,12 @@ for i, row in scoring.iterrows():
         xaxis: {{
             title: '',
             showgrid: false,
-            type: 'date',
-            tickformat: '%b %d',
-            dtick: 86400000 * {max(1, len(chart_dates) // 10) if chart_dates else 3},  // Dynamic tick interval
-            tickangle: -45,
+            type: 'linear',
+            ticktext: labels,
+            tickvals: dates,
+            tickangle: 0,
             showticklabels: true,
-            range: [{json.dumps(chart_dates[0] if chart_dates else '')}, {json.dumps(chart_dates[-1] if chart_dates else '')}]
+            range: [0, {len(chart_dates) - 1}]
         }},
         legend: {{
             orientation: 'h',
@@ -2675,7 +2782,10 @@ for i, row in scoring.iterrows():
             }}
         }}
         
-        // Don't initialize immediately - wait for user to navigate to panorama slide
+        // If no video, initialize panorama immediately since it's the only view
+        {f'initPanorama();' if not has_video else ''}
+        
+        // Don't initialize immediately if video exists - wait for user to navigate to panorama slide
         
         // Reinitialize when carousel shows panorama
         const originalMoveCarousel = window.moveInteractiveCarousel;
@@ -2767,13 +2877,19 @@ for i, row in scoring.iterrows():
     
     <div style="text-align: center; color: black; font-size: 14px; padding: 20px 0; font-family: 'Inter', sans-serif; border: none !important; box-shadow: none !important; background: transparent;">
         Build: {datetime.now(pytz.timezone('America/Mexico_City')).strftime('%-d %b %Y %I:%M:%S %p CST')}{' | ' + sys.argv[1] if len(sys.argv) > 1 else ''}
+        <div style="margin-top: 10px;">
+            <a href="https://docs.google.com/spreadsheets/d/1efvF54Fy_155wnrN0lcAUJhCPoosX9bAHzt-W1HDRBI/edit?gid=0#gid=0" target="_blank" style="color: #0066cc; text-decoration: none; margin: 0 10px;">Report an issue</a> |
+            <a href="https://docs.google.com/spreadsheets/d/1efvF54Fy_155wnrN0lcAUJhCPoosX9bAHzt-W1HDRBI/edit?gid=2092445270#gid=2092445270" target="_blank" style="color: #0066cc; text-decoration: none; margin: 0 10px;">Request a feature</a> |
+            <a href="https://drive.google.com/drive/folders/1ikLvk6LeRrR3OUj9Z68JIMsqQdGRR6NR?usp=sharing" target="_blank" style="color: #0066cc; text-decoration: none; margin: 0 10px;">Download source data</a>
+        </div>
     </div>
 </body>
 </html>
 """
     
-            # Save it
-            with open(f"{bbl}.html", 'w') as f:
+            # Save it to Building reports folder
+            output_path = f"/Users/forrestmiller/Desktop/New/Building reports/{bbl}.html"
+            with open(output_path, 'w') as f:
                 f.write(html)
             
             # Progress indicator
@@ -2790,3 +2906,14 @@ for i, row in scoring.iterrows():
         continue
 
 print("✓ All building pages done!")
+
+# Print PM2.5 cache statistics
+total_buildings = len(scoring)
+api_calls_made = len(PM25_CACHE)
+api_calls_saved = total_buildings - api_calls_made
+if api_calls_saved > 0:
+    print(f"\n📊 PM2.5 API Efficiency:")
+    print(f"   • Total buildings: {total_buildings}")
+    print(f"   • API calls made: {api_calls_made}")
+    print(f"   • API calls saved by proximity caching: {api_calls_saved}")
+    print(f"   • Savings: {(api_calls_saved/total_buildings*100):.1f}%")

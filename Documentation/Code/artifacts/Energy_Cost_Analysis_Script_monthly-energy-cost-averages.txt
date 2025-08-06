@@ -1,0 +1,1 @@
+#!/usr/bin/env python3 """ Script to calculate and fill odcv_hvac_savings_pct column based on: - 50% weight: % Leased (inverse relationship - lower lease % = higher savings) - 50% weight: Automation systems (direct relationship - more automation = hi

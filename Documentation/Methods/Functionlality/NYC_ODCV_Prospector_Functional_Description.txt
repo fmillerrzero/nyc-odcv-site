@@ -1,0 +1,421 @@
+================================================================================
+NYC ODCV PROSPECTOR - FUNCTIONAL DESCRIPTION
+================================================================================
+
+EXECUTIVE SUMMARY
+----------------
+The NYC ODCV Prospector is a comprehensive web-based platform developed by R-Zero 
+that analyzes commercial buildings in New York City for energy efficiency 
+opportunities, specifically focusing on On-Demand Control and Ventilation (ODCV) 
+savings potential. The system processes data from 585+ buildings to identify and 
+rank sales opportunities based on financial impact, infrastructure readiness, and 
+implementation feasibility.
+
+================================================================================
+1. PRODUCT OVERVIEW
+================================================================================
+
+PURPOSE & TARGET USERS
+----------------------
+• Primary Users: Sales teams, energy consultants, building owners, property managers
+• Core Function: Identify and prioritize buildings with highest ODCV implementation 
+  potential and ROI
+• Business Goal: Streamline sales process by focusing on "sales-ready" buildings 
+  with existing infrastructure
+
+KEY VALUE PROPOSITIONS
+----------------------
+• Year One Savings: $74.1M+ across all analyzed buildings
+• LL97 Compliance: Helps buildings avoid carbon emission penalties ($268M+ exposure)
+• Data-Driven Rankings: 110-point scoring system prioritizing implementation readiness
+• Portfolio Analysis: Group buildings by owner/manager for multi-building opportunities
+
+================================================================================
+2. DATA ARCHITECTURE
+================================================================================
+
+CORE DATA SOURCES (14 CSV FILES)
+---------------------------------
+
+1. SCORING & RANKINGS (odcv_scoring.csv)
+   • Final rankings and scores for 585 buildings
+   • Total ODCV savings calculations
+   • Composite scores across multiple criteria
+   • Annual USD savings and present value calculations
+
+2. BUILDING CHARACTERISTICS (buildings_BIG.csv)
+   • Physical attributes: floors, square footage, year built
+   • Ownership and management information
+   • Energy Star scores and green certifications
+   • Contact information for owners and managers
+   • Operational expenses and lease percentages
+
+3. CARBON COMPLIANCE (LL97_BIG.csv)
+   • LL97 compliance status for 2024 and 2030
+   • Carbon emission limits and actual emissions
+   • Penalty calculations for non-compliance
+   • Critical for urgency-based prioritization
+
+4. HVAC SYSTEMS (system_BIG.csv)
+   • Building automation system (BAS) presence
+   • Heating and cooling system types
+   • Automation capabilities by system
+   • Key infrastructure readiness indicator
+
+5. ENERGY CONSUMPTION (energy_BIG.csv)
+   • Monthly consumption data for electricity, gas, steam
+   • Separated HVAC vs non-HVAC electrical usage
+   • Cost data for all energy sources
+   • 91 columns of granular energy metrics
+
+6. HVAC SAVINGS CALCULATIONS (hvac_office_energy_BIG.csv)
+   • ODCV savings projections by energy type
+   • Monthly savings breakdowns
+   • Office space percentage calculations
+   • 30% HVAC savings baseline assumption
+
+7. OFFICE ENERGY PATTERNS (office_energy_BIG.csv)
+   • Office-specific energy usage and costs
+   • Current baseline consumption patterns
+   • Used for occupancy-based savings calculations
+
+8. ADDRESS NORMALIZATION (all_building_addresses.csv)
+   • Multiple address variations per building (up to 152 columns)
+   • Alternative building names and aliases
+   • Critical for search functionality
+   • Handles NYC's complex addressing system
+
+9. MARKET DATA (CostarExport_Master_with_BBL_filtered.csv)
+   • Commercial real estate metrics
+   • Owner and manager contact details
+   • Operating expenses and floor sizes
+   • Elevator counts and building amenities
+
+10. TENANT INFORMATION (Costar_Tenants_2025_07_31_17_56.csv)
+    • Current tenant roster by building
+    • Square footage occupied per tenant
+    • Industry classifications
+    • Lease expiration dates
+
+11. PHYSICAL DIMENSIONS (building_heights.csv)
+    • Roof heights for panorama generation
+    • Geographic coordinates
+    • Building footprint data
+    • Used for visualization features
+
+12. ROOFTOP EQUIPMENT (equipment_counts.csv)
+    • Cooling tower counts
+    • Water tank inventories
+    • Total equipment tallies
+    • Infrastructure complexity indicators
+
+13. MULTIMEDIA ASSETS (aerial_videos.csv)
+    • AWS S3 video availability
+    • 40-second aerial footage links
+    • Building visualization assets
+
+14. EXTERNAL LINKS (NYC_Wiki_Pages_Buildings_with_BBL_verified.csv)
+    • Wikipedia article links for notable buildings
+    • Additional context and history
+
+================================================================================
+3. WEBSITE FUNCTIONALITY
+================================================================================
+
+HOMEPAGE (index.html - generated by homepage.py)
+-------------------------------------------------
+
+A. HEADER SECTION
+   • R-Zero branding and logo
+   • "Prospector: NYC - ODCV Opportunities" title
+   • Key statistics dashboard:
+     - Total Year One Savings ($74.1M+)
+     - Buildings facing 2026 LL97 penalties
+     - Buildings with existing BMS infrastructure
+
+B. TOP PORTFOLIOS
+   • Interactive tiles showing top 3 building owners
+   • Portfolio-level savings aggregation
+   • Click-to-filter functionality
+   • Owner company logos when available
+   • Building counts and total savings per portfolio
+
+C. OFFICE OCCUPANCY TRENDS
+   • Collapsible chart section
+   • NYC vs National vs SF occupancy rates
+   • Jan 2020 - June 2025 timeline
+   • Shows NYC's 76% occupancy advantage
+   • Context for ODCV opportunity sizing
+
+D. RANKING METHODOLOGY
+   • Expandable explanation section
+   • 110-point scoring breakdown:
+     - Financial Impact (40 pts): ODCV savings + LL97 penalties
+     - BAS Infrastructure (30 pts): No BAS = 0 points (deal breaker)
+     - Owner Portfolio (20 pts): Larger portfolios = easier sales
+     - Implementation Ease (10 pts): Fewer tenants, larger floors
+     - Prestige Factors (10 pts): LEED, Energy Star, Class A status
+
+E. SEARCH & FILTER INTERFACE
+   • Google Places autocomplete integration
+   • Multi-field search (address, owner, manager, BBL)
+   • NYC address normalization (handles "6th Ave" vs "Ave of Americas")
+   • Clear filter button with state management
+   • Result counter showing filtered/total buildings
+
+F. BUILDING RANKINGS TABLE
+   • Sortable columns:
+     - Rank badge (#1-585)
+     - Building thumbnail (70x70px from GitHub)
+     - Building address (Wikipedia links where available)
+     - Owner name (clickable filter)
+     - Property manager (clickable filter)
+     - Annual savings (color-coded by amount)
+     - Total score (0-110 scale)
+   • Row hover effects
+   • Click-through to individual building reports
+   • Sticky header for scrolling
+
+G. EXPORT FUNCTIONALITY
+   • CSV export of filtered results
+   • Includes all visible table data
+   • Preserves current sort order
+
+H. FOOTER
+   • Build timestamp (CST timezone)
+   • Links to issue reporting
+   • Feature request form
+   • Source data downloads
+
+BUILDING REPORTS (BBL.html - generated by building.py)
+-------------------------------------------------------
+
+A. HERO SECTION
+   • Large hero image of building
+   • Building name and address
+   • Rank badge and Wikipedia link
+   • Combined savings banner (ODCV + LL97 avoidance)
+   • 360° panorama viewer integration
+
+B. KEY METRICS DASHBOARD
+   • Three primary cards:
+     - Annual ODCV Savings (dollar amount + percentage)
+     - LL97 Status (2026 & 2030 compliance/penalties)
+     - BAS Status (Yes/No with sub-system details)
+
+C. BUILDING DETAILS TABS
+   Tab 1 - Energy Performance:
+   • Monthly energy consumption charts (Jan-Dec)
+   • Three energy types: Electricity, Gas, Steam
+   • HVAC percentage of total electric load
+   • Monthly ODCV savings projections
+   • Cost breakdowns by energy source
+
+   Tab 2 - Property Details:
+   • Physical characteristics (floors, sq ft, year built)
+   • Commercial metrics (% leased, OpEx/SF)
+   • Owner and manager information with logos
+   • Contact details (phone, email)
+   • Building class and certifications
+
+   Tab 3 - System Information:
+   • Heating system type
+   • Cooling system type
+   • Automation capabilities
+   • Energy Star scores (current vs target)
+   • LL33 energy grade
+
+   Tab 4 - Carbon Compliance:
+   • Current emissions vs limits
+   • 2024 and 2030 compliance status
+   • Penalty calculations
+   • Emissions reduction requirements
+
+D. TENANT ROSTER
+   • Complete tenant list with:
+     - Company names
+     - Industry classifications
+     - Floor locations
+     - Square footage occupied
+     - Lease expiration dates
+   • Sortable columns
+   • Search functionality
+
+E. VISUAL ASSETS
+   • Image carousel:
+     - Hero shot
+     - Street view
+     - Satellite view
+     - Equipment photos
+     - 360° panorama
+   • Aerial video player (40-second clips from AWS S3)
+
+F. LOCATION MAP
+   • Google Maps integration
+   • Building marker
+   • Nearby buildings overlay
+   • Street view access
+
+================================================================================
+4. DATA PROCESSING & CALCULATIONS
+================================================================================
+
+ODCV SAVINGS METHODOLOGY
+------------------------
+• Base Assumption: 30% reduction in HVAC energy during unoccupied hours
+• Occupancy Assumption: 70% occupied hours (based on NYC trends)
+• Energy Types: Separate calculations for electricity, gas, and steam
+• Monthly Granularity: Accounts for seasonal variations
+• Cost Basis: Actual 2023 energy rates from utility tariffs
+
+SCORING ALGORITHM (110 POINTS TOTAL)
+-------------------------------------
+1. Financial Impact (40 points)
+   • ODCV annual savings scaled to portfolio
+   • LL97 penalty avoidance value
+   • Total present value calculations
+
+2. BAS Infrastructure (30 points)
+   • Binary: Has BAS = 30 points, No BAS = 0 points
+   • Critical gate for sales readiness
+   • Sub-scores for heating/cooling automation
+
+3. Ownership Scale (20 points)
+   • Points based on owner's portfolio size
+   • Recognizes enterprise sales opportunities
+   • Weighted by total portfolio savings potential
+
+4. Implementation Complexity (10 points)
+   • Inverse correlation with tenant count
+   • Bonus for larger typical floor plates
+   • Simpler buildings score higher
+
+5. Prestige Bonuses (10 points)
+   • LEED certification: +3 points
+   • Energy Star certified: +3 points
+   • Class A building: +4 points
+
+RANKING LOGIC
+-------------
+• Sales Readiness > Pure Savings Amount
+• Example: $1.4M savings with no BAS ranks below $500K with perfect infrastructure
+• Prioritizes immediately actionable opportunities
+• Reduces sales cycle time and implementation barriers
+
+================================================================================
+5. TECHNICAL FEATURES
+================================================================================
+
+SEARCH & NORMALIZATION
+----------------------
+• NYC Address Standardization:
+  - "W 42nd St" = "West 42nd Street" = "W 42 Street"
+  - "6th Avenue" → "Ave Of The Americas"
+  - Handles numbered streets (1st-200th+)
+  - Direction abbreviations (N/S/E/W)
+
+• Search Capabilities:
+  - Building addresses (all variations)
+  - Building names and aliases
+  - Owner company names
+  - Property manager names
+  - BBL (Borough-Block-Lot) numbers
+
+PERFORMANCE OPTIMIZATIONS
+-------------------------
+• GitHub CDN for static assets (images, logos)
+• AWS S3 for video streaming
+• Lazy loading for images
+• SessionStorage for video URL caching
+• Responsive design for mobile/tablet
+
+INTERACTIVE ELEMENTS
+--------------------
+• Portfolio tile selection with visual feedback
+• Sortable table columns with indicators
+• Collapsible content sections
+• Chart.js for data visualization
+• Google Maps API integration
+• 360° panorama viewers
+
+DATA REFRESH PROCESS
+--------------------
+• Python scripts regenerate HTML files
+• Build timestamp tracking
+• Version control via GitHub
+• Automated deployment pipeline
+• CSV data updates trigger rebuilds
+
+================================================================================
+6. USER INSIGHTS & VALUE DELIVERY
+================================================================================
+
+PRIMARY INSIGHTS PROVIDED
+-------------------------
+1. PRIORITIZED OPPORTUNITIES
+   • Not just "biggest savings" but "most likely to close"
+   • Infrastructure readiness as primary filter
+   • Portfolio effects for enterprise sales
+
+2. FINANCIAL JUSTIFICATION
+   • Combined ODCV + penalty avoidance ROI
+   • Year one payback scenarios
+   • Operating expense reduction metrics
+
+3. COMPLIANCE URGENCY
+   • 2026 deadline pressure for LL97
+   • Specific penalty amounts as motivation
+   • Carbon reduction requirements
+
+4. IMPLEMENTATION FEASIBILITY
+   • BAS presence as go/no-go indicator
+   • Tenant complexity considerations
+   • Building class and certification status
+
+5. PORTFOLIO STRATEGIES
+   • Owner aggregation for multi-building deals
+   • Management company relationships
+   • Geographic clustering opportunities
+
+TARGET OUTCOMES
+---------------
+• Accelerated Sales Cycles: Focus on ready buyers
+• Higher Close Rates: Pre-qualified opportunities
+• Larger Deal Sizes: Portfolio-based approaches
+• Reduced CAC: Efficient targeting
+• Market Education: Data-driven value propositions
+
+================================================================================
+7. COMPETITIVE ADVANTAGES
+================================================================================
+
+• COMPREHENSIVE DATA: 14 integrated data sources
+• SALES FOCUS: Readiness scoring vs pure technical analysis
+• NYC SPECIFICITY: Address normalization, LL97 integration
+• VISUAL RICHNESS: Photos, videos, panoramas, maps
+• REAL-TIME SEARCH: Google Places + local database
+• PORTFOLIO VIEW: Enterprise sales enablement
+• TRANSPARENCY: Open methodology explanation
+
+================================================================================
+8. FUTURE ENHANCEMENT OPPORTUNITIES
+================================================================================
+
+• Real-time occupancy data integration
+• Predictive modeling for savings
+• CRM integration for sales tracking
+• Automated proposal generation
+• Mobile app development
+• API for third-party integration
+• Historical performance tracking
+• Competitive analysis features
+
+================================================================================
+END OF FUNCTIONAL DESCRIPTION
+================================================================================
+
+Document Generated: 2025-08-06
+Analysis Based On: 585 NYC Buildings
+Total Addressable Savings: $74.1M+ Year One
+Buildings with BMS: 348
+Buildings Facing 2026 Penalties: 268

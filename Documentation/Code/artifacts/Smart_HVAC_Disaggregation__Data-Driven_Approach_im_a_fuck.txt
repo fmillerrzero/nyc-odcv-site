@@ -1,0 +1,1 @@
+# Convert BBL from "1-01119-0036" format to "1001190036" format # Using awk to process the Excel file (after converting to CSV) awk -F',' 'NR==1 {print; next} {gsub(/-/, "", $7); print}' input.csv > output.csv # Or using sed to remove hyphens from

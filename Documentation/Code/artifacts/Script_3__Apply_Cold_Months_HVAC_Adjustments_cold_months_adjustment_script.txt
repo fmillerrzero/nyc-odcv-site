@@ -1,0 +1,1 @@
+print("\n" + "="*80) print("EXPECTED PATTERNS ANALYSIS") print("="*80) print("\nWe EXPECT to see variation:") print("- Gas/Steam buildings: Flat winter electricity (heat from fuel), HIGH summer (cooling)") print("- Electric buildings: HIGH winter el

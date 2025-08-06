@@ -1,0 +1,1 @@
+#!/usr/bin/env python3 """ Update elevator counts in buildings_BIG.csv: - If Number Of Elevators = 0 AND numfloors > 5, set Number Of Elevators = 1 - Save updated CSV to both original location and NYC Test folder """ import pandas as pd import os #

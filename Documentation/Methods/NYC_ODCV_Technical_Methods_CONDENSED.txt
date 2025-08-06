@@ -1,0 +1,127 @@
+# NYC ODCV PROSPECTOR - CONDENSED TECHNICAL METHODS
+
+## 1. HVAC ELECTRICITY DISAGGREGATION
+
+**Formula:** `baseline = min_daily × days × 0.85`
+
+Calculates non-HVAC baseline using minimum daily electricity across all months, multiplied by days in month, with 0.85 multiplier. Assumes 15% minimum HVAC (ventilation, pumps, controls) in lowest consumption month.
+
+**Validation Results:**
+- No buildings had zero HVAC with non-zero electricity
+- Minimum HVAC: exactly 15.0% (657 month-building combinations between 14.9%-15.1%)
+- Average HVAC Usage: **28.3%** across all buildings
+
+**Output:** 48 new columns in energy_BIG_disaggregated.csv
+- Elec_HVAC_[Month]_2023_kBtu
+- Elec_NonHVAC_[Month]_2023_kBtu
+- Elec_HVAC_[Month]_2023_Cost_USD
+- Elec_NonHVAC_[Month]_2023_Cost_USD
+
+## 2. DATA SOURCES (14 CSV FILES)
+
+All linked via BBL (Borough-Block-Lot) identifier:
+
+1. **odcv_scoring.csv** - Master rankings (22 columns)
+2. **buildings_BIG.csv** - Building characteristics
+3. **all_building_addresses.csv** - Address mapping (159 columns)
+4. **hvac_office_energy_BIG.csv** - HVAC patterns (105 columns)
+5. **office_energy_BIG.csv** - Monthly energy consumption
+6. **system_BIG.csv** - BAS details (7 columns)
+7. **LL97_BIG.csv** - Carbon penalties (9 columns)
+8. **energy_BIG.csv** - Raw energy data (91 columns)
+9. **CostarExport_Master_with_BBL_filtered.csv** - Commercial real estate data
+10. **Costar_Tenants_2025_07_31_17_56.csv** - Tenant information
+11. **building_heights.csv** - Roof heights for visualizations
+12. **equipment_counts.csv** - Rooftop equipment inventory
+13. **aerial_videos.csv** - AWS S3 video links
+14. **NYC_Wiki_Pages_Buildings_with_BBL_verified.csv** - Wikipedia links
+
+## 3. ODCV SAVINGS CALCULATION
+
+**Core Formula:** 
+Savings = HVAC Energy × 30% unoccupied time × 30% savings rate
+
+**Applied to:**
+- Electricity: Direct calculation
+- Gas: 90% HVAC portion × 30% × 30%
+- Steam: 90% HVAC portion × 30% × 30%
+
+**Occupancy Rates:**
+- Midtown: 76% occupied
+- Downtown: 73% occupied
+- Assumption: 30% unoccupied time when ODCV savings occur
+
+**Total Identified Savings:** $75.3M annually across 585 buildings
+
+## 4. 110-POINT SCORING SYSTEM
+
+### Financial Impact (40 points)
+**Formula:** 40 × ((586 - rank) / 585)
+- Rank 1 = 40 points
+- Rank 585 = ~0 points
+
+### BAS Infrastructure (30 points) - BINARY GATE
+- **No BAS = 0 points** (deal breaker, cannot implement ODCV)
+- Has BAS = 15 base points plus:
+  - Heating automation: +2.5 (YES) or -1 (NO)
+  - Cooling automation: +2.5 (YES) or -1 (NO)
+  - Year altered: 10 points (2020+) to 0 (pre-1990)
+
+### Owner Portfolio (20 points)
+**Owner:**
+- 10+ buildings: 15 points
+- 5-9 buildings: 10 points
+- 2-4 buildings: 6 points
+- 1 building: 3 points
+
+**Manager:** 1-5 additional points based on portfolio size
+
+### Implementation Ease (10 points)
+- 1-5 units: 5 points
+- 6-10 units: 4 points
+- 11-20 units: 3 points
+- 21-50 units: 2 points
+- 51+ units: 0 points
+
+### Prestige Bonuses (10 points)
+- LEED: up to 3 points
+- Energy Star: up to 3 points
+- Class A: up to 4 points
+
+**Key Principle:** Sales readiness > pure savings
+Example: $1.4M savings with no BAS ranks below $500K with BAS
+
+## 5. ENERGY COST CALCULATIONS
+
+### SC-9 Rate I
+- Customer: $71/month
+- Demand: Summer $42.80/kW, Winter $33.50/kW
+- Energy: 1.66¢/kWh
+
+### SC-9 Rate II (Time-of-Use)
+- Customer: $500/month
+- Summer Demand:
+  - M-F 8AM-6PM: $11.59/kW
+  - M-F 8AM-10PM: $23.35/kW
+  - All hours: $21.09/kW
+- Winter Demand:
+  - M-F 8AM-10PM: $18.60/kW
+  - All hours: $5.60/kW
+- Energy: 0.79¢/kWh
+
+### Conversion
+- kBtu to kWh: 1 kWh = 3.412 kBtu
+- Total Cost = Customer + Demand + Energy charges
+
+### Gas/Steam Rates
+- Gas: SC-2 $2.23/therm, SC-3 $2.00/therm, SC-4 $1.75/therm
+- Steam: SC-1 ~$72.86/Mlb, SC-2 ~$48.51/Mlb
+
+## 6. KEY METRICS SUMMARY
+
+- Buildings Analyzed: 585
+- Buildings with BAS: 470
+- Buildings facing 2026 LL97 penalties: 32
+- Average HVAC percentage: 28.3%
+- Total potential savings: $75.3M year one
+- LL97 penalty rate: $268/ton CO2 (starting 2026)
