@@ -1,1 +1,0 @@
-import pandas as pd import numpy as np from datetime import datetime import shutil # File paths file_path = '/Users/forrestmiller/Desktop/FINAL NYC/BIG/office_hvac_BIG.csv' backup_path = f'/Users/forrestmiller/Desktop/FINAL NYC/Resources/office_hvac

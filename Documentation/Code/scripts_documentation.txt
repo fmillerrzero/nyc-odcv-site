@@ -1,0 +1,174 @@
+NYC DATA PROCESSING SCRIPTS - COMPREHENSIVE DOCUMENTATION
+==========================================================
+
+This document provides detailed descriptions of all Python scripts used for NYC building energy analysis, data processing, and visualization. These scripts form a complete pipeline for analyzing commercial buildings, calculating energy savings opportunities, and generating reports for Opportunity-Driven Commercial Ventilation (ODCV) implementations and Local Law 97 compliance.
+
+ENERGY ANALYSIS & HVAC DISAGGREGATION SCRIPTS
+----------------------------------------------
+
+baseline_hvac_disaggregation (3).txt
+- Most recent version (17 days ago) of HVAC disaggregation
+- Performs advanced HVAC energy disaggregation using adjusted baseline methodology
+- Calculates building-specific HVAC percentages (40-60% range) based on energy intensity, seasonal variation, and ENERGY STAR scores
+- Identifies buildings with electric heating through winter ratio analysis
+- Creates 48 new columns splitting electricity into HVAC and Non-HVAC components
+- Applies seasonal adjustments with 25% minimum HVAC for continuous ventilation
+- Includes comprehensive QA validation to ensure energy conservation
+
+calculate-total-odcv-savings (17).txt
+- Most recent version (14 days ago) of ODCV savings validation
+- Checks existence of ODCV savings columns in office_hvac_BIG.csv
+- Validates Office_Gas_Savings_ODCV_Jan_USD and Office_Steam_Savings_ODCV_Jan_USD columns
+- Displays first 5 values for quick data inspection
+- Used as preliminary data quality check before complex calculations
+
+cold_months_adjustment_script.txt
+- Most recent version (16 days ago) of cold months adjustment
+- Adjusts HVAC electricity allocation for 222 buildings with low fuel usage during cold months
+- Increases HVAC percentage during Jan, Feb, Mar, Sep, Oct, Nov, Dec
+- Caps HVAC allocation at 65% of total electricity
+- Proportionally reallocates costs while maintaining total energy conservation
+- Validates adjustments through comprehensive QA checks
+
+genability_costs_disaggregated (1).txt
+- Most recent version (15 days ago) of Genability integration
+- Integrates with Genability API for accurate utility cost calculations
+- Handles multiple ConEd tariff types (SC9 Rate I/II, SC2)
+- Splits electricity costs proportionally between HVAC and Non-HVAC usage
+- Implements rate limiting and concurrent API calls for efficiency
+- Validates API responses and handles errors gracefully
+
+monthly-energy-cost-averages (1).txt
+- Most recent version (14 days ago) of cost averages
+- Calculates average monthly energy costs by fuel type
+- Filters to only include buildings using each fuel type
+- Provides seasonal comparisons and building counts
+- Generates summary statistics for budgeting purposes
+
+seasonal_electricity_analysis.txt
+- Most recent version (18 days ago) of seasonal analysis
+- Identifies electric heating patterns through seasonal usage analysis
+- Calculates winter/summer/shoulder season electricity ratios
+- Detects buildings with likely electric heating (winter ratio > 1.3)
+- Identifies high cooling usage buildings for summer optimization
+- Provides pattern-based building categorization
+
+total-savings-by-fuel-season.txt
+- Most recent version (14 days ago) of savings aggregation
+- Aggregates ODCV savings across all fuel types by season
+- Sums savings for gas, steam, and electricity separately
+- Calculates percentage savings by fuel type
+- Provides grand total annual savings projections
+- Creates pivot tables for seasonal analysis
+
+DATA EXTRACTION & PROCESSING SCRIPTS
+-------------------------------------
+
+costar-smart-extractor (1).txt
+- Most recent version (5 days ago) of smart extractor
+- Advanced CoStar data extraction using color and position detection
+- Extracts stacking diagrams from middle column
+- Identifies and extracts up to 3 building photos from right column
+- Uses adaptive thresholding and HoughLines for table detection
+- Creates annotated preview images showing extraction regions
+- Processes entire directories with batch reporting
+
+costar-template-extractor (1).txt
+- Most recent version (5 days ago) of template extractor
+- Template-based extraction for consistent CoStar layouts
+- Uses fixed coordinate ratios based on CoStar's standard format
+- Extracts regions with generous white padding included
+- More reliable for standard CoStar report formats
+
+bulletproof-costar-fix (3).txt
+- Most recent version (25 days ago) of CoStar data
+- CSV data file containing cleaned CoStar building information
+- Includes building class, ownership, leasing percentages, and tenant types
+- Not a script but reference data for other processes
+
+
+STREET VIEW & SATELLITE IMAGERY SCRIPTS
+----------------------------------------
+
+nyc-streetview-pro (1).txt
+- Most recent version (13 days ago) of Street View capture
+- Production-ready Google Street View image capture system
+- Uses actual Manhattan grid orientation (29° rotation)
+- Implements proper even/odd address logic for camera positioning
+- Captures multiple perspectives (far/near × different angles)
+- Calculates optimal pitch and FOV based on building dimensions
+- Includes progress tracking and resume capability
+- API key management with password manager integration
+
+nyc_360_streetview (3).txt
+- Most recent version (13 days ago) of 360 Street View capture
+- Captures 360-degree panoramic Street View images
+- Provides immersive visual documentation for properties
+- Handles panorama ID extraction and metadata
+- Creates complete spherical captures
+
+streetview_panorama_extractor (2).txt
+- Most recent version (11 days ago) of panorama extractor
+- Extracts and processes panoramic imagery from Street View API
+- Handles image stitching and perspective corrections
+- Manages panorama metadata and geo-positioning
+- Optimizes for high-resolution output
+
+nyc-satellite-fast-google (1).txt
+- Most recent version (25 days ago) of satellite capture
+- High-resolution satellite image capture system
+- Creates 6x6 tile grids (3840x3840px total resolution)
+- Implements concurrent tile fetching for speed
+- Integrates Google geocoding for address resolution
+- Includes caching system to avoid duplicate API calls
+- Progress tracking with JSON-based resume capability
+
+sv360_pro_prep.txt
+- Most recent version (11 days ago) of 360 prep script
+- Prepares 360-degree Street View data for professional use
+- Handles preprocessing and format conversion
+- Optimizes imagery for visualization workflows
+
+DATA POPULATION & BUILDING INFORMATION SCRIPTS
+-----------------------------------------------
+
+populate-office-energy-data (1).txt
+- Most recent version (14 days ago) of office energy population
+- Populates office-specific energy data from total building usage
+- Applies office percentage allocations to energy metrics
+- Creates detailed office energy profiles
+- Backs up data before modifications
+- Handles all fuel types and monthly granularity
+
+populate-office-energy-usage (1).txt
+- Most recent version (14 days ago) of office usage calculation
+- Calculates HVAC percentage of total electricity by month
+- Creates office-specific energy usage patterns
+- Based on occupancy schedules and building characteristics
+
+
+
+BUILDING CLASSIFICATION & SCORING SCRIPTS
+------------------------------------------
+
+odcv_scoring_calculator (1).txt
+- Most recent version (14 days ago) of ODCV scoring
+- Calculates comprehensive ODCV opportunity scores
+- Factors include energy usage, building size, system types, and potential savings
+- Generates HTML reports for top 200 buildings
+- Creates professional reports with charts, imagery, and recommendations
+- Includes interactive web interface with Chart.js integration
+- Exports both JSON and HTML formats
+
+
+INTERVAL DATA & TIME SERIES SCRIPTS
+------------------------------------
+
+sc9-interval-generator.txt
+- Most recent version (18 days ago) of interval generator
+- Generates detailed electricity cost breakdowns using Genability API
+- Creates 15-minute interval data for Sub-meter Category 9 requirements
+- Processes all buildings with monthly granularity
+- Categorizes charges by type (energy, demand, taxes, fees)
+- Creates both summary and detailed cost reports
+- Handles ConEd's complex tariff structures

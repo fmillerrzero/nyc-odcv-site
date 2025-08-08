@@ -1,0 +1,281 @@
+#!/usr/bin/env python3
+"""
+CoStar Smart Region Extractor
+Uses color and position-based detection to accurately find stacking diagrams and photos
+"""
+
+import cv2
+import numpy as np
+from PIL import Image
+import os
+import json
+from datetime import datetime
+
+class CoStarExtractor:
+    def __init__(self):
+        # Define regions based on typical CoStar layout
+        # These are ratios of the total width/height
+        self.regions = {
+            'left_column': {'x_start': 0, 'x_end': 0.33},
+            'middle_column': {'x_start': 0.33, 'x_end': 0.67},
+            'right_column': {'x_start': 0.67, 'x_end': 1.0}
+        }
+        
+    def extract_regions(self, image_path, output_dir='extracted_regions'):
+        """Extract stacking diagram and photos from CoStar screenshot"""
+        print(f"\nProcessing: {os.path.basename(image_path)}")
+        
+        # Load image
+        img = cv2.imread(image_path)
+        if img is None:
+            print(f"ERROR: Could not load {image_path}")
+            return None
+            
+        height, width, _ = img.shape
+        print(f"Image size: {width}x{height}")
+        
+        # Create output directory
+        os.makedirs(output_dir, exist_ok=True)
+        base_name = os.path.splitext(os.path.basename(image_path))[0]
+        
+        results = {
+            'source_file': os.path.basename(image_path),
+            'stacking_diagram': None,
+            'photos': []
+        }
+        
+        # Extract stacking diagram from middle column
+        diagram_info = self.extract_stacking_diagram(img, width, height)
+        if diagram_info:
+            diagram_path = os.path.join(output_dir, f"{base_name}_stacking_diagram.png")
+            cv2.imwrite(diagram_path, diagram_info['image'])
+            results['stacking_diagram'] = diagram_path
+            print(f"✓ Saved stacking diagram: {diagram_path}")
+        
+        # Extract photos from right column
+        photos = self.extract_photos(img, width, height)
+        for i, photo in enumerate(photos):
+            photo_path = os.path.join(output_dir, f"{base_name}_photo_{i+1}.png")
+            cv2.imwrite(photo_path, photo['image'])
+            results['photos'].append(photo_path)
+            print(f"✓ Saved photo {i+1}: {photo_path}")
+        
+        # Create annotated preview
+        self.create_preview(img, diagram_info, photos, output_dir, base_name)
+        
+        return results
+    
+end = int(height * 0.8)
+        
+        # Extract middle column region
+        middle_col = img[y_start:y_end, x_start:x_end]
+        
+        # Look for horizontal lines that indicate a table
+        gray = cv2.cvtColor(middle_col, cv2.COLOR_BGR2GRAY)
+        edges = cv2.Canny(gray, 30, 100)
+        
+        # Detect horizontal lines
+        lines = cv2.HoughLinesP(edges, 1, np.pi/180, 80, 
+                               minLineLength=100, maxLineGap=10)
+        
+        if lines is not None and len(lines) > 5:
+            # Find the bounds of the table
+            y_coords = []
+            for line in lines:
+                x1, y1, x2, y2 = line[0]
+                # Only consider horizontal lines
+                if abs(y2 - y1) < 5:  # Nearly horizontal
+                    y_coords.append(y1)
+                    y_coords.append(y2)
+            
+            if y_coords:
+                # Get table bounds with some padding
+                table_top = max(0, min(y_coords) - 20)
+                table_bottom = min(middle_col.shape[0], max(y_coords) + 20)
+                
+                # Extract the table region
+                diagram = middle_col[table_top:table_bottom, :]
+                
+                return {
+                    'image': diagram,
+                    'x': x_start,
+                    'y': y_start + table_top,
+                    'width': x_end - x_start,
+                    'height': table_bottom - table_top
+                }
+        
+        # Fallback: just take the middle section
+        diagram = middle_col[50:-50, 20:-20]
+        return {
+            'image': diagram,
+            'x': x_start + 20,
+            'y': y_start + 50,
+            'width': (x_end - x_start) - 40,
+            'height': (y_end - y_start) - 100
+        }
+    
+    def extract_photos(self, img, width, height):
+        """Extract photos from the right column"""
+        # Define right column boundaries
+        x_start = int(width * self.regions['right_column']['x_start'])
+        x_end = int(width * 0.98)  # Leave some margin
+        
+        # Start looking for photos after the header
+        y_start = int(height * 0.15)
+        
+        # Extract right column
+        right_col = img[y_start:, x_start:x_end]
+        
+        # Convert to grayscale and find edges
+        gray = cv2.cvtColor(right_col, cv2.COLOR_BGR2GRAY)
+        
+        # Use adaptive thresholding to find photo boundaries
+        thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C,
+                                      cv2.THRESH_BINARY_INV, 11, 2)
+        
+        # Find contours
+        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        photos = []
+        for contour in contours:
+            x, y, w, h = cv2.boundingRect(contour)
+            
+            # Filter for photo-like rectangles
+            if w > right_col.shape[1] * 0.7 and h > 150 and h < height * 0.4:
+                # Extract photo with small padding
+                padding = 5
+                photo_y1 = max(0, y - padding)
+                photo_y2 = min(right_col.shape[0], y + h + padding)
+                photo_x1 = max(0, x - padding)
+                photo_x2 = min(right_col.shape[1], x + w + padding)
+                
+                photo = right_col[photo_y1:photo_y2, photo_x1:photo_x2]
+                
+                photos.append({
+                    'image': photo,
+                    'x': x_start + photo_x1,
+                    'y': y_start + photo_y1,
+                    'width': photo_x2 - photo_x1,
+                    'height': photo_y2 - photo_y1
+                })
+        
+        # Sort by y-coordinate (top to bottom)
+        photos.sort(key=lambda p: p['y'])
+        
+        # If we didn't find photos with contours, try a simpler approach
+        if len(photos) < 2:
+            photos = self.extract_photos_simple(right_col, x_start, y_start)
+        
+        return photos[:3]  # Usually 3 photos max
+    
+    def extract_photos_simple(self, right_col, x_offset, y_offset):
+        """Simple approach to extract photos by dividing the column"""
+        photos = []
+        h, w = right_col.shape[:2]
+        
+        # Assume 3 photos evenly spaced
+        photo_height = h // 3
+        
+        for i in range(3):
+            y1 = i * photo_height + 20  # Add some padding
+            y2 = (i + 1) * photo_height - 20
+            
+            if y2 <= h:
+                photo = right_col[y1:y2, 10:-10]  # Add horizontal padding
+                photos.append({
+                    'image': photo,
+                    'x': x_offset + 10,
+                    'y': y_offset + y1,
+                    'width': w - 20,
+                    'height': y2 - y1
+                })
+        
+        return photos
+    
+    def create_preview(self, img, diagram_info, photos, output_dir, base_name):
+        """Create an annotated preview showing what was extracted"""
+        preview = img.copy()
+        
+        # Draw rectangle around stacking diagram in RED
+        if diagram_info:
+            cv2.rectangle(preview,
+                         (diagram_info['x'], diagram_info['y']),
+                         (diagram_info['x'] + diagram_info['width'], 
+                          diagram_info['y'] + diagram_info['height']),
+                         (0, 0, 255), 3)
+            cv2.putText(preview, "STACKING DIAGRAM", 
+                       (diagram_info['x'] + 10, diagram_info['y'] - 10),
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+        
+        # Draw rectangles around photos in GREEN
+        for i, photo in enumerate(photos):
+            cv2.rectangle(preview,
+                         (photo['x'], photo['y']),
+                         (photo['x'] + photo['width'], photo['y'] + photo['height']),
+                         (0, 255, 0), 3)
+            cv2.putText(preview, f"PHOTO {i+1}", 
+                       (photo['x'] + 10, photo['y'] + 30),
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+        
+        preview_path = os.path.join(output_dir, f"{base_name}_preview.png")
+        cv2.imwrite(preview_path, preview)
+        print(f"✓ Saved preview: {preview_path}")
+    
+    def process_directory(self, directory_path, output_dir='extracted_regions'):
+        """Process all PNG files in a directory"""
+        png_files = [f for f in os.listdir(directory_path) if f.lower().endswith('.png')]
+        print(f"\nFound {len(png_files)} PNG files to process")
+        
+        all_results = []
+        
+        for png_file in png_files:
+            image_path = os.path.join(directory_path, png_file)
+            results = self.extract_regions(image_path, output_dir)
+            if results:
+                all_results.append(results)
+        
+        # Save summary report
+        report = {
+            'processed_date': datetime.now().isoformat(),
+            'total_files': len(png_files),
+            'successful_extractions': len(all_results),
+            'results': all_results
+        }
+        
+        report_path = os.path.join(output_dir, 'extraction_report.json')
+        with open(report_path, 'w') as f:
+            json.dump(report, f, indent=2)
+        
+        print(f"\n{'='*60}")
+        print(f"EXTRACTION COMPLETE!")
+        print(f"{'='*60}")
+        print(f"Processed: {len(all_results)} files")
+        print(f"Extracted regions saved to: {output_dir}/")
+        print(f"Report saved to: {report_path}")
+        
+        return report
+
+
+# MAIN EXECUTION
+if __name__ == "__main__":
+    extractor = CoStarExtractor()
+    
+    # Process all images in the Tenants directory
+    tenants_dir = '/Users/forrestmiller/Desktop/Tenants'
+    
+    if os.path.exists(tenants_dir):
+        print("CoStar Smart Region Extractor")
+        print("="*60)
+        extractor.process_directory(tenants_dir)
+    else:
+        print(f"ERROR: Directory not found: {tenants_dir}")
+        
+        # Try current directory as fallback
+        current_dir = os.getcwd()
+        png_files = [f for f in os.listdir(current_dir) if f.lower().endswith('.png')]
+        
+        if png_files:
+            print(f"\nFound {len(png_files)} PNG files in current directory")
+            response = input("Process current directory instead? (y/n): ")
+            if response.lower() == 'y':
+                extractor.process_directory(current_dir)

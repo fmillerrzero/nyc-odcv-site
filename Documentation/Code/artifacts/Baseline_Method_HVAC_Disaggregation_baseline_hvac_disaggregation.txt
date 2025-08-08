@@ -1,1 +1,0 @@
-/BIG/system_BIG.csv') print(f"System_BIG has {len(system_big)} buildings") # Find buildings with missing dates missing_mask = system_big['Submission Date'].isna() missing_bbls = system_big[missing_mask]['BBL'].tolist() print(f"Found {len(missing_bbl

@@ -1,1 +1,0 @@
-import pandas as pd import os # File paths input_file = '/Users/forrestmiller/Desktop/FINAL NYC/Data/1_building_info_FINAL OWNERS JULY 12.csv' output_dir = '/Users/forrestmiller/Desktop/FINAL NYC/BIG' output_file = os.path.join(output_dir, 'big_play

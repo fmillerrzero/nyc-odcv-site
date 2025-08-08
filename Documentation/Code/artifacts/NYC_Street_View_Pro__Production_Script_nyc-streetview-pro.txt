@@ -1,1 +1,0 @@
-1. YEAR ONE ROI - SIMPLIFIED Homepage Changes: # Replace "Average per Building" card with Year One Savings: <div class="stat-card"> <div class="stat-value">${total_year_one_savings/1000000:.1f}M</div> <div class="stat-label">Year One Savings<

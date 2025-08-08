@@ -1,0 +1,555 @@
+#!/usr/bin/env python3
+"""
+NYC BUILDING SATELLITE IMAGE CAPTURE - FAST GOOGLE ONLY VERSION
+Captures HIGH RESOLUTION satellite images using Google geocoded addresses only.
+Optimized for speed while maintaining maximum image quality.
+"""
+
+import math
+import requests
+import time
+import os
+import re
+import json
+import pandas as pd
+from PIL import Image, ImageDraw, ImageFont
+from io import BytesIO
+from datetime import datetime
+from tqdm import tqdm
+import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
+
+# === CONFIGURATION ===
+# File paths
+CSV_INPUT = "/Users/forrestmiller/Desktop/FINAL NYC/Data/Building/1_building_info_COMPLETE_filled.csv"
+OUTPUT_DIR = "/Users/forrestmiller/Desktop/FINAL NYC/Images/Satellite/Google"
+PROGRESS_FILE = os.path.join(OUTPUT_DIR, "capture_progress.json")
+OUTPUT_CSV = os.path.join(OUTPUT_DIR, "image_mapping.csv")
+ERROR_LOG = os.path.join(OUTPUT_DIR, "capture_errors.log")
+
+# Google API settings
+API_KEY = "AIzaSyCsPtot_LaeHITMOB7t9GANaukmNCBmHg0"  # Dummy key - auto-replaced by password manager
+TILE_SIZE = 640
+SCALE = 2
+
+# Processing settings
+TEST_MODE = False  # Set to True to test with 5 buildings only
+TEST_LIMIT = 5 if TEST_MODE else None
+FORCE_RECAPTURE = False  # Set to True to recapture all buildings (ignores existing)
+API_DELAY = 0.2  # Minimum delay between API requests
+GEOCODING_DELAY = 0.05  # Delay after geocoding
+MAX_RETRIES = 2  # Maximum retries for failed requests
+CONCURRENT_TILES = 8  # Number of tiles to fetch concurrently
+MAX_WORKERS = 4  # Max concurrent tile fetching threads
+
+# Image settings - HIGH RESOLUTION MAINTAINED
+ADD_ADDRESS_TEXT = True  # Add address label to images
+FONT_SIZE = 50
+GRID_SIZE = 6  # HIGH RESOLUTION: 6x6 grid = 3840x3840px
+ZOOM_LEVEL = 20  # Maximum zoom for detail
+
+# Rate limiting
+rate_limiter = threading.Semaphore(50)  # Allow 50 concurrent API requests
+request_times = []
+request_lock = threading.Lock()
+
+def check_environment():
+    """Check if environment is properly set up"""
+    print("🔍 Checking environment setup...")
+    
+    required_packages = {
+        'pandas': 'pandas',
+        'PIL': 'pillow',
+        'requests': 'requests',
+        'tqdm': 'tqdm'
+    }
+    
+    missing = []
+    for module, package in required_packages.items():
+        try:
+            __import__(module)
+        except ImportError:
+            missing.append(package)
+    
+    if missing:
+        print(f"❌ Missing required packages: {', '.join(missing)}")
+        print(f"   Install with: pip3 install {' '.join(missing)}")
+        return False
+    
+    print("✅ Environment check passed!")
+    return True
+
+def rate_limit_check():
+    """Ensure we don't exceed API rate limits"""
+    with request_lock:
+        now = time.time()
+        # Remove requests older than 1 minute
+        global request_times
+        request_times = [t for t in request_times if now - t < 60]
+        
+        # If we've made 500 requests in the last minute, wait
+        if len(request_times) >= 500:
+            sleep_time = 60 - (now - request_times[0])
+            if sleep_time > 0:
+                time.sleep(sleep_time)
+        
+        request_times.append(now)
+
+def load_progress():
+    """Load progress from previous run - checks both JSON and CSV"""
+    progress = {'completed': [], 'failed': {}}
+    
+    # First, load from CSV if it exists (this is the source of truth)
+    if os.path.exists(OUTPUT_CSV):
+        try:
+            existing_df = pd.read_csv(OUTPUT_CSV)
+            # Get unique BBLs from the CSV
+            completed_bbls = existing_df['bbl'].astype(str).unique().tolist()
+            progress['completed'] = completed_bbls
+            print(f"   📊 Loaded {len(completed_bbls)} completed buildings from CSV")
+        except Exception as e:
+            print(f"   ⚠️  Error reading existing CSV: {e}")
+    
+    # Then, check JSON for any additional info (like failed buildings)
+    if os.path.exists(PROGRESS_FILE):
+        try:
+            with open(PROGRESS_FILE, 'r') as f:
+                json_data = json.load(f)
+                
+                # Merge failed buildings info
+                if 'failed' in json_data:
+                    progress['failed'] = json_data['failed']
+                
+                # Add any BBLs from JSON that aren't in CSV (shouldn't happen, but just in case)
+                if 'completed' in json_data:
+                    json_completed = []
+                    for item in json_data['completed']:
+                        if item.endswith('_google'):
+                            json_completed.append(item[:-7])
+                        elif item.endswith('_csv'):
+                            continue
+                        else:
+                            json_completed.append(item)
+                    
+                    # Add any from JSON not in CSV
+                    for bbl in json_completed:
+                        if bbl not in progress['completed']:
+                            progress['completed'].append(bbl)
+                            print(f"   📝 Added BBL {bbl} from JSON (not in CSV)")
+        except:
+            pass
+    
+    return progress
+
+def save_progress(progress):
+    """Save progress to file"""
+    os.makedirs(os.path.dirname(PROGRESS_FILE), exist_ok=True)
+    with open(PROGRESS_FILE, 'w') as f:
+        json.dump(progress, f, indent=2)
+
+def log_error(bbl, error_msg):
+    """Log errors to file"""
+    os.makedirs(os.path.dirname(ERROR_LOG), exist_ok=True)
+    with open(ERROR_LOG, 'a') as f:
+        f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - BBL {bbl}: {error_msg}\n")
+
+def latlon_to_pixel(lat, lon, zoom):
+    """Convert lat/lon to pixel coordinates"""
+    siny = math.sin(lat * math.pi / 180)
+    siny = max(-0.9999, min(0.9999, siny))
+    x = 256 * (0.5 + lon / 360) * 2**zoom
+    y = 256 * (0.5 - math.log((1 + siny) / (1 - siny)) / (4 * math.pi)) * 2**zoom
+    return x, y
+
+def pixel_to_latlon(x, y, zoom):
+    """Convert pixel coordinates to lat/lon"""
+    scale = 256 * 2**zoom
+    lon = (x / scale - 0.5) * 360
+    lat = math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * y / scale))))
+    return lat, lon
+
+def get_google_geocode(address):
+    """Get lat/lon from Google Geocoding API"""
+    try:
+        rate_limit_check()
+        
+        # Clean up address
+        address = address.strip()
+        if "new york" not in address.lower() and "ny" not in address.lower():
+            address += ", New York, NY"
+        
+        url = "https://maps.googleapis.com/maps/api/geocode/json"
+        params = {
+            'address': address,
+            'key': API_KEY
+        }
+        
+        with rate_limiter:
+            response = requests.get(url, params=params, timeout=5)
+        data = response.json()
+        
+        if data['status'] == 'OK' and data['results']:
+            location = data['results'][0]['geometry']['location']
+            return location['lat'], location['lng']
+        else:
+            return None, None
+            
+    except Exception as e:
+        return None, None
+
+def add_text_to_image(img, text, font_size=50):
+    """Add address text to bottom of image"""
+    draw = ImageDraw.Draw(img)
+    
+    try:
+        font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", font_size)
+    except:
+        font = ImageFont.load_default()
+    
+    bbox = draw.textbbox((0, 0), text, font=font)
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
+    
+    new_height = img.height + text_height + 30
+    new_img = Image.new('RGB', (img.width, new_height), 'white')
+    new_img.paste(img, (0, 0))
+    
+    draw = ImageDraw.Draw(new_img)
+    text_x = (img.width - text_width) // 2
+    text_y = img.height + 15
+    draw.text((text_x, text_y), text, fill='black', font=font)
+    
+    return new_img
+
+def fetch_tile(params):
+    """Fetch a single tile"""
+    row, col, lat_tile, lon_tile, lat, lon, zoom = params
+    
+    rate_limit_check()
+    
+    url = (
+        f"https://maps.googleapis.com/maps/api/staticmap"
+        f"?center={lat_tile},{lon_tile}&zoom={zoom}"
+        f"&size={TILE_SIZE}x{TILE_SIZE}&scale={SCALE}"
+        f"&maptype=hybrid"
+        f"&style=feature:poi|visibility:off"
+        f"&style=feature:transit|visibility:off"
+        f"&markers=color:red|size:large|{lat},{lon}"
+        f"&key={API_KEY}"
+    )
+    
+    for attempt in range(MAX_RETRIES):
+        try:
+            with rate_limiter:
+                response = requests.get(url, timeout=10)
+            response.raise_for_status()
+            return (row, col, Image.open(BytesIO(response.content)))
+        except Exception as e:
+            if attempt == MAX_RETRIES - 1:
+                return (row, col, None)
+            time.sleep(0.5 * (attempt + 1))
+    
+    return (row, col, None)
+
+def capture_building_image_fast(row, lat, lon, output_dir):
+    """Capture a building image using concurrent tile fetching"""
+    address = row['address']
+    bbl = str(row['bbl'])
+    
+    zoom = ZOOM_LEVEL
+    grid = GRID_SIZE
+    
+    print(f"   📐 Creating {grid}x{grid} HIGH RES grid at zoom {zoom} = {grid * TILE_SIZE}x{grid * TILE_SIZE}px")
+    
+    # Prepare tile coordinates
+    center_px, center_py = latlon_to_pixel(lat, lon, zoom)
+    half = grid // 2
+    full_tile = TILE_SIZE / SCALE
+    
+    tile_params = []
+    for r in range(grid):
+        for c in range(grid):
+            dx = (c - half) * full_tile
+            dy = (r - half) * full_tile
+            lat_tile, lon_tile = pixel_to_latlon(center_px + dx, center_py + dy, zoom)
+            tile_params.append((r, c, lat_tile, lon_tile, lat, lon, zoom))
+    
+    # Fetch tiles concurrently
+    stitched = Image.new("RGB", (grid * TILE_SIZE, grid * TILE_SIZE), 'gray')
+    successful_tiles = 0
+    
+    print(f"   📡 Fetching {len(tile_params)} tiles concurrently...")
+    start_time = time.time()
+    
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        future_to_tile = {executor.submit(fetch_tile, params): params for params in tile_params}
+        
+        for future in as_completed(future_to_tile):
+            row_idx, col_idx, img = future.result()
+            if img:
+                stitched.paste(img, (col_idx * TILE_SIZE, row_idx * TILE_SIZE))
+                successful_tiles += 1
+            else:
+                # Create gray placeholder for failed tiles
+                placeholder = Image.new('RGB', (TILE_SIZE, TILE_SIZE), 'gray')
+                stitched.paste(placeholder, (col_idx * TILE_SIZE, row_idx * TILE_SIZE))
+    
+    fetch_time = time.time() - start_time
+    print(f"   ✓ Fetched {successful_tiles}/{len(tile_params)} tiles in {fetch_time:.1f}s")
+    
+    # Add address text if enabled
+    if ADD_ADDRESS_TEXT:
+        final_img = add_text_to_image(stitched, address)
+    else:
+        final_img = stitched
+    
+    # Save image
+    safe_address = re.sub(r'[/\\:*?"<>|,.]', '_', address)[:100]
+    filename = f"{bbl}_{safe_address}.png"
+    filepath = os.path.join(output_dir, filename)
+    
+    final_img.save(filepath)
+    print(f"   ✅ Saved: {filename}")
+    
+    return filename, grid, zoom
+
+def process_building(row, output_dir, progress):
+    """Process a single building"""
+    address = row['address']
+    bbl = str(row['bbl'])
+    
+    # Check if already completed
+    if bbl in progress['completed'] and not FORCE_RECAPTURE:
+        return None
+    
+    print(f"\n🏢 Processing: {address}")
+    print(f"   BBL: {bbl}")
+    
+    # Check if image already exists
+    safe_address = re.sub(r'[/\\:*?"<>|,.]', '_', address)[:100]
+    expected_filename = f"{bbl}_{safe_address}.png"
+    expected_filepath = os.path.join(output_dir, expected_filename)
+    
+    if os.path.exists(expected_filepath) and not FORCE_RECAPTURE:
+        print(f"   ✅ Image already exists: {expected_filename}")
+        return None
+    
+    try:
+        # Get Google geocoded coordinates
+        print(f"   🔍 Geocoding address...")
+        google_lat, google_lon = get_google_geocode(address)
+        
+        if not google_lat or not google_lon:
+            print("   ⚠️  Google geocoding failed, skipping")
+            log_error(bbl, "Geocoding failed")
+            return None
+        
+        print(f"   📍 Coordinates: {google_lat:.7f}, {google_lon:.7f}")
+        time.sleep(GEOCODING_DELAY)
+        
+        # Capture image
+        filename, grid, zoom = capture_building_image_fast(
+            row, google_lat, google_lon, output_dir
+        )
+        
+        # Mark as completed
+        progress['completed'].append(bbl)
+        save_progress(progress)
+        
+        return {
+            'bbl': row['bbl'],
+            'address': address,
+            'image_filename': filename,
+            'latitude': google_lat,
+            'longitude': google_lon,
+            'resolution': f"{grid * TILE_SIZE}x{grid * TILE_SIZE}",
+            'zoom': zoom,
+            'capture_date': datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        error_msg = f"Error processing building: {str(e)}"
+        print(f"   ❌ {error_msg}")
+        log_error(bbl, error_msg)
+        
+        if bbl not in progress['failed']:
+            progress['failed'][bbl] = []
+        progress['failed'][bbl].append({
+            'timestamp': datetime.now().isoformat(),
+            'error': str(e)
+        })
+        save_progress(progress)
+        
+        return None
+
+def main():
+    print("🚀 NYC BUILDING SATELLITE IMAGE CAPTURE - FAST GOOGLE HIGH-RES VERSION")
+    print("=" * 60)
+    print("📍 Capturing HIGH RESOLUTION images using Google geocoding")
+    print(f"📐 Resolution: {GRID_SIZE * TILE_SIZE}x{GRID_SIZE * TILE_SIZE}px ({GRID_SIZE}x{GRID_SIZE} grid)")
+    print(f"🚄 Speed optimizations: Concurrent tile fetching with {MAX_WORKERS} workers")
+    print(f"📂 Output: {OUTPUT_DIR}")
+    if FORCE_RECAPTURE:
+        print("⚠️  FORCE RECAPTURE MODE ENABLED - Will recapture all buildings!")
+    print("=" * 60)
+    
+    # Check environment
+    if not check_environment():
+        print("\n❌ Please fix environment issues before running.")
+        sys.exit(1)
+    
+    # Create output directory
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    
+    # Count existing images
+    existing_images = len([f for f in os.listdir(OUTPUT_DIR) if f.endswith('.png')])
+    if existing_images > 0:
+        print(f"\n📷 Found {existing_images} existing images in output directory")
+    
+    # Load progress
+    progress = load_progress()
+    
+    # Read CSV
+    print(f"\n📊 Reading building data...")
+    try:
+        df = pd.read_csv(CSV_INPUT)
+        print(f"   ✅ Loaded {len(df)} buildings")
+    except Exception as e:
+        print(f"   ❌ Error reading CSV: {e}")
+        sys.exit(1)
+    
+    # Apply test limit
+    if TEST_LIMIT:
+        df = df.head(TEST_LIMIT)
+        print(f"   🧪 TEST MODE: Processing only {TEST_LIMIT} buildings")
+    
+    # Count completed
+    if FORCE_RECAPTURE:
+        print(f"\n⚠️  FORCE RECAPTURE MODE: Will recapture all buildings")
+        progress['completed'] = []
+        remaining_df = df
+    else:
+        completed_count = len([bbl for bbl in df['bbl'].astype(str) if bbl in progress['completed']])
+        
+        if completed_count > 0:
+            print(f"\n📊 Previous progress:")
+            print(f"   Already captured: {completed_count} buildings")
+            print(f"   Failed: {len(progress['failed'])}")
+            
+            # Show some examples of completed buildings
+            if completed_count > 0:
+                print(f"   Examples of completed BBLs: {', '.join(progress['completed'][:5])}")
+                if completed_count > 5:
+                    print(f"   ... and {completed_count - 5} more")
+        
+        # Filter incomplete buildings
+        remaining_df = df[~df['bbl'].astype(str).isin(progress['completed'])]
+    
+    print(f"\n📋 Buildings to process: {len(remaining_df)}")
+    
+    if len(remaining_df) == 0:
+        print("\n✅ All buildings have been captured!")
+        print("   To recapture all buildings, set FORCE_RECAPTURE = True")
+        return
+    
+    # Estimate time and cost
+    tiles_per_image = GRID_SIZE * GRID_SIZE
+    total_tiles = len(remaining_df) * tiles_per_image
+    
+    # With concurrent fetching, time estimate is much lower
+    time_per_building = (tiles_per_image / MAX_WORKERS * 0.5) + 2  # Roughly 2 seconds overhead per building
+    time_estimate = (len(remaining_df) * time_per_building) / 3600
+    
+    # Cost estimate (Google Maps Static API pricing)
+    cost_estimate = (total_tiles / 1000) * 7 + (len(remaining_df) / 1000) * 5
+    
+    print(f"\n💰 Estimates:")
+    print(f"   Time: ~{time_estimate:.1f} hours (with concurrent fetching)")
+    print(f"   Cost: ~${cost_estimate:.2f}")
+    print(f"   Total tiles: {total_tiles:,}")
+    
+    # Confirm
+    if not TEST_MODE and len(remaining_df) > 10:
+        confirm = input("\n⚠️  Continue? (y/n): ")
+        if confirm.lower() != 'y':
+            print("Cancelled.")
+            return
+    
+    # Process buildings
+    print(f"\n🏗️  Starting capture...")
+    start_time = time.time()
+    results = []
+    
+    # Load ALL existing results to preserve them
+    existing_results_df = None
+    if os.path.exists(OUTPUT_CSV) and not FORCE_RECAPTURE:
+        try:
+            existing_results_df = pd.read_csv(OUTPUT_CSV)
+            print(f"   📂 Preserving {len(existing_results_df)} existing records in CSV")
+        except:
+            pass
+    
+    # Process each building
+    for idx, (_, row) in enumerate(tqdm(remaining_df.iterrows(), total=len(remaining_df), desc="Processing")):
+        try:
+            result = process_building(row, OUTPUT_DIR, progress)
+            
+            if result:
+                results.append(result)
+                
+                # Save periodically - append new results to existing
+                if len(results) % 10 == 0:
+                    if existing_results_df is not None:
+                        combined_df = pd.concat([existing_results_df, pd.DataFrame(results)], ignore_index=True)
+                        combined_df.to_csv(OUTPUT_CSV, index=False)
+                    else:
+                        pd.DataFrame(results).to_csv(OUTPUT_CSV, index=False)
+                
+        except KeyboardInterrupt:
+            print("\n\n⚠️  Interrupted by user")
+            print("   Progress saved. Run again to resume.")
+            break
+        except Exception as e:
+            print(f"\n❌ Unexpected error: {e}")
+            log_error("SYSTEM", str(e))
+    
+    # Final save - combine with existing results
+    if results:
+        if existing_results_df is not None:
+            combined_df = pd.concat([existing_results_df, pd.DataFrame(results)], ignore_index=True)
+            combined_df.to_csv(OUTPUT_CSV, index=False)
+            print(f"   💾 Saved {len(results)} new records (total: {len(combined_df)})")
+        else:
+            pd.DataFrame(results).to_csv(OUTPUT_CSV, index=False)
+            print(f"   💾 Saved {len(results)} records")
+    
+    # Summary
+    elapsed = time.time() - start_time
+    
+    print(f"\n\n📊 SUMMARY")
+    print("=" * 50)
+    print(f"Processed in this session: {len(results)}")
+    print(f"Total in image_mapping.csv: {len(progress['completed'])}")
+    print(f"Total images in directory: {len([f for f in os.listdir(OUTPUT_DIR) if f.endswith('.png')])}")
+    print(f"Failed: {len(progress['failed'])}")
+    print(f"Time elapsed: {elapsed / 60:.1f} minutes")
+    if len(results) > 0:
+        print(f"Average time per building: {elapsed / len(results):.1f} seconds")
+    
+    print(f"\n✨ Output saved to: {OUTPUT_DIR}")
+    print(f"   Mapping CSV: {OUTPUT_CSV}")
+    
+    if progress['failed']:
+        print(f"\n⚠️  {len(progress['failed'])} buildings failed.")
+        retry = input("   Retry failed buildings? (y/n): ")
+        if retry.lower() == 'y':
+            for bbl in list(progress['failed'].keys()):
+                if bbl in progress['completed']:
+                    progress['completed'].remove(bbl)
+            progress['failed'] = {}
+            save_progress(progress)
+            print("   Failed buildings cleared. Run again to retry.")
+
+if __name__ == "__main__":
+    main()

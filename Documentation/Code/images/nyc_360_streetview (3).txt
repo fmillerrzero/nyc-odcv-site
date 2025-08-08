@@ -1,0 +1,388 @@
+#!/usr/bin/env python3
+"""
+NYC Buildings 360 Street View Capture
+=====================================
+Captures 360-degree composite Street View images for existing building folders,
+optimized for web hosting with smart pitch adjustment for tall buildings.
+
+Creates panoramic composites by stitching multiple viewpoints.
+"""
+
+import os
+import re
+import math
+import requests
+from PIL import Image
+from io import BytesIO
+import logging
+from datetime import datetime
+import json
+
+# Configuration
+API_KEY = "AIzaSyCsPtot_LaeHITMOB7t9GANaukmNCBmHg0"  # Replace with your API key
+BASE_DIR = "/Users/forrestmiller/Desktop/FINAL NYC/BIG/images"
+DEFAULT_HEIGHT = 150  # Default building height in feet
+DEFAULT_STREET_WIDTH = 20  # Default street width in meters
+SAFETY_MARGIN = 0.85  # Use 85% of street width
+
+# Web optimization settings
+WEB_WIDTH = 2400  # Total width for 360 composite
+WEB_HEIGHT = 600   # Height for each panel
+JPEG_QUALITY = 85  # JPEG quality (85 is good for web)
+
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+
+class StreetView360Capture:
+    def __init__(self, base_dir, api_key):
+        self.base_dir = base_dir
+        self.api_key = api_key
+        self.completed_file = os.path.join(base_dir, '360_completed.txt')
+        self.completed = self.load_completed()
+        self.stats = {'processed': 0, 'skipped': 0, 'failed': 0}
+        
+    def load_completed(self):
+        """Load list of completed folders"""
+        if os.path.exists(self.completed_file):
+            with open(self.completed_file, 'r') as f:
+                return set(line.strip() for line in f)
+        return set()
+    
+    def mark_completed(self, folder_name):
+        """Mark folder as completed"""
+        with open(self.completed_file, 'a') as f:
+            f.write(folder_name + '\n')
+        self.completed.add(folder_name)
+    
+    def extract_info_from_folder(self, folder_name):
+        """Extract BBL and address from folder name"""
+        # Format: BBL_ADDRESS
+        match = re.match(r'^(\d+)_(.+)$', folder_name)
+        if match:
+            bbl = match.group(1)
+            address = match.group(2)
+            return bbl, address
+        return None, None
+    
+    def geocode_address(self, address):
+        """Get coordinates for address"""
+        url = (
+            f"https://maps.googleapis.com/maps/api/geocode/json?"
+            f"address={requests.utils.quote(address)}&key={self.api_key}"
+        )
+        
+        try:
+            response = requests.get(url, timeout=10).json()
+            if response['status'] == 'OK' and response['results']:
+                location = response['results'][0]['geometry']['location']
+                return location['lat'], location['lng']
+        except Exception as e:
+            logging.error(f"Geocoding error: {e}")
+        
+        return None, None
+    
+    def get_street_position(self, lat, lng):
+        """Get street-level position using Directions API"""
+        url = (
+            f"https://maps.googleapis.com/maps/api/directions/json?"
+            f"origin={lat},{lng}&destination={lat},{lng}&mode=walking"
+            f"&key={self.api_key}"
+        )
+        
+        try:
+            response = requests.get(url, timeout=10).json()
+            if response['status'] == 'OK' and response['routes']:
+                route = response['routes'][0]
+                if route['legs'] and route['legs'][0]['steps']:
+                    end_location = route['legs'][0]['end_location']
+                    return end_location['lat'], end_location['lng']
+        except Exception as e:
+            logging.error(f"Directions API error: {e}")
+        
+        return lat, lng
+    
+    def is_even_address(self, address):
+        """Check if building number is even"""
+        match = re.search(r'\b(\d+)', address)
+        if match:
+            return int(match.group(1)) % 2 == 0
+        return None
+    
+    def offset_coords(self, lat, lng, distance_meters, bearing_degrees):
+        """Calculate offset coordinates"""
+        R = 6371000  # Earth's radius in meters
+        
+        lat_rad = math.radians(lat)
+        bearing_rad = math.radians(bearing_degrees)
+        
+        lat2_rad = math.asin(
+            math.sin(lat_rad) * math.cos(distance_meters / R) +
+            math.cos(lat_rad) * math.sin(distance_meters / R) * math.cos(bearing_rad)
+        )
+        
+        lng2_rad = math.radians(lng) + math.atan2(
+            math.sin(bearing_rad) * math.sin(distance_meters / R) * math.cos(lat_rad),
+            math.cos(distance_meters / R) - math.sin(lat_rad) * math.sin(lat2_rad)
+        )
+        
+        return math.degrees(lat2_rad), math.degrees(lng2_rad)
+    
+    def get_camera_position(self, lat, lng, address, street_bearing):
+        """Calculate optimal camera position"""
+        is_even = self.is_even_address(address)
+        
+        # Manhattan even/odd logic
+        if is_even:
+            camera_bearing = (street_bearing - 90) % 360
+        else:
+            camera_bearing = (street_bearing + 90) % 360
+        
+        distance = DEFAULT_STREET_WIDTH * SAFETY_MARGIN
+        
+        camera_lat, camera_lng = self.offset_coords(lat, lng, distance, camera_bearing)
+        
+        return camera_lat, camera_lng
+    
+    def calculate_pitch_for_360(self, building_height_ft=DEFAULT_HEIGHT):
+        """Calculate pitch optimized for tall buildings in 360 view"""
+        # For 360 views, we want a balanced pitch that captures the building
+        # but also shows context
+        base_pitch = 15  # Start with slight upward tilt
+        
+        # Adjust for building height
+        if building_height_ft > 200:
+            pitch = base_pitch + 10  # Tall buildings
+        elif building_height_ft > 100:
+            pitch = base_pitch + 5   # Medium buildings
+        else:
+            pitch = base_pitch       # Low buildings
+        
+        return min(pitch, 30)  # Cap at 30 for 360 views
+    
+    def get_streetview_image(self, lat, lng, heading, fov=90, pitch=15, size="640x640"):
+        """Fetch a Street View image"""
+        url = (
+            f"https://maps.googleapis.com/maps/api/streetview?"
+            f"size={size}&location={lat},{lng}"
+            f"&heading={heading}&fov={fov}&pitch={pitch}"
+            f"&source=outdoor&radius=50&return_error_code=true"
+            f"&key={self.api_key}"
+        )
+        
+        try:
+            response = requests.get(url, timeout=15)
+            if response.status_code == 200 and response.content:
+                image = Image.open(BytesIO(response.content))
+                if image.size[0] > 100:  # Valid image check
+                    return image
+        except Exception as e:
+            logging.warning(f"Failed to get image: {e}")
+        
+        return None
+    
+    def create_360_composite(self, lat, lng, pitch=15):
+        """Create a 360-degree composite image from 4 views"""
+        # Capture 4 views: N, E, S, W
+        headings = [0, 90, 180, 270]
+        images = []
+        
+        for heading in headings:
+            img = self.get_streetview_image(lat, lng, heading, fov=90, pitch=pitch)
+            if img:
+                # Resize for web
+                img = img.resize((WEB_WIDTH // 4, WEB_HEIGHT), Image.Resampling.LANCZOS)
+                images.append(img)
+            else:
+                # Create blank panel if image fails
+                blank = Image.new('RGB', (WEB_WIDTH // 4, WEB_HEIGHT), (200, 200, 200))
+                images.append(blank)
+        
+        # Create composite
+        composite = Image.new('RGB', (WEB_WIDTH, WEB_HEIGHT))
+        for i, img in enumerate(images):
+            composite.paste(img, (i * (WEB_WIDTH // 4), 0))
+        
+        return composite
+    
+    def create_360_cylindrical(self, lat, lng, pitch=15):
+        """Create a more seamless 360 view with 8 views for smoother panorama"""
+        # Capture 8 views for smoother transition
+        num_views = 8
+        headings = [i * (360 / num_views) for i in range(num_views)]
+        images = []
+        
+        panel_width = WEB_WIDTH // num_views
+        
+        for heading in headings:
+            img = self.get_streetview_image(lat, lng, heading, fov=60, pitch=pitch, size="800x800")
+            if img:
+                # Crop center portion for seamless stitching
+                width, height = img.size
+                crop_width = int(width * 0.7)  # Use center 70%
+                left = (width - crop_width) // 2
+                img_cropped = img.crop((left, 0, left + crop_width, height))
+                
+                # Resize for web
+                img_resized = img_cropped.resize((panel_width, WEB_HEIGHT), Image.Resampling.LANCZOS)
+                images.append(img_resized)
+            else:
+                blank = Image.new('RGB', (panel_width, WEB_HEIGHT), (200, 200, 200))
+                images.append(blank)
+        
+        # Create composite
+        composite = Image.new('RGB', (WEB_WIDTH, WEB_HEIGHT))
+        for i, img in enumerate(images):
+            composite.paste(img, (i * panel_width, 0))
+        
+        return composite
+    
+    def estimate_building_height(self, address):
+        """Estimate building height from address patterns"""
+        # Simple heuristic based on common NYC patterns
+        address_lower = address.lower()
+        
+        # Towers and high-rises
+        if any(word in address_lower for word in ['tower', 'plaza', 'center']):
+            return 300
+        
+        # Avenues often have taller buildings
+        if any(word in address_lower for word in ['avenue', 'ave', 'broadway']):
+            return 200
+        
+        # Default
+        return DEFAULT_HEIGHT
+    
+    def process_folder(self, folder_name):
+        """Process a single building folder"""
+        if folder_name in self.completed:
+            logging.info(f"Skipping {folder_name} (already done)")
+            self.stats['skipped'] += 1
+            return
+        
+        folder_path = os.path.join(self.base_dir, folder_name)
+        if not os.path.isdir(folder_path):
+            return
+        
+        # Extract info
+        bbl, address = self.extract_info_from_folder(folder_name)
+        if not bbl or not address:
+            logging.error(f"Could not parse folder name: {folder_name}")
+            self.stats['failed'] += 1
+            return
+        
+        logging.info(f"Processing: {address} (BBL: {bbl})")
+        
+        # Check if 360 image already exists
+        address_no_commas = address.replace(',', '')
+        filename_360 = f"{bbl}_360_{address_no_commas}.jpg"
+        filepath_360 = os.path.join(folder_path, filename_360)
+        
+        if os.path.exists(filepath_360):
+            logging.info(f"360 image already exists: {filename_360}")
+            self.mark_completed(folder_name)
+            self.stats['skipped'] += 1
+            return
+        
+        # Geocode address
+        lat, lng = self.geocode_address(address)
+        if not lat or not lng:
+            logging.error(f"Failed to geocode: {address}")
+            self.stats['failed'] += 1
+            return
+        
+        # Get street position
+        street_lat, street_lng = self.get_street_position(lat, lng)
+        
+        # Determine street bearing
+        if any(x in address.lower() for x in ['avenue', 'ave', 'broadway']):
+            street_bearing = 29  # N-S
+        else:
+            street_bearing = 119  # E-W
+        
+        # Get camera position
+        camera_lat, camera_lng = self.get_camera_position(
+            street_lat, street_lng, address, street_bearing
+        )
+        
+        # Estimate building height and calculate pitch
+        height = self.estimate_building_height(address)
+        pitch = self.calculate_pitch_for_360(height)
+        
+        logging.info(f"Creating 360 view with pitch={pitch}° for estimated height={height}ft")
+        
+        # Create 360 composite
+        try:
+            # Use cylindrical method for better quality
+            composite = self.create_360_cylindrical(camera_lat, camera_lng, pitch)
+            
+            # Save with web optimization
+            composite.save(filepath_360, 'JPEG', quality=JPEG_QUALITY, optimize=True)
+            
+            # Get file size
+            file_size_mb = os.path.getsize(filepath_360) / (1024 * 1024)
+            logging.info(f"Saved 360 image: {filename_360} ({file_size_mb:.2f} MB)")
+            
+            self.mark_completed(folder_name)
+            self.stats['processed'] += 1
+            
+        except Exception as e:
+            logging.error(f"Failed to create 360 image: {e}")
+            self.stats['failed'] += 1
+    
+    def run(self):
+        """Process all folders"""
+        start_time = datetime.now()
+        
+        # Get all folders
+        folders = [f for f in os.listdir(self.base_dir) 
+                  if os.path.isdir(os.path.join(self.base_dir, f))]
+        
+        logging.info(f"Found {len(folders)} building folders")
+        
+        # Process each folder
+        for i, folder in enumerate(folders):
+            logging.info(f"\n[{i+1}/{len(folders)}] Processing {folder}")
+            try:
+                self.process_folder(folder)
+            except Exception as e:
+                logging.error(f"Unexpected error: {e}")
+                self.stats['failed'] += 1
+        
+        # Summary
+        elapsed = datetime.now() - start_time
+        logging.info("\n" + "="*50)
+        logging.info("PROCESSING COMPLETE")
+        logging.info(f"Total time: {elapsed}")
+        logging.info(f"Processed: {self.stats['processed']}")
+        logging.info(f"Skipped: {self.stats['skipped']}")
+        logging.info(f"Failed: {self.stats['failed']}")
+
+
+def main():
+    """Main entry point"""
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Capture 360 Street View images for NYC buildings')
+    parser.add_argument('--base-dir', default=BASE_DIR, help='Base directory with building folders')
+    parser.add_argument('--api-key', default=API_KEY, help='Google Maps API key')
+    parser.add_argument('--reset', action='store_true', help='Reset progress and start fresh')
+    
+    args = parser.parse_args()
+    
+    # Reset if requested
+    if args.reset:
+        completed_file = os.path.join(args.base_dir, '360_completed.txt')
+        if os.path.exists(completed_file):
+            os.remove(completed_file)
+            print("Progress reset - starting fresh")
+    
+    # Run capture
+    capture = StreetView360Capture(args.base_dir, args.api_key)
+    capture.run()
+
+
+if __name__ == "__main__":
+    main()

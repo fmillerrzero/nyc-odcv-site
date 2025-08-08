@@ -1,0 +1,91 @@
+if __name__ == "__main__":
+    # Your panorama CSV file
+    csv_file = "/Users/forrestmiller/Desktop/panorama_ids_output.csv"
+    
+    if not os.path.exists(csv_file):
+        print(f"Error: Cannot find {csv_file}")
+        print("Please run streetview_panorama_extractor.py first!")
+        print("\nLooking for the CSV file at:", csv_file)
+        print("\nFiles on Desktop:")
+        desktop_files = os.listdir("/Users/forrestmiller/Desktop/")
+        csv_files = [f for f in desktop_files if f.endswith('.csv')]
+        for f in csv_files:
+            print(f"  - {f}")
+    else:
+        total = prepare_for_sv360_pro(csv_file)
+        print("\nReady for Street View 360 Pro!")#!/usr/bin/env python3
+"""
+Street View 360 Pro Preparation Script
+Prepares panorama IDs and reference data for bulk downloading with proper names
+"""
+
+import pandas as pd
+import os
+
+def prepare_for_sv360_pro(csv_file: str):
+    """
+    Prepare panorama data for Street View 360 Pro bulk download
+    """
+    # Read the panorama data
+    print("Reading panorama data...")
+    df = pd.read_csv(csv_file)
+    
+    # Filter for successful panoramas only
+    successful = df[df['status'] == 'SUCCESS'].copy()
+    print(f"\nFound {len(successful)} successful panoramas")
+    
+    # Create reference files
+    print("\nCreating reference files...")
+    
+    # 1. Just the panorama IDs for bulk paste
+    pano_ids_only = successful['pano_id'].tolist()
+    with open('pano_ids_for_sv360.txt', 'w') as f:
+        for pid in pano_ids_only:
+            f.write(f"{pid}\n")
+    print("✓ Created: pano_ids_for_sv360.txt")
+    
+    # 2. Reference sheet with all data
+    reference_df = successful[['pano_id', 'bbl', 'address', 'neighborhood']].copy()
+    reference_df.to_csv('panorama_reference.csv', index=False)
+    print("✓ Created: panorama_reference.csv")
+    
+    # 3. Create a lookup file for verification
+    lookup_dict = {}
+    for _, row in successful.iterrows():
+        lookup_dict[row['pano_id']] = {
+            'bbl': row['bbl'],
+            'address': row['address'],
+            'neighborhood': row['neighborhood']
+        }
+    
+    import json
+    with open('panorama_lookup.json', 'w') as f:
+        json.dump(lookup_dict, f, indent=2)
+    print("✓ Created: panorama_lookup.json")
+    
+    # Copy all panorama IDs to clipboard
+    all_ids_text = '\n'.join(pano_ids_only)
+    print(f"\n✓ All {len(pano_ids_only)} panorama IDs saved to: pano_ids_for_sv360.txt")
+    print("  Open this file and copy all the IDs")
+    
+    print("\n" + "="*60)
+    print("PREPARATION COMPLETE!")
+    print("="*60)
+    print(f"Total panoramas ready for download: {len(successful)}")
+    print("\nFiles created:")
+    print("- pano_ids_for_sv360.txt: All panorama IDs")
+    print("- panorama_reference.csv: Reference sheet")
+    print("- panorama_lookup.json: For verification")
+    
+    return len(successful)
+
+if __name__ == "__main__":
+    # Your panorama CSV file
+    csv_file = "panorama_ids_output.csv"
+    
+    if not os.path.exists(csv_file):
+        print(f"Error: Cannot find {csv_file}")
+        print("Please run streetview_panorama_extractor.py first!")
+    else:
+        total = prepare_for_sv360_pro(csv_file)
+        print("\nReady for Street View 360 Pro!")

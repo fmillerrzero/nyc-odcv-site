@@ -5,30 +5,30 @@ import sys
 from html import escape
 
 # Read what we need
-scoring = pd.read_csv('../data/odcv_scoring.csv')
-buildings = pd.read_csv('../data/buildings_BIG.csv')
-ll97 = pd.read_csv('../data/LL97_BIG.csv')
-addresses = pd.read_csv('../data/all_building_addresses.csv')
-system = pd.read_csv('../data/system_BIG.csv')
+scoring = pd.read_csv('data/odcv_scoring.csv')
+buildings = pd.read_csv('data/buildings_BIG.csv')
+ll97 = pd.read_csv('data/LL97_BIG.csv')
+addresses = pd.read_csv('data/all_building_addresses.csv')
+system = pd.read_csv('data/system_BIG.csv')
 
-# Read Wikipedia links data
-wikipedia_links = {}
+# Read building links data (various sources, not just Wikipedia)
+building_links = {}
 try:
-    wiki_df = pd.read_csv('../data/NYC_Wiki_Pages_Buildings_with_BBL_verified.csv')
-    for _, row in wiki_df.iterrows():
-        if pd.notna(row['Wikipedia_Link']):
+    links_df = pd.read_csv('data/TOP_250_BUILDING_LINKS_FINAL_CORRECTED.csv')
+    for _, row in links_df.iterrows():
+        if pd.notna(row['url']):
             # Convert BBL to int to match the format in other dataframes
-            bbl = int(float(row['BBL']))
-            wikipedia_links[bbl] = row['Wikipedia_Link']
-    print(f"Loaded {len(wikipedia_links)} Wikipedia links")
+            bbl = int(float(row['bbl']))
+            building_links[bbl] = row['url']
+    print(f"Loaded {len(building_links)} building links")
 except:
-    print("No Wikipedia links file found")
-    wikipedia_links = {}
+    print("No building links file found")
+    building_links = {}
 
 # Read aerial videos data
 aerial_videos = {}
 try:
-    aerial_df = pd.read_csv('../data/aerial_videos.csv')
+    aerial_df = pd.read_csv('data/aerial_videos.csv')
     for _, row in aerial_df.iterrows():
         if row['status'] == 'active' and pd.notna(row['video_id']):
             aerial_videos[int(row['bbl'])] = row['video_id']
@@ -525,7 +525,7 @@ html += f"""
         <div style="background: #f8f8f8; border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
             <details>
                 <summary style="cursor: pointer; font-size: 1.5em; color: var(--rzero-primary); font-weight: 600; padding: 10px 0; list-style: none;">
-                    Office Occupancy Trend <span style="font-size: 0.8em; transition: transform 0.3s; display: inline-block;">▼</span>
+                    Office Occupancy Recovery <span style="font-size: 0.8em; transition: transform 0.3s; display: inline-block;">▼</span>
                 </summary>
                 <div style="margin-top: 15px;">
                     <div style="display: flex; gap: 25px; font-size: 0.95em; margin-bottom: 20px; justify-content: center;">
@@ -555,16 +555,23 @@ html += f"""
                     Behind the Rankings <span style="font-size: 0.8em; transition: transform 0.3s; display: inline-block;">▼</span>
                 </summary>
                 <div style="margin-top: 15px;">
-                    <p>Buildings are ranked by <strong>SALES READINESS</strong>, not just savings amount. The scoring system (110 points total):</p>
+                    <p>Rankings combine sales readiness, technical fit, and projected savings. Every building is scored out of 110 points — 100 core points plus 10 extra-credit bonus points:</p>
+                    
+                    <h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--rzero-primary);">Core Scoring – 100 points</h4>
                     <ul style="line-height: 1.8;">
-                        <li><strong>Financial Impact (40 pts):</strong> ODCV savings & LL97 penalty avoidance</li>
-                        <li><strong>BAS Infrastructure (30 pts):</strong> No BAS = 0 points (major barrier to sale)</li>
-                        <li><strong>Owner Portfolio (20 pts):</strong> Large portfolios score higher (one pitch → multiple buildings)</li>
-                        <li><strong>Implementation Ease (10 pts):</strong> Fewer tenants + larger floors = easier installation</li>
-                        <li><strong>Prestige Factors (10 pts):</strong> LEED certification, Energy Star ambitions, Class A buildings</li>
+                        <li><strong>Financial Impact (40 pts)</strong> – Modeled ODCV annual savings plus Local Law 97 penalty avoidance.</li>
+                        <li><strong>BMS Infrastructure (30 pts)</strong> – No BMS = 0 points (major barrier); with BMS = 15 base points, plus heating and cooling automation bonuses, and recency bonus for alterations.</li>
+                        <li><strong>Owner Portfolio (20 pts)</strong> – Larger portfolios score higher because one pitch can land multiple buildings.</li>
+                        <li><strong>Implementation Ease (10 pts)</strong> – Fewer tenants and larger floor plates score higher for simpler installation.</li>
                     </ul>
+                    
+                    <h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--rzero-primary);">Extra Credit – 10 points</h4>
+                    <ul style="line-height: 1.8;">
+                        <li><strong>Prestige Factors (10 pts)</strong> – LEED certification, ENERGY STAR improvement potential, and Class A designation.</li>
+                    </ul>
+                    
                     <p style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #ffeeba;">
-                        <strong>Example:</strong> A building with $1.4M savings but no BAS ranks #123, while a $539K building with perfect infrastructure ranks #1. Focus on the ready buyers!
+                        <strong>Example:</strong> A building with $1.4M in savings but no BMS ranks #123, while a $539K building with perfect infrastructure, strong ownership portfolio, and easy install potential ranks #1. The scoring favors targets that are financially attractive, technically ready, and operationally easy to close.
                     </p>
                 </div>
             </details>
@@ -614,6 +621,8 @@ for i, row in scoring.iterrows():
         search_terms = []
         main_address = address_info.iloc[0]['main_address']
         search_terms.append(str(main_address).lower())
+        # Also add address without city/state for better matching
+        search_terms.append(str(main_address).split(',')[0].lower())
         
         # Add all alternate addresses
         for col in address_info.columns:
@@ -621,6 +630,8 @@ for i, row in scoring.iterrows():
                 alt_addr = address_info.iloc[0][col]
                 if pd.notna(alt_addr) and alt_addr:
                     search_terms.append(str(alt_addr).lower())
+                    # Also add without city/state
+                    search_terms.append(str(alt_addr).split(',')[0].lower())
         
         # Add building names from CSV
         building_name_cols = ['primary_building_name', 'alternative_name_1', 'alternative_name_2', 'alternative_name_3']
@@ -629,6 +640,11 @@ for i, row in scoring.iterrows():
                 building_name = address_info.iloc[0][col]
                 if pd.notna(building_name) and building_name:
                     search_terms.append(str(building_name).lower())
+                    # Add variations without "Building", "Tower", etc.
+                    clean_name = str(building_name).lower()
+                    for suffix in [' building', ' tower', ' center', ' plaza']:
+                        if clean_name.endswith(suffix):
+                            search_terms.append(clean_name.replace(suffix, ''))
         
         address = main_address
     else:
@@ -688,11 +704,11 @@ for i, row in scoring.iterrows():
     rank = int(row['final_rank'])
     rank_display = f'<span class="rzero-badge">#{rank}</span>'
     
-    # Check if this building has a Wikipedia link
+    # Check if this building has an external link
     address_display = address.split(',')[0]
-    if bbl in wikipedia_links:
-        # Add Wikipedia link with blue color
-        address_cell = f'''<a href="{wikipedia_links[bbl]}" target="_blank" onclick="event.stopPropagation();" style="color: var(--rzero-primary); text-decoration: none;">
+    if bbl in building_links:
+        # Add building link with blue color
+        address_cell = f'''<a href="{building_links[bbl]}" target="_blank" onclick="event.stopPropagation();" style="color: var(--rzero-primary); text-decoration: none;">
             {address_display}
         </a>'''
     else:
@@ -754,10 +770,18 @@ html += """
     
     // NYC Address Normalization Function
     // Based on address_normalization.json mapping
-    function normalizeAddress(address) {
+    function normalizeAddress(address, skipCitySuffix = false) {
         if (!address) return '';
         
         let normalized = address.trim();
+        
+        // Remove city, state, zip suffixes that Google adds
+        normalized = normalized.split(',')[0].trim();
+        
+        // Check if this looks like a building name (contains "square", "plaza", "tower", "building", "center", numbers at start)
+        const isBuildingName = /\\b(square|plaza|tower|building|center|place)\\b/i.test(normalized) ||
+                               /^\\d+\\s+(times|penn|park|madison|lexington|wall|water)\\b/i.test(normalized) ||
+                               /^(one|two|three|four|five|six|seven|eight|nine|ten)\\s+/i.test(normalized);
         
         // First, create a lowercase version for matching while preserving original for numbers
         const lowerAddress = normalized.toLowerCase();
@@ -784,32 +808,30 @@ html += """
         normalized = normalized.replace(/\\b(eleventh|11th|11)\\s+(avenue|ave\\.?|av)\\b/gi, '11 Ave');
         normalized = normalized.replace(/\\b(twelfth|12th|12)\\s+(avenue|ave\\.?|av)\\b/gi, '12 Ave');
         
-        // Step 3: Handle numbered streets (WITH ordinal suffixes)
-        // Format: "4 Street" → "4th St"
-        normalized = normalized.replace(/\\b(first|1)\\s+(street|st\\.?)\\b/gi, '1st St');
-        normalized = normalized.replace(/\\b(second|2)\\s+(street|st\\.?)\\b/gi, '2nd St');
-        normalized = normalized.replace(/\\b(third|3)\\s+(street|st\\.?)\\b/gi, '3rd St');
-        normalized = normalized.replace(/\\b(fourth|4)\\s+(street|st\\.?)\\b/gi, '4th St');
-        normalized = normalized.replace(/\\b(fifth|5)\\s+(street|st\\.?)\\b/gi, '5th St');
-        normalized = normalized.replace(/\\b(sixth|6)\\s+(street|st\\.?)\\b/gi, '6th St');
-        normalized = normalized.replace(/\\b(seventh|7)\\s+(street|st\\.?)\\b/gi, '7th St');
-        normalized = normalized.replace(/\\b(eighth|8)\\s+(street|st\\.?)\\b/gi, '8th St');
-        normalized = normalized.replace(/\\b(ninth|9)\\s+(street|st\\.?)\\b/gi, '9th St');
-        normalized = normalized.replace(/\\b(tenth|10)\\s+(street|st\\.?)\\b/gi, '10th St');
-        normalized = normalized.replace(/\\b(eleventh|11)\\s+(street|st\\.?)\\b/gi, '11th St');
-        normalized = normalized.replace(/\\b(twelfth|12)\\s+(street|st\\.?)\\b/gi, '12th St');
+        // Remove ordinals from numbered avenues if they exist
+        normalized = normalized.replace(/\\b(\\d+)(st|nd|rd|th)\\s+(Ave|Avenue)\\b/gi, '$1 Ave');
         
-        // Handle higher numbered streets (13+)
+        // Step 3: Handle numbered streets (NO ordinals - match database)
+        // Format: "4 Street" → "4 St" NOT "4th St"
+        normalized = normalized.replace(/\\b(first|1st|1)\\s+(street|st\\.?)\\b/gi, '1 St');
+        normalized = normalized.replace(/\\b(second|2nd|2)\\s+(street|st\\.?)\\b/gi, '2 St');
+        normalized = normalized.replace(/\\b(third|3rd|3)\\s+(street|st\\.?)\\b/gi, '3 St');
+        normalized = normalized.replace(/\\b(fourth|4th|4)\\s+(street|st\\.?)\\b/gi, '4 St');
+        normalized = normalized.replace(/\\b(fifth|5th|5)\\s+(street|st\\.?)\\b/gi, '5 St');
+        normalized = normalized.replace(/\\b(sixth|6th|6)\\s+(street|st\\.?)\\b/gi, '6 St');
+        normalized = normalized.replace(/\\b(seventh|7th|7)\\s+(street|st\\.?)\\b/gi, '7 St');
+        normalized = normalized.replace(/\\b(eighth|8th|8)\\s+(street|st\\.?)\\b/gi, '8 St');
+        normalized = normalized.replace(/\\b(ninth|9th|9)\\s+(street|st\\.?)\\b/gi, '9 St');
+        normalized = normalized.replace(/\\b(tenth|10th|10)\\s+(street|st\\.?)\\b/gi, '10 St');
+        normalized = normalized.replace(/\\b(eleventh|11th|11)\\s+(street|st\\.?)\\b/gi, '11 St');
+        normalized = normalized.replace(/\\b(twelfth|12th|12)\\s+(street|st\\.?)\\b/gi, '12 St');
+        
+        // Handle higher numbered streets (13+) - NO ordinals to match database
         normalized = normalized.replace(/\\b(\\d+)\\s+(street|st\\.?)\\b/gi, function(match, num) {
             const n = parseInt(num);
             if (n >= 13) {
-                let suffix = 'th';
-                if (n % 100 !== 11 && n % 100 !== 12 && n % 100 !== 13) {
-                    if (n % 10 === 1) suffix = 'st';
-                    else if (n % 10 === 2) suffix = 'nd';
-                    else if (n % 10 === 3) suffix = 'rd';
-                }
-                return num + suffix + ' St';
+                // Just return the number + St, no ordinal suffix
+                return num + ' St';
             }
             return match;
         });
@@ -860,12 +882,16 @@ html += """
             return match.toUpperCase();
         });
         
-        // Step 7: Ensure NYC, NY format
-        if (!normalized.includes(', NY') && !normalized.includes('New York')) {
-            normalized += ', New York, NY';
-        } else if (normalized.includes('New York') && !normalized.includes(', NY')) {
-            normalized += ', NY';
+        // Step 7: Ensure NYC, NY format - BUT NOT FOR BUILDING NAMES
+        /* REMOVED - Database doesn't have NYC suffix
+        if (!skipCitySuffix && !isBuildingName) {
+            if (!normalized.includes(', NY') && !normalized.includes('New York')) {
+                normalized += ', New York, NY';
+            } else if (normalized.includes('New York') && !normalized.includes(', NY')) {
+                normalized += ', NY';
+            }
         }
+        */
         
         return normalized;
     }
@@ -893,15 +919,14 @@ html += """
             autocomplete.addListener('place_changed', function() {
                 const place = autocomplete.getPlace();
                 if (place && place.formatted_address) {
-                    // Extract street address and normalize
-                    const streetAddress = place.formatted_address.split(',')[0].trim();
-                    const normalized = normalizeAddress(streetAddress);
+                    // Extract ONLY the building name/address (before first comma)
+                    const cleanAddress = place.formatted_address.split(',')[0].trim();
                     
-                    // Update search box with normalized address
-                    searchInput.value = normalized;
+                    // Update search box with clean address (no city/state)
+                    searchInput.value = cleanAddress;
                     
-                    // Filter the table with ALL addresses
-                    filterTableWithValue(normalized);
+                    // Filter using the comprehensive cleaning function
+                    filterTableWithValue(cleanAddress);
                     updateClearButtonState();
                 }
             });
@@ -929,116 +954,71 @@ html += """
         }
     }
     
+    
     function filterTableWithValue(searchValue) {
-        // SIMPLIFIED: Just check if search value is contained in the data
-        const searchTerm = searchValue.toLowerCase().trim();
         const rows = document.querySelectorAll('#buildingTable tbody tr');
         let visibleCount = 0;
         
-        if (!searchTerm) {
-            // If empty search, show all
+        if (!searchValue || !searchValue.trim()) {
+            // Show all if empty
             rows.forEach(row => {
                 row.style.display = '';
                 visibleCount++;
             });
         } else {
-            // Special handling for NYC-specific cases
-            let searchTerms = [searchTerm];
+            // Clean the search term - lowercase and strip location suffixes
+            let cleanSearch = searchValue.toLowerCase().trim();
             
-            // CRITICAL: 6th Avenue → Ave of the Americas (NYC special case)
-            // Handle all variations: "6th", "6th ave", "6th avenue", "sixth ave", etc.
-            if (searchTerm.includes('6th')) {
-                // Replace all variations of 6th with Ave of the Americas
-                searchTerms.push(searchTerm.replace(/6th/gi, 'ave of the americas'));
+            // Strip ALL location suffixes that Google adds
+            cleanSearch = cleanSearch.replace(/, new york.*$/i, '');
+            cleanSearch = cleanSearch.replace(/, ny.*$/i, '');
+            cleanSearch = cleanSearch.replace(/, usa.*$/i, '');
+            cleanSearch = cleanSearch.replace(/, united states.*$/i, '');
+            cleanSearch = cleanSearch.replace(/, manhattan.*$/i, '');
+            cleanSearch = cleanSearch.replace(/, nyc.*$/i, '');
+            cleanSearch = cleanSearch.replace(/, 10[0-9]{3}.*$/i, ''); // zip codes
+            
+            // Remove commas and normalize spaces
+            cleanSearch = cleanSearch.replace(/,/g, ' ').replace(/\\s+/g, ' ').trim();
+            
+            // Create search variations
+            let searchTerms = [cleanSearch];
+            
+            // Handle "Square" vs "Sq" variations
+            if (cleanSearch.includes('square')) {
+                searchTerms.push(cleanSearch.replace(/\\bsquare\\b/g, 'sq'));
             }
-            if (searchTerm.match(/\\b6th\\s+(ave|avenue)\\b/i)) {
-                searchTerms.push(searchTerm.replace(/\\b6th\\s+(ave|avenue)\\b/gi, 'ave of the americas'));
-            }
-            if (searchTerm.match(/\\bsixth\\s+(ave|avenue)\\b/i)) {
-                searchTerms.push(searchTerm.replace(/\\bsixth\\s+(ave|avenue)\\b/gi, 'ave of the americas'));
-            }
-            // Also handle "6 ave" or "6 avenue" (without "th")
-            if (searchTerm.match(/\\b6\\s+(ave|avenue)\\b/i)) {
-                searchTerms.push(searchTerm.replace(/\\b6\\s+(ave|avenue)\\b/gi, 'ave of the americas'));
+            if (cleanSearch.includes(' sq')) {
+                searchTerms.push(cleanSearch.replace(/\\bsq\\b/g, 'square'));
             }
             
-            // Apply ALL special case expansions using word boundary aware replacements
-            const expansions = [
-                // Directions
-                [/\\bw\\b/gi, 'west'], [/\\bwest\\b/gi, 'w'],
-                [/\\be\\b/gi, 'east'], [/\\beast\\b/gi, 'e'],
-                [/\\bn\\b/gi, 'north'], [/\\bnorth\\b/gi, 'n'],
-                [/\\bs\\b/gi, 'south'], [/\\bsouth\\b/gi, 's'],
-                
-                // Street types
-                [/\\bave\\b/gi, 'avenue'], [/\\bavenue\\b/gi, 'ave'],
-                [/\\bav\\b/gi, 'avenue'],
-                [/\\bst\\b/gi, 'street'], [/\\bstreet\\b/gi, 'st'],
-                [/\\bstr\\b/gi, 'street'],
-                [/\\brd\\b/gi, 'road'], [/\\broad\\b/gi, 'rd'],
-                [/\\bpl\\b/gi, 'place'], [/\\bplace\\b/gi, 'pl'],
-                [/\\bplz\\b/gi, 'plaza'], [/\\bplaza\\b/gi, 'plz'],
-                [/\\bsq\\b/gi, 'square'], [/\\bsquare\\b/gi, 'sq'],
-                [/\\bct\\b/gi, 'court'], [/\\bcourt\\b/gi, 'ct'],
-                [/\\bln\\b/gi, 'lane'], [/\\blane\\b/gi, 'ln'],
-                [/\\bpkwy\\b/gi, 'parkway'], [/\\bparkway\\b/gi, 'pkwy'],
-                [/\\bcir\\b/gi, 'circle'], [/\\bcircle\\b/gi, 'cir'],
-                [/\\bblvd\\b/gi, 'boulevard'], [/\\bboulevard\\b/gi, 'blvd'],
-                [/\\bdr\\b/gi, 'drive'], [/\\bdrive\\b/gi, 'dr'],
-                [/\\bhwy\\b/gi, 'highway'], [/\\bhighway\\b/gi, 'hwy'],
-                [/\\bter\\b/gi, 'terrace'], [/\\bterrace\\b/gi, 'ter'],
-                [/\\bmt\\b/gi, 'mount'], [/\\bmount\\b/gi, 'mt'],
-                [/\\bft\\b/gi, 'fort'], [/\\bfort\\b/gi, 'ft'],
-                
-                // Ordinals to words
-                [/\\b1st\\b/gi, 'first'], [/\\bfirst\\b/gi, '1st'],
-                [/\\b2nd\\b/gi, 'second'], [/\\bsecond\\b/gi, '2nd'],
-                [/\\b3rd\\b/gi, 'third'], [/\\bthird\\b/gi, '3rd'],
-                [/\\b4th\\b/gi, 'fourth'], [/\\bfourth\\b/gi, '4th'],
-                [/\\b5th\\b/gi, 'fifth'], [/\\bfifth\\b/gi, '5th'],
-                [/\\b6th\\b/gi, 'sixth'], [/\\bsixth\\b/gi, '6th'],
-                [/\\b7th\\b/gi, 'seventh'], [/\\bseventh\\b/gi, '7th'],
-                [/\\b8th\\b/gi, 'eighth'], [/\\beighth\\b/gi, '8th'],
-                [/\\b9th\\b/gi, 'ninth'], [/\\bninth\\b/gi, '9th'],
-                [/\\b10th\\b/gi, 'tenth'], [/\\btenth\\b/gi, '10th'],
-                [/\\b11th\\b/gi, 'eleventh'], [/\\beleventh\\b/gi, '11th'],
-                [/\\b12th\\b/gi, 'twelfth'], [/\\btwelfth\\b/gi, '12th'],
-                
-                // NYC specific
-                // 6th Avenue special handling (must come before general "6th" → "sixth")
-                [/\\b6th\\s+ave\\b/gi, 'ave of the americas'],
-                [/\\b6th\\s+avenue\\b/gi, 'ave of the americas'],
-                [/\\bsixth\\s+ave\\b/gi, 'ave of the americas'],
-                [/\\bsixth\\s+avenue\\b/gi, 'ave of the americas'],
-                [/\\bavenue of the americas\\b/gi, '6th ave'],
-                [/\\bave of the americas\\b/gi, '6th avenue'],
-                
-                [/\\bpark ave s\\b/gi, 'park avenue south'],
-                [/\\bpark avenue south\\b/gi, 'park ave s'],
-                [/\\blex\\b/gi, 'lexington'], [/\\blexington\\b/gi, 'lex'],
-                [/\\bmad\\b/gi, 'madison'], [/\\bmadison\\b/gi, 'mad'],
-                [/\\bbway\\b/gi, 'broadway'], [/\\bbroadway\\b/gi, 'bway'],
-                [/\\bcol\\b/gi, 'columbus'], [/\\bcolumbus\\b/gi, 'col'],
-                [/\\bcpw\\b/gi, 'central park west'],
-                [/\\bcentral park west\\b/gi, 'cpw'],
-                [/\\brsd\\b/gi, 'riverside drive'],
-                [/\\briverside drive\\b/gi, 'rsd'],
-                [/\\bfdr\\b/gi, 'fdr drive']
-            ];
-            
-            // Apply each expansion to generate variations
-            expansions.forEach(([pattern, replacement]) => {
-                if (searchTerm.match(pattern)) {
-                    searchTerms.push(searchTerm.replace(pattern, replacement));
+            // Try without building suffixes
+            ['building', 'tower', 'center', 'plaza'].forEach(suffix => {
+                if (cleanSearch.includes(suffix)) {
+                    const withoutSuffix = cleanSearch.replace(new RegExp('\\\\b' + suffix + '\\\\b', 'g'), '').replace(/\\s+/g, ' ').trim();
+                    if (withoutSuffix.length > 2) {
+                        searchTerms.push(withoutSuffix);
+                    }
                 }
-            })
+            });
             
+            // NYC special cases
+            if (cleanSearch === '6' || cleanSearch === 'sixth' || cleanSearch.includes('6 ave') || cleanSearch.includes('6th')) {
+                searchTerms.push('ave of the americas');
+            }
+            if (cleanSearch.includes('6th') || cleanSearch.includes('sixth')) {
+                searchTerms.push(cleanSearch.replace(/\\b(6th|sixth)\\s+(ave|avenue)\\b/g, 'ave of the americas'));
+            }
+            
+            // Search for any matching term
             rows.forEach(row => {
                 const searchText = (row.getAttribute('data-search') || '').toLowerCase();
-                // Show row if ANY search term is contained in the data
-                const matchesSearch = searchTerms.some(term => searchText.includes(term));
-                row.style.display = matchesSearch ? '' : 'none';
-                if (matchesSearch) visibleCount++;
+                const matches = searchTerms.some(term => {
+                    if (!term || term.length < 2) return false;
+                    return searchText.includes(term);
+                });
+                row.style.display = matches ? '' : 'none';
+                if (matches) visibleCount++;
             });
         }
         

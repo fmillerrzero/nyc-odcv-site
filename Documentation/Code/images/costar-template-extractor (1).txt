@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+"""
+CoStar Template-Based Extractor
+Uses fixed coordinates based on CoStar's consistent template layout
+"""
+
+import cv2
+import numpy as np
+from PIL import Image
+import os
+import json
+from datetime import datetime
+
+class CoStarTemplateExtractor:
+    def __init__(self):
+        # Define fixed regions based on CoStar's consistent template
+        # These coordinates include the generous white padding
+        self.template_regions = {
+            'stacking_diagram': {
+                'x_ratio': 0.245,  # Start of stacking diagram with padding
+                'y_ratio': 0.175,  # Below the header area
+                'width_ratio': 0.41,  # Width including padding
+                'height_ratio': 0.72  # Most of the page height
+            },
+            'photos': {
+                'x_ratio': 0.665,  # Start of photo column with padding
+                'y_ratio': 0.175,  # Below header
+                'width_ratio': 0.33,  # Width of photo area
+                'height_ratio': 

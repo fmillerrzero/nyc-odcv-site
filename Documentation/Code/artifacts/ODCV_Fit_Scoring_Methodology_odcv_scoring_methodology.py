@@ -1,1 +1,0 @@
-import pandas as pd # Read the comparison file df = pd.read_csv('/Users/forrestmiller/Desktop/steam_comparison.csv') # Filter for buildings that actually have steam usage in energy_BIG buildings_with_steam = df[df['total_steam_2023'] > 0] print(f"

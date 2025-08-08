@@ -1,1 +1,0 @@
-import csv # File paths original_file = '/Users/forrestmiller/Desktop/Manhattan visits/Placer/placer_final_correct.csv' previous_filtered = '/Users/forrestmiller/Desktop/Manhattan visits/placer nyc - Sheet2_final.csv' new_filtered = '/Users/forrestm

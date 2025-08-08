@@ -1,0 +1,120 @@
+﻿This response provides a comprehensive distillation of the key topics from our conversation and the provided sources.
+
+
+### Initial Data Exploration and Overview
+
+
+The analytical journey began with a **thorough examination of three core NYC BIG CSV files**: `system_BIG.csv`, `energy_BIG.csv`, and `buildings_BIG.csv`. This initial data exploration aimed to understand their structure, data types, and key content.
+
+
+*   **`system_BIG.csv`**: This file contained data for 449 buildings across 14 columns, primarily focusing on **HVAC and building system information**. Key data points included heating/cooling system types, air distribution (CAV/VAV), and automation status. Notably, it was identified that this file represented a *subset* of the buildings found in the other two files.
+*   **`energy_BIG.csv`**: Comprising 533 rows and 82 columns, this dataset provided **detailed energy consumption and cost data for 2023**. It included monthly electricity, gas, and district steam usage in kBtu, along with their respective costs. Critical identifiers like address, BBL, and office square footage were also present. This file served as the primary source for actual building consumption patterns.
+*   **`buildings_BIG.csv`**: With 533 rows and 17 columns, this file contained **building characteristics and ownership information**. Key attributes included BBL, address, owner name, property manager, building class (A, B, C), year altered, number of floors, and crucial performance metrics like ENERGY STAR scores and LL33 grades.
+
+
+A pivotal finding during this phase was the identification of **BBL (Borough-Block-Lot) as the common identifier across all files**. This column was crucial for merging and cross-referencing data between the independent datasets. It was observed that `energy_BIG.csv` and `buildings_BIG.csv` had matching row counts (533 buildings), suggesting they covered the same set of buildings, while `system_BIG.csv` covered a subset of these (449 buildings). The overall dataset represented a comprehensive collection of NYC office building data suitable for analyzing energy performance, costs, and building characteristics.
+
+
+### HVAC Electricity Disaggregation Methodology
+
+
+A core principle guiding the HVAC electricity disaggregation was to **"Trust Data Over Documentation"**. System descriptions found in `system_BIG.csv` were recognized as potentially outdated or incorrect due to the dynamic nature of buildings and the slow pace of record updates. Instead, the approach prioritized **actual energy consumption patterns** to reveal true operating behavior.
+
+
+The methodology evolved into a sophisticated, **per-building baseline approach** to estimate HVAC load. Initially, there were attempts at simpler profiles based on actual fuel use (Electric Heat, Standard Fuel, High Efficiency). However, the analysis revealed that a more nuanced, data-driven approach was needed, focusing on each building's unique consumption patterns.
+
+
+Key aspects of this refined disaggregation strategy included:
+
+
+*   **Baseline Calculation**: The **minimum monthly electricity usage (adjusted for days in month)** was identified as the baseline, representing the non-HVAC load (e.g., lighting, plug loads, elevators). Any consumption *above* this baseline was attributed to variable HVAC loads.
+*   **Minimum HVAC Load**: It was recognized that **NYC office buildings require a continuous base HVAC load** for essential services like ventilation fans, water pumps, and controls, even during mild months. Research indicated that ventilation alone accounts for approximately 10% of total commercial building energy use, and HVAC base loads contribute 25-33% of total electrical load consistently. Therefore, a **minimum of 15% HVAC electricity usage was applied for all months**. This ensured that no month would show zero HVAC usage, reflecting physical reality.
+*   **Data-Driven Heating Type Determination**: Instead of solely relying on the "Heating System Type" column in `system_BIG.csv`, the approach primarily used **actual winter fuel consumption (gas and steam)** to classify buildings as "fuel-heated" or "electric-heated". This was crucial for correcting "system type mismatches," where buildings documented as "electric boilers" were found to use significant fuel.
+*   **Seasonal Variation**: HVAC loads vary significantly by season. The methodology incorporated **seasonal logic** to apply different HVAC percentages based on the period of the year (winter, summer, shoulder). For instance, winter percentages for fuel-heated buildings were lower (15-25% for fans/pumps) compared to electric-heated buildings (50-60%). Summer months generally showed higher HVAC percentages due to cooling loads.
+*   **Building Characteristics and System Details**: The disaggregation adjusted HVAC percentages based on various factors:
+    *   **Efficiency Scores**: **ENERGY STAR scores** from `buildings_BIG.csv` were used, with higher scores generally leading to lower HVAC percentages.
+    *   **Cooling Type**: "Plant" or "Chiller" systems indicated central cooling, potentially leading to slightly higher summer HVAC percentages compared to "DX Cooling" systems.
+    *   **Air Distribution**: Central air distribution systems were recognized to consume more fan energy year-round, impacting base HVAC loads.
+    *   **Building Class and Automation**: Class A buildings and those with Building Automation Systems (BAS) were considered more efficient, influencing HVAC percentages.
+*   **Column Transformation**: The strategy involved **deleting original "total" electricity usage and cost columns** (`Elec_[Month]_2023_kBtu` and `Elec_[Month]_2023_Cost_USD`) and **adding new, explicit `Elec_HVAC_` and `Elec_NonHVAC_` columns** for both usage and cost. This was a "clean" solution to prevent double-counting and ensure data clarity. Gas and steam data remained untouched during this electricity disaggregation phase.
+
+
+The result of this sophisticated methodology was a disaggregated dataset where each building's electricity consumption was split into HVAC and Non-HVAC components based on its unique consumption patterns and characteristics, providing a more accurate foundation for further analysis. The average annual HVAC percentage was found to be around 28.3%, aligning with Manhattan office building reality.
+
+
+### Utility Cost Modeling (Gas & Steam)
+
+
+The project required comprehensive utility cost modeling across all three energy types: electricity, gas, and steam.
+
+
+#### Electricity Cost Modeling
+
+
+For electricity, the modeling focused on **Con Edison SC-9 tariffs, specifically Rate I and Rate II**. Key steps included:
+
+
+*   **Unit Conversion**: Raw electricity usage data, initially in **kBtu**, was converted to **kWh** by dividing by 3.412, as tariffs are priced in $/kWh.
+*   **Demand Estimation**: Since peak demand (kW) was not directly available, it was **estimated using monthly kWh consumption and building-size specific load factors**. Load factors varied by building size (e.g., large buildings >500k sqft used 0.65, medium 0.55, small 0.45).
+*   **Rate Application Logic**: The script applied the correct rate structure based on the `likely_tariff` column in the data. This included:
+    *   **Rate I (Standard)**: Involved a fixed customer charge, seasonal demand charges ($/kW), and a flat energy charge ($/kWh).
+    *   **Rate II (Large TOD)**: Applied a different fixed charge, and more complex, time-of-day (TOD) weighted demand charges. A simplified approach assumed all demand in "All hours" buckets, while a more sophisticated option split demand across peak and off-peak periods (e.g., 70% during M-F 8AM-10PM).
+*   **Genability API Integration**: For **detailed electricity cost calculations**, the project utilized the **Genability API**. The script was designed to make API calls for each building and month, handling unit conversions, demand estimation, and tariff application. A **smart resume feature** was implemented to manage large datasets and network errors, allowing the process to pick up where it left off.
+*   **Output and Reconciliation**: The API calls generated comprehensive outputs, including monthly costs, cost per kWh, and detailed charge components (delivery, supply, taxes). The calculated electricity costs were then added as new columns (`Elec_[Month]_2023_Cost_USD`) directly to the `energy_BIG.csv` file, aligning with the existing usage columns. The total annual electricity cost for the portfolio of 533 buildings was approximately **$484-486 million**.
+
+
+#### Gas & Steam Tariff Identification and Calculation
+
+
+Unlike electricity, **Genability did not have modeled tariffs for NYC gas or steam**. Therefore, a **manual modeling approach using fixed, all-in rates** was adopted based on typical 2025 NYC commercial rates.
+
+
+*   **Tariff Identification**: Con Edison tariffs for commercial natural gas included **SC-2 (Small General Service), SC-3 (General Firm Service), and SC-4 (Large Volume Firm Service)**, depending on usage volume and building size. For district steam, the relevant tariffs were **SC-1 (General Service)** for smaller users and **SC-2 (Annual Power Service)** for larger commercial office buildings. The `gas_tariff` and `steam_tariff` columns in `energy_BIG.csv` were used to assign the correct rate to each building.
+*   **Unit Conversion**: Gas usage (kBtu) was converted to **therms** by dividing by 100, while steam usage (kBtu) was converted to **Mlbs** by dividing by 1,194 (1 Mlb steam ≈ 1,194 kBtu).
+*   **Cost Calculation**: Monthly costs were calculated by applying the appropriate fixed rates (e.g., Gas SC-2 at ~$2.53/therm, Steam SC-1 at ~$68/Mlb, Steam SC-2 at ~$42.7/Mlb) to the converted usage amounts. These rates included all components like delivery, supply, and adjustments.
+*   **Validation against Benchmarks**: The calculated gas and steam costs were **validated against suggested monthly cost-per-square-foot benchmarks** to ensure realism. Initial validation revealed significant discrepancies, especially for gas costs (e.g., model showed $0.08/sqft vs. benchmark $3.22/sqft). This highlighted that the model might only capture direct-billed gas, missing allocated costs or gas bundled into operating expenses.
+*   **High Cost Outliers and Research**: Buildings with unusually high gas/steam costs (e.g., 350 Park Avenue) were investigated through online research. This revealed that **high-energy users like Citadel (a trading firm) explained extreme steam costs due to massive cooling needs for server infrastructure**. This underscored that high costs could be legitimate given the building's specialized use.
+*   **High Cost of Steam in NYC**: The analysis confirmed that **district steam is exceptionally expensive per BTU in NYC** compared to electricity or natural gas. This is attributed to high distribution losses and the centralized generation and piping infrastructure. For steam-using buildings, steam often represents the largest energy expense, especially in winter. Even in summer, office buildings use significant district steam, primarily for absorption chillers (cooling) and reheat/humidity control.
+
+
+#### ODCV Savings Calculation
+
+
+Occupancy-based Demand Controlled Ventilation (ODCV) represented a significant opportunity for energy savings. The calculation of ODCV savings involved building-specific percentages:
+
+
+*   **`odcv_hvac_savings_pct`**: This column, specific to each building, represented the overall ODCV savings percentage.
+*   **Electricity Savings**: For electricity, savings were calculated by multiplying the `Office_Elec_Usage_Current_[Month]_kBtu` (usage attributed to the office portion of the building) by the `Elec_HVAC_[Month]_2023_Pct` (HVAC percentage of electricity for that month) and then by the `odcv_hvac_savings_pct`. This accounted for the fact that HVAC is only a *portion* of total electricity usage, and electricity savings vary seasonally.
+*   **Gas and Steam Savings**: For gas and steam, savings were more straightforward. Since these fuels are primarily used for heating (HVAC), the `Office_Gas_Usage_Current_[Month]_kBtu` and `Office_Steam_Usage_Current_[Month]_kBtu` were multiplied directly by the building's `odcv_hvac_savings_pct`. The calculated savings (both usage in kBtu and cost in USD) were then populated into dedicated `Office_[Fuel]_Savings_ODCV_[Month]_` columns.
+
+
+#### LL84 Energy Data Integration
+
+
+NYC's Local Law 84 (LL84) benchmarking data was a critical source for validating and enriching the energy datasets.
+
+
+*   **Data Content**: LL84 files provided actual reported monthly energy usage, including "District Steam Use (kBtu)", "Natural Gas Use - Monthly (kBtu)", and "Electricity Use (kBtu)".
+*   **Unit Differences**: A crucial aspect was managing unit differences: LL84 monthly data was often already in kBtu, while annual LL84 data used original units like kWh (for electricity) and therms (for natural gas). This required careful conversion (e.g., kWh × 3.412 = kBtu, therms × 100 = kBtu) for consistent analysis.
+*   **Data Availability**: It was observed that not all buildings had 2023 monthly steam data; for some, 2021 monthly data or 2023 annual totals (which then needed to be seasonally distributed) were used instead.
+*   **Validation**: LL84 data was used to cross-verify the calculated energy values and identify patterns, such as the stark divide between buildings with minimal summer gas/steam usage and those with heavy summer usage (often for cooling via absorption chillers).
+
+
+### File Management and Reporting
+
+
+A significant part of the project involved meticulous file management and comprehensive reporting to present the complex energy analysis in an understandable format.
+
+
+*   **Clean Data Structure**: To prevent double-counting and maintain clarity, the data was ultimately separated into two distinct CSV files:
+    *   **`office_energy_BIG.csv`**: Contained the base energy data, including original monthly usage and current costs for all fuels.
+    *   **`hvac_office_energy_BIG.csv`**: Housed all the HVAC-related calculations and ODCV savings, including the newly created `Elec_HVAC_` and `Elec_NonHVAC_` columns. This clean separation allowed for distinct analysis of raw data versus derived savings opportunities.
+*   **Comprehensive Savings Reporting**: The project culminated in generating an easy-to-understand report on energy savings. This report provided:
+    *   **Total Annual Savings Across All Fuels**: Projected to be over **$50.7 million** for all 585 buildings.
+    *   **Savings by Fuel Type**: Steam consistently emerged as the **biggest money-saver**, accounting for the largest percentage of total savings (e.g., 56.3% of total savings, $34.2M), despite being used by fewer buildings than gas or electricity. This was attributed to steam buildings being significantly larger (Manhattan skyscrapers) and steam being an expensive fuel per unit.
+    *   **Seasonal Breakdown**: Savings were analyzed by season (Winter vs. Summer), showing that winter accounted for a larger portion of overall savings due to the dominance of heating fuels like gas and steam.
+    *   **Average Savings Per Building**: Providing a per-building perspective for each fuel type.
+    *   **Top-Saving Buildings**: Identifying the top 10 buildings by total dollar savings, showcasing significant individual opportunities (e.g., 111 8 Ave with $1.54M in annual savings).
+
+
+This comprehensive process, from data exploration and refined disaggregation to robust cost modeling and clear reporting, provided deep insights into NYC office building energy consumption and the substantial savings potential through HVAC optimization.

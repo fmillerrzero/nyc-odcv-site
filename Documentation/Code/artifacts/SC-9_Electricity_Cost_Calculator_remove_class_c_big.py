@@ -1,1 +1,0 @@
-import pandas as pd # File paths matches_file = '/Users/forrestmiller/Desktop/manhattan_buildings_matched.csv' big_players_file = '/Users/forrestmiller/Desktop/FINAL NYC/BIG/big_players_4plus_properties.csv' main_file = '/Users/forrestmiller/Desktop

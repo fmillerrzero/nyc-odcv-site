@@ -1,1 +1,0 @@
-import pandas as pd # Read the BIG file to get missing BBLs df_big = pd.read_csv('/Users/forrestmiller/Desktop/FINAL NYC/BIG/buildings_BIG.csv', dtype={'bbl': str}) missing_scores = df_big[df_big['Latest_ENERGY_STAR_Score'].isna()] missing_bbls = mi

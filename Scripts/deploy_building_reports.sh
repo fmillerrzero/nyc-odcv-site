@@ -8,9 +8,9 @@ echo "🚀 Deploying building reports to GitHub..."
 # Change to the repo directory
 cd /Users/forrestmiller/Desktop/New
 
-# Copy all HTML files from Building reports to repo root
-echo "📋 Copying building reports..."
-cp "/Users/forrestmiller/Desktop/New/Building reports/"*.html .
+# Reports are now generated directly in repo root, no need to copy
+echo "📋 Checking building reports..."
+# Just verify they exist in the root
 
 # Check if any files were copied
 if ls *.html 1> /dev/null 2>&1; then

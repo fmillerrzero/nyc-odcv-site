@@ -1,0 +1,510 @@
+#!/usr/bin/env python3
+"""
+Street View Panorama ID Extractor for Manhattan Buildings
+This script processes a CSV file of Manhattan building addresses and retrieves
+the best available Google Street View panorama IDs for bulk downloading.
+"""
+
+import pandas as pd
+import googlemaps
+import time
+import json
+import requests
+from datetime import datetime
+import os
+from typing import Dict, List, Tuple, Optional
+import logging
+from tqdm import tqdm
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('panorama_extraction.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
+class StreetViewPanoramaExtractor:
+    """Extract Street View panorama IDs for a list of addresses."""
+    
+    def __init__(self, api_key: str):
+        """
+        Initialize the extractor with Google API key.
+        
+        Args:
+            api_key: Google Maps API key with Street View and Geocoding enabled
+        """
+        self.api_key = api_key
+        self.gmaps = googlemaps.Client(key=api_key)
+        self.metadata_base_url = "https://maps.googleapis.com/maps/api/streetview/metadata"
+        
+    def geocode_address(self, address: str) -> Optional[Tuple[float, float]]:
+        """
+        Convert address to latitude/longitude coordinates.
+        
+        Args:
+            address: Street address to geocode
+            
+        Returns:
+            Tuple of (latitude, longitude) or None if geocoding fails
+        """
+        try:
+            # Add Manhattan, NY to ensure correct location
+            if "NY" not in address.upper():
+                address += ", Manhattan, NY"
+                
+            result = self.gmaps.geocode(address)
+            
+            if result and len(result) > 0:
+                location = result[0]['geometry']['location']
+                return (location['lat'], location['lng'])
+            else:
+                logger.warning(f"No geocoding results for: {address}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Geocoding error for {address}: {str(e)}")
+            return None
+    
+    def get_panorama_metadata(self, lat: float, lng: float, radius: int = 50) -> Optional[Dict]:
+        """
+        Get Street View panorama metadata for a location.
+        
+        Args:
+            lat: Latitude
+            lng: Longitude
+            radius: Search radius in meters (default 50)
+            
+        Returns:
+            Dictionary with panorama metadata or None if not found
+        """
+        try:
+            params = {
+                'location': f"{lat},{lng}",
+                'radius': radius,
+                'key': self.api_key,
+                'source': 'outdoor'  # Prefer outdoor imagery
+            }
+            
+            response = requests.get(self.metadata_base_url, params=params)
+            response.raise_for_status()
+            
+            data = response.json()
+            
+            if data.get('status') == 'OK':
+                return {
+                    'pano_id': data.get('pano_id'),
+                    'lat': data['location']['lat'],
+                    'lng': data['location']['lng'],
+                    'date': data.get('date', 'Unknown'),
+                    'status': 'OK'
+                }
+            else:
+                logger.warning(f"No panorama found at {lat},{lng}: {data.get('status')}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error getting panorama metadata for {lat},{lng}: {str(e)}")
+            return None
+    
+    def get_best_panorama_for_address(self, address: str, bbl: str = None) -> Dict:
+        """
+        Get the best available panorama for an address.
+        
+        Args:
+            address: Street address
+            bbl: Borough Block Lot number (optional)
+            
+        Returns:
+            Dictionary with panorama information
+        """
+        result = {
+            'address': address,
+            'bbl': bbl,
+            'lat': None,
+            'lng': None,
+            'pano_id': None,
+            'pano_lat': None,
+            'pano_lng': None,
+            'date': None,
+            'distance_meters': None,
+            'status': 'FAILED'
+        }
+        
+        # Step 1: Geocode the address
+        coords = self.geocode_address(address)
+        if not coords:
+            result['status'] = 'GEOCODING_FAILED'
+            return result
+            
+        lat, lng = coords
+        result['lat'] = lat
+        result['lng'] = lng
+        
+        # Step 2: Get panorama metadata
+        # Try different radii to find the best panorama
+        for radius in [25, 50, 100, 200]:
+            metadata = self.get_panorama_metadata(lat, lng, radius)
+            if metadata:
+                result.update({
+                    'pano_id': metadata['pano_id'],
+                    'pano_lat': metadata['lat'],
+                    'pano_lng': metadata['lng'],
+                    'date': metadata['date'],
+                    'status': 'SUCCESS'
+                })
+                
+                # Calculate distance from original location
+                from math import radians, sin, cos, sqrt, atan2
+                R = 6371000  # Earth's radius in meters
+                lat1, lon1 = radians(lat), radians(lng)
+                lat2, lon2 = radians(metadata['lat']), radians(metadata['lng'])
+                dlat = lat2 - lat1
+                dlon = lon2 - lon1
+                a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+                c = 2 * atan2(sqrt(a), sqrt(1-a))
+                distance = R * c
+                result['distance_meters'] = round(distance, 2)
+                
+                break
+        
+        if result['status'] != 'SUCCESS':
+            result['status'] = 'NO_PANORAMA_FOUND'
+            
+        return result
+    
+    def download_streetview_image(self, pano_id: str, output_path: str, 
+                                 size: str = "640x640", fov: int = 90, 
+                                 heading: int = 0, pitch: int = 0) -> bool:
+        """
+        Download a Street View image using the Static API.
+        Note: This downloads a single view, not a full 360 panorama.
+        
+        Args:
+            pano_id: Panorama ID
+            output_path: Path to save the image
+            size: Image size (max 640x640 for free tier)
+            fov: Field of view (max 120)
+            heading: Compass heading (0-360)
+            pitch: Up/down angle (-90 to 90)
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            url = "https://maps.googleapis.com/maps/api/streetview"
+            params = {
+                'pano': pano_id,
+                'size': size,
+                'fov': fov,
+                'heading': heading,
+                'pitch': pitch,
+                'key': self.api_key
+            }
+            
+            response = requests.get(url, params=params)
+            response.raise_for_status()
+            
+            with open(output_path, 'wb') as f:
+                f.write(response.content)
+                
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error downloading image for {pano_id}: {str(e)}")
+            return False
+    
+    def process_csv(self, input_file: str, output_file: str, sample_size: Optional[int] = None):
+        """
+        Process CSV file of addresses and extract panorama IDs.
+        
+        Args:
+            input_file: Path to input CSV file
+            output_file: Path to output CSV file
+            sample_size: Optional number of addresses to process (for testing)
+        """
+        # Read the CSV file
+        logger.info(f"Reading CSV file: {input_file}")
+        df = pd.read_csv(input_file)
+        
+        # Sample if requested
+        if sample_size:
+            df = df.head(sample_size)
+            logger.info(f"Processing sample of {sample_size} addresses")
+        
+        logger.info(f"Total addresses to process: {len(df)}")
+        
+        # Process each address
+        results = []
+        
+        # Use tqdm for progress bar
+        for idx, row in tqdm(df.iterrows(), total=len(df), desc="Processing addresses"):
+            address = row.get('address', '')
+            bbl = row.get('bbl', '')
+            
+            if pd.isna(address) or address.strip() == '':
+                logger.warning(f"Skipping empty address at row {idx}")
+                continue
+            
+            # Get panorama data
+            result = self.get_best_panorama_for_address(address, bbl)
+            
+            # Add additional fields from original data
+            result['owner_name'] = row.get('ownername', '')
+            result['num_floors'] = row.get('numfloors', '')
+            result['neighborhood'] = row.get('neighborhood', '')
+            
+            results.append(result)
+            
+            # Rate limiting - Google allows 25,000 requests per day
+            # That's about 17 requests per minute to stay safe
+            time.sleep(3.5)  # ~17 requests per minute
+            
+            # Save intermediate results every 50 addresses
+            if (idx + 1) % 50 == 0:
+                self._save_results(results, f"{output_file}.tmp")
+                logger.info(f"Saved intermediate results: {idx + 1} addresses processed")
+        
+        # Save final results
+        self._save_results(results, output_file)
+        logger.info(f"Processing complete! Results saved to: {output_file}")
+        
+        # Generate summary statistics
+        self._print_summary(results)
+        
+        # Generate panorama IDs file for Street View Download 360
+        self._generate_panorama_ids_file(results, output_file.replace('.csv', '_pano_ids.txt'))
+        
+        # Generate Street View URLs file for easy verification
+        self._generate_streetview_urls(results, output_file.replace('.csv', '_urls.txt'))
+        
+        # Generate Python download script
+        self._generate_download_script(results, output_file.replace('.csv', '_download.py'))
+        
+    def _save_results(self, results: List[Dict], output_file: str):
+        """Save results to CSV file."""
+        df = pd.DataFrame(results)
+        df.to_csv(output_file, index=False)
+        
+    def _print_summary(self, results: List[Dict]):
+        """Print summary statistics."""
+        df = pd.DataFrame(results)
+        
+        logger.info("\n" + "="*50)
+        logger.info("SUMMARY STATISTICS")
+        logger.info("="*50)
+        logger.info(f"Total addresses processed: {len(df)}")
+        logger.info(f"Successful panoramas found: {len(df[df['status'] == 'SUCCESS'])}")
+        logger.info(f"Geocoding failures: {len(df[df['status'] == 'GEOCODING_FAILED'])}")
+        logger.info(f"No panorama found: {len(df[df['status'] == 'NO_PANORAMA_FOUND'])}")
+        
+        if len(df[df['status'] == 'SUCCESS']) > 0:
+            success_df = df[df['status'] == 'SUCCESS']
+            logger.info(f"\nAverage distance to panorama: {success_df['distance_meters'].mean():.2f} meters")
+            logger.info(f"Max distance to panorama: {success_df['distance_meters'].max():.2f} meters")
+            
+            # Date distribution
+            date_counts = success_df['date'].value_counts().head(10)
+            logger.info("\nTop panorama dates:")
+            for date, count in date_counts.items():
+                logger.info(f"  {date}: {count} panoramas")
+    
+    def _generate_streetview_urls(self, results: List[Dict], output_file: str):
+        """Generate Google Street View URLs for verification."""
+        with open(output_file, 'w') as f:
+            f.write("Google Street View URLs for Verification\n")
+            f.write("=" * 50 + "\n\n")
+            
+            for result in results:
+                if result['status'] == 'SUCCESS' and result['pano_id']:
+                    url = f"https://www.google.com/maps/@?api=1&map_action=pano&pano={result['pano_id']}"
+                    f.write(f"Address: {result['address']}\n")
+                    f.write(f"Panorama ID: {result['pano_id']}\n")
+                    f.write(f"URL: {url}\n")
+                    f.write("-" * 30 + "\n")
+        
+    def download_streetview_image(self, pano_id: str, output_path: str, 
+                                 size: str = "640x640", fov: int = 90, 
+                                 heading: int = 0, pitch: int = 0) -> bool:
+        """
+        Download a Street View image using the Static API.
+        Note: This downloads a single view, not a full 360 panorama.
+        
+        Args:
+            pano_id: Panorama ID
+            output_path: Path to save the image
+            size: Image size (max 640x640 for free tier)
+            fov: Field of view (max 120)
+            heading: Compass heading (0-360)
+            pitch: Up/down angle (-90 to 90)
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            url = "https://maps.googleapis.com/maps/api/streetview"
+            params = {
+                'pano': pano_id,
+                'size': size,
+                'fov': fov,
+                'heading': heading,
+                'pitch': pitch,
+                'key': self.api_key
+            }
+            
+            response = requests.get(url, params=params)
+            response.raise_for_status()
+            
+            with open(output_path, 'wb') as f:
+                f.write(response.content)
+                
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error downloading image for {pano_id}: {str(e)}")
+            return False
+    
+    def _generate_panorama_ids_file(self, results: List[Dict], output_file: str):
+        """Generate a file with just panorama IDs for Street View Download 360."""
+        successful_panos = [r['pano_id'] for r in results 
+                           if r['status'] == 'SUCCESS' and r['pano_id']]
+        
+        with open(output_file, 'w') as f:
+            for pano_id in successful_panos:
+                f.write(f"{pano_id}\n")
+        
+        logger.info(f"\nPanorama IDs file saved to: {output_file}")
+        logger.info(f"Total panorama IDs: {len(successful_panos)}")
+        logger.info("You can copy and paste these IDs into Street View Download 360")
+    
+    def _generate_download_script(self, results: List[Dict], output_file: str):
+        """Generate a Python script to download all panoramas programmatically."""
+        script_content = '''#!/usr/bin/env python3
+"""
+Auto-generated script to download Street View panoramas.
+This script downloads full 360° panoramas using the streetview library.
+"""
+
+import os
+import time
+from typing import List
+import streetview
+import pandas as pd
+from tqdm import tqdm
+
+# Configuration
+OUTPUT_DIR = "streetview_panoramas"
+ZOOM_LEVEL = 3  # 0=lowest quality, 5=highest quality
+
+# Panorama data
+panorama_data = [
+'''
+        
+        # Add successful panorama data
+        for result in results:
+            if result['status'] == 'SUCCESS' and result['pano_id']:
+                script_content += f'    {{"pano_id": "{result["pano_id"]}", "address": "{result["address"]}", "bbl": "{result["bbl"]}"}},\n'
+        
+        script_content += ''']
+
+def download_panoramas(panorama_list: List[dict], output_dir: str = OUTPUT_DIR, zoom: int = ZOOM_LEVEL):
+    """Download all panoramas from the list."""
+    
+    # Create output directory
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    
+    # Track results
+    success_count = 0
+    failed_count = 0
+    
+    print(f"Starting download of {len(panorama_list)} panoramas...")
+    
+    for idx, pano_info in enumerate(tqdm(panorama_list, desc="Downloading panoramas")):
+        pano_id = pano_info['pano_id']
+        address = pano_info['address']
+        bbl = pano_info['bbl']
+        
+        try:
+            # Download panorama
+            panorama = streetview.download_panorama_v3(pano_id, zoom=zoom, disp=False)
+            
+            # Save with meaningful filename
+            filename = f"{bbl}_{address.replace(',', '').replace(' ', '_')}.jpg"
+            filepath = os.path.join(output_dir, filename)
+            
+            # Save image
+            import matplotlib.pyplot as plt
+            plt.imsave(filepath, panorama)
+            
+            success_count += 1
+            
+        except Exception as e:
+            print(f"\\nError downloading {pano_id} ({address}): {str(e)}")
+            failed_count += 1
+        
+        # Rate limiting
+        time.sleep(1)  # Be respectful to Google's servers
+    
+    print(f"\\nDownload complete!")
+    print(f"Successfully downloaded: {success_count}")
+    print(f"Failed: {failed_count}")
+    print(f"Images saved to: {os.path.abspath(output_dir)}")
+
+if __name__ == "__main__":
+    # Install required libraries if not present
+    try:
+        import streetview
+    except ImportError:
+        print("Installing required library...")
+        import subprocess
+        subprocess.check_call(["pip", "install", "git+https://github.com/robolyst/streetview"])
+    
+    # Download all panoramas
+    download_panoramas(panorama_data)
+'''
+        
+        with open(output_file, 'w') as f:
+            f.write(script_content)
+        
+        # Make script executable on Unix systems
+        try:
+            os.chmod(output_file, 0o755)
+        except:
+            pass
+            
+        logger.info(f"\nDownload script saved to: {output_file}")
+        logger.info("Run this script to download all panoramas programmatically")
+
+
+def main():
+    """Main execution function."""
+    # Configuration
+    API_KEY = "AIzaSyCsPtot_LaeHITMOB7t9GANaukmNCBmHg0"  # Your API key
+    INPUT_FILE = "/Users/forrestmiller/Desktop/FINAL NYC/BIG/buildings_BIG.csv"
+    OUTPUT_FILE = "panorama_ids_output.csv"
+    
+    # Create extractor instance
+    extractor = StreetViewPanoramaExtractor(API_KEY)
+    
+    # Process the CSV file
+    # For testing, you can use sample_size parameter to process only a few addresses
+    # extractor.process_csv(INPUT_FILE, OUTPUT_FILE, sample_size=10)
+    
+    # For full processing:
+    extractor.process_csv(INPUT_FILE, OUTPUT_FILE)
+    
+    logger.info("\nNext steps:")
+    logger.info("1. Review the output CSV file for complete data")
+    logger.info("2. For Street View Download 360:")
+    logger.info("   - Use the _pano_ids.txt file (copy all IDs and paste into the tool)")
+    logger.info("3. For programmatic download:")
+    logger.info("   - Run the _download.py script")
+    logger.info("4. Check the _urls.txt file to verify panoramas in browser")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,1 +1,0 @@
-#!/usr/bin/env python3 """ Get electricity costs from Genability for buildings missing costs in energy_BIG_disag_coldwarmfix.csv Updated to handle disaggregated HVAC/NonHVAC columns """ import pandas as pd import requests import json import time fro

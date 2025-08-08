@@ -10,6 +10,7 @@ import json
 import re
 import time
 import math
+import csv
 
 # Load environment variables from .env file
 load_dotenv()
@@ -22,6 +23,9 @@ OPENWEATHER_API_KEY = "9e666d3512bac2a16c6b9c3c029dcef6"
 # PM2.5 cache for proximity-based reuse
 PM25_CACHE = {}  # (lat, lon) -> (data, chart_dates, chart_values, chart_labels, avg_pm25, max_pm25)
 PROXIMITY_THRESHOLD = 0.002  # ~200 meters in NYC latitude
+
+# Global months array for use throughout the script
+months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 def haversine_distance(lat1, lon1, lat2, lon2):
     """Calculate distance between two points in km"""
@@ -117,28 +121,28 @@ def safe_val(df, bbl, column, default='N/A'):
     return val
 
 # Read ALL the CSVs we need
-scoring = pd.read_csv('../data/odcv_scoring.csv')
-buildings = pd.read_csv('../data/buildings_BIG.csv')
-ll97 = pd.read_csv('../data/LL97_BIG.csv')
-system = pd.read_csv('../data/system_BIG.csv')
-energy = pd.read_csv('../data/energy_BIG.csv')
-addresses = pd.read_csv('../data/all_building_addresses.csv')
-hvac = pd.read_csv('../data/hvac_office_energy_BIG.csv')
-office = pd.read_csv('../data/office_energy_BIG.csv')
+scoring = pd.read_csv('data/odcv_scoring.csv')
+buildings = pd.read_csv('data/buildings_BIG.csv')
+ll97 = pd.read_csv('data/LL97_BIG.csv')
+system = pd.read_csv('data/system_BIG.csv')
+energy = pd.read_csv('data/energy_BIG.csv')
+addresses = pd.read_csv('data/all_building_addresses.csv')
+hvac = pd.read_csv('data/hvac_office_energy_BIG.csv')
+office = pd.read_csv('data/office_energy_BIG.csv')
 
 # Read building heights
-heights = pd.read_csv('../data/building_heights.csv')
+heights = pd.read_csv('data/building_heights.csv')
 
 # Read equipment counts
 try:
-    equipment_counts = pd.read_csv('../data/equipment_counts.csv')
+    equipment_counts = pd.read_csv('data/equipment_counts.csv')
 except:
     equipment_counts = pd.DataFrame()  # Empty dataframe if file not found
 
 # Check which aerial videos exist in S3
 aerial_videos_available = set()
 try:
-    aerial_df = pd.read_csv('../data/aerial_videos.csv')
+    aerial_df = pd.read_csv('data/aerial_videos.csv')
     for _, row in aerial_df.iterrows():
         if row['status'] == 'active' and pd.notna(row['video_id']):
             aerial_videos_available.add(int(row['bbl']))
@@ -148,13 +152,13 @@ except:
 
 # Read CostarExport data for owner phone information
 try:
-    costar_df = pd.read_csv('../data/CostarExport_Master_with_BBL_filtered.csv')
+    costar_df = pd.read_csv('data/CostarExport_Master_with_BBL_filtered.csv')
 except:
     pass  # No CostarExport file
 
 # Read tenant data
 try:
-    tenants_df = pd.read_csv('../data/Costar_Tenants_2025_07_31_17_56.csv')
+    tenants_df = pd.read_csv('data/Costar_Tenants_2025_07_31_17_56.csv')
     # PropertyID extraction removed - using BBL directly
     # Clean SF Occupied - remove commas and convert to numeric
     tenants_df['SF_Occupied_Clean'] = tenants_df['SF Occupied'].str.replace(',', '').str.replace('"', '')
@@ -277,6 +281,34 @@ for i, row in scoring.iterrows():
             # Calculate annual cost totals
             annual_building_cost = sum(elec_cost) + sum(gas_cost) + sum(steam_cost)
             annual_office_cost = sum(office_elec_cost) + sum(office_gas_cost) + sum(office_steam_cost)
+            
+            # Calculate monthly HVAC costs for new visualization
+            monthly_hvac_elec_cost = []
+            monthly_hvac_gas_cost = []
+            monthly_hvac_steam_cost = []
+            monthly_total_hvac_cost = []
+
+            for i, m in enumerate(months):
+                # Electric HVAC = office electric cost × HVAC %
+                elec_hvac = office_elec_cost[i] * hvac_pct[i] if i < len(hvac_pct) else 0
+                # Gas HVAC = office gas cost × 90%
+                gas_hvac = office_gas_cost[i] * 0.9
+                # Steam HVAC = office steam cost × 90%
+                steam_hvac = office_steam_cost[i] * 0.9
+                
+                monthly_hvac_elec_cost.append(elec_hvac)
+                monthly_hvac_gas_cost.append(gas_hvac)
+                monthly_hvac_steam_cost.append(steam_hvac)
+                monthly_total_hvac_cost.append(elec_hvac + gas_hvac + steam_hvac)
+
+            # Calculate monthly ODCV savings as percentage of monthly HVAC
+            monthly_odcv_percentages = []
+            for i in range(12):
+                if monthly_total_hvac_cost[i] > 0:
+                    monthly_percentage = (odcv_savings[i] / monthly_total_hvac_cost[i]) * 100
+                else:
+                    monthly_percentage = 0
+                monthly_odcv_percentages.append(monthly_percentage)
             
             # Extract values (default to 'N/A' if missing) - SIMPLE VERSION
             owner = building['ownername'].iloc[0] if not building.empty else 'N/A'
@@ -469,7 +501,7 @@ for i, row in scoring.iterrows():
             else:
                 manager_logo = ""
             
-            # Get detailed BAS info
+            # Get detailed BMS info
             has_bas = safe_val(system_data, bbl, 'Has Building Automation', 'N/A')
             heating_automation = safe_val(system_data, bbl, 'Heating Automation', 'N/A')
             cooling_automation = safe_val(system_data, bbl, 'Cooling Automation', 'N/A')
@@ -708,11 +740,38 @@ for i, row in scoring.iterrows():
             rank = int(row['final_rank'])
             total_2026_savings = total_odcv_savings + penalty_2026
             
+            # Calculate total annual office HVAC costs for Elizabeth's percentage
+            total_office_hvac_cost_annual = 0
+            for m_idx in range(12):
+                # Electric HVAC cost = Office electric cost × HVAC percentage
+                monthly_elec_hvac = office_elec_cost[m_idx] * hvac_pct[m_idx] if m_idx < len(hvac_pct) else 0
+                # Gas HVAC cost = Office gas cost × 0.9 (90% is HVAC)
+                monthly_gas_hvac = office_gas_cost[m_idx] * 0.9
+                # Steam HVAC cost = Office steam cost × 0.9 (90% is HVAC)
+                monthly_steam_hvac = office_steam_cost[m_idx] * 0.9
+                total_office_hvac_cost_annual += monthly_elec_hvac + monthly_gas_hvac + monthly_steam_hvac
+
+            # Calculate ODCV savings as percentage of HVAC costs
+            odcv_percentage_of_hvac = (total_odcv_savings / total_office_hvac_cost_annual * 100) if total_office_hvac_cost_annual > 0 else 0
+            
+            # Calculate additional ODCV metrics for summary box
+            avg_monthly_hvac_cost = total_office_hvac_cost_annual / 12
+            avg_monthly_odcv_savings = total_odcv_savings / 12
+            payback_months = (50000 / total_odcv_savings * 12) if total_odcv_savings > 0 else 999  # Assume $50k implementation cost
+            if odcv_savings and len(odcv_savings) > 0:
+                best_month_idx = odcv_savings.index(max(odcv_savings))
+                best_month_name = months[best_month_idx]
+                best_month_savings = max(odcv_savings)
+            else:
+                best_month_idx = 0
+                best_month_name = "Jan"
+                best_month_savings = 0
+            
             # Penalty breakdown for header
             if penalty_2026 > 0:
                 penalty_breakdown_html = f'''<div style="font-size: 0.75em; opacity: 0.9; margin-top: 8px; line-height: 1.4;">
-                    <div>ODCV Savings: ${total_odcv_savings:,.0f}</div>
-                    <div>LL97 Penalty Avoidance: ${penalty_2026:,.0f}</div>
+                    <div>ODCV Savings: ${{total_odcv_savings:,.0f}}</div>
+                    <div>LL97 Penalty Avoidance: ${{penalty_2026:,.0f}}</div>
                 </div>'''
             else:
                 penalty_breakdown_html = ''
@@ -722,7 +781,7 @@ for i, row in scoring.iterrows():
             
             # Simple score breakdown
             cost_savings_score = min(40, total_odcv_savings / 25000)  # Max 40 pts
-            bas_score = 30 if has_bas == 'yes' else 0  # 30 pts for BAS
+            bas_score = 30 if has_bas == 'yes' else 0  # 30 pts for BMS
             portfolio_score = 20 if owner_building_count > 5 else 10  # 20 pts for big portfolios
             ease_score = 10 if num_floors < 20 else 5  # 10 pts for smaller buildings
             
@@ -756,7 +815,7 @@ for i, row in scoring.iterrows():
                 except:
                     energy_star_delta = ""
             
-            # Create BAS text with details
+            # Create BMS text with details
             if has_bas == 'yes':
                 has_heating = heating_automation == 'yes'
                 has_cooling = cooling_automation == 'yes'
@@ -827,8 +886,8 @@ for i, row in scoring.iterrows():
                 <div class="page">
                     <h3 class="page-title">LL97 Compliance</h3>
                     <div class="stat">
-                        <span class="stat-label">2024-2029 Status: </span>
-                        <span class="stat-value"><span class="{'yes' if compliance_2024 == 'Compliant' else 'no'}">{compliance_2024}</span>{f' <span style="color: #c41e3a; font-weight: bold;">(${penalty_2026:,.0f} annual penalty)</span>' if compliance_2024 == 'Non-Compliant' else ''}</span>
+                        <span class="stat-label">2024-2029 Status: <span class="info-tooltip" data-tooltip="CO₂e vs LL97 cap; post-ODCV recheck; add avoided $268/ton fines if under cap." style="display: inline-block; margin-left: 5px; width: 16px; height: 16px; background-color: #00769d; color: white; border-radius: 50%; text-align: center; line-height: 16px; font-size: 12px; cursor: help; position: relative;">i</span></span>
+                        <span class="stat-value"><span class="{'yes' if compliance_2024 == 'Compliant' else 'no'}">{compliance_2024}</span>{f' <span style="color: #c41e3a; font-weight: bold;">(${{penalty_2026:,.0f}} annual penalty)</span>' if compliance_2024 == 'Non-Compliant' else ''}</span>
                     </div>
                     <div class="stat">
                         <span class="stat-label">Current Emissions: </span>
@@ -982,7 +1041,7 @@ for i, row in scoring.iterrows():
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 3rem;
+            gap: 6rem;
             position: relative;
         }}
         
@@ -995,7 +1054,7 @@ for i, row in scoring.iterrows():
         
         /* Section styling */
         .section {{ 
-            padding: 40px 5%; 
+            padding: 40px 0; 
             background: white;
             position: relative;
             width: 100%;
@@ -1440,6 +1499,55 @@ for i, row in scoring.iterrows():
         .urgent {{ color: #c41e3a; font-weight: bold; }}
         .bas {{ color: #38a169; font-weight: 600; }}
         .no-bas {{ color: #c41e3a; font-weight: 600; }}
+        
+        /* Info tooltip styles */
+        .info-tooltip::after {{
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: #fff;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            line-height: 1.4;
+            white-space: nowrap;
+            max-width: 300px;
+            white-space: normal;
+            width: max-content;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            pointer-events: none;
+        }}
+        
+        .info-tooltip:hover::after {{
+            opacity: 1;
+            visibility: visible;
+        }}
+        
+        .info-tooltip::before {{
+            content: "";
+            position: absolute;
+            bottom: 115%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #333;
+            z-index: 10001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }}
+        
+        .info-tooltip:hover::before {{
+            opacity: 1;
+            visibility: visible;
+        }}
     </style>
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
@@ -1479,7 +1587,7 @@ for i, row in scoring.iterrows():
         </div>
         
         <!-- Section 1: General -->
-        <div class="section section-white">
+        <div class="section">
             <div class="section-content">
                 <h2 class="section-header">Image Gallery</h2>
                 
@@ -1592,7 +1700,7 @@ for i, row in scoring.iterrows():
         </div>
         
         <!-- Building Overview Section -->
-        <div class="section section-gray">
+        <div class="section">
             <div class="section-content">
                 <h2 class="section-header">Building Overview</h2>
                 
@@ -1641,7 +1749,7 @@ for i, row in scoring.iterrows():
                 </div>
                 {"<div class='stat'><span class='stat-label'>Elevator Shafts: </span><span class='stat-value'>" + str(num_elevators) + "</span></div>" if num_elevators is not None and num_elevators > 0 else ""}
                 <div class="stat">
-                    <span class="stat-label">BMS Controls: </span>
+                    <span class="stat-label">BMS Controls:</span>
                     <span class="stat-value">{bas_text}</span>
                 </div>
                 {"<div class='stat'><span class='stat-label'>Heating System: </span><span class='stat-value'>" + heating_type + "</span></div>" if heating_type != 'N/A' else ""}
@@ -1652,7 +1760,7 @@ for i, row in scoring.iterrows():
         </div>
         
         {f'''<!-- Major Tenants Section -->
-        <div class="section section-white">
+        <div class="section">
             <div class="section-content">
                 <h2 class="section-header">Major Tenants</h2>
                 <div class="page">
@@ -1690,7 +1798,7 @@ for i, row in scoring.iterrows():
         ''' if not building_tenants.empty else ""}
         
         <!-- Section 2: Building -->
-        <div class="section section-gray">
+        <div class="section">
             <div class="section-content">
                 <h2 class="section-header">Energy Efficiency</h2>
                 
@@ -1718,7 +1826,7 @@ for i, row in scoring.iterrows():
                     </div>
                 </div>
                 <div class="stat">
-                    <span class="stat-label">LL33 Grade: </span>
+                    <span class="stat-label">LL33 Grade: <span class="info-tooltip" data-tooltip="Energy Star→LL33 grade; lightly tunes HVAC% of electricity." style="display: inline-block; margin-left: 5px; width: 16px; height: 16px; background-color: #00769d; color: white; border-radius: 50%; text-align: center; line-height: 16px; font-size: 12px; cursor: help; position: relative;">i</span></span>
                     <span class="stat-value"><span class="energy-grade grade-{ll33_grade_raw}">{ll33_grade}</span></span>
                 </div>
             </div>
@@ -1728,12 +1836,12 @@ for i, row in scoring.iterrows():
         </div>
         
         <!-- Section 3: Energy Consumption -->
-        <div class="section section-white">
+        <div class="section">
             <div class="section-content">
                 <h2 class="section-header">Energy Consumption</h2>
                 
                 <div class="page">
-                <h3 class="page-title">Usage</h3>
+                <h3 class="page-title">Usage <span class="info-tooltip" data-tooltip="LL84 monthly kWh/therms/steam (normalized). Feeds HVAC electricity split." style="display: inline-block; margin-left: 5px; width: 16px; height: 16px; background-color: #00769d; color: white; border-radius: 50%; text-align: center; line-height: 16px; font-size: 12px; cursor: help; position: relative;">i</span></h3>
             <div class="chart-carousel">
                 <div class="chart-toggle">
                     <button class="toggle-btn active" onclick="showChart('usage', 'building')">Building</button>
@@ -1749,7 +1857,7 @@ for i, row in scoring.iterrows():
         </div>
         
         <div class="page">
-            <h3 class="page-title">Cost</h3>
+            <h3 class="page-title">Cost <span class="info-tooltip" data-tooltip="Priced with Genability all-in $/kWh; gas/steam use published NYC rates." style="display: inline-block; margin-left: 5px; width: 16px; height: 16px; background-color: #00769d; color: white; border-radius: 50%; text-align: center; line-height: 16px; font-size: 12px; cursor: help; position: relative;">i</span></h3>
             <div class="chart-carousel">
                 <div class="chart-toggle">
                     <button class="toggle-btn active" onclick="showChart('cost', 'building')">Building</button>
@@ -1766,29 +1874,40 @@ for i, row in scoring.iterrows():
         </div>
         
         <!-- Section 4: ODCV -->
-        <div class="section section-gray">
+        <div class="section">
             <div class="section-content">
                 <h2 class="section-header">HVAC Analysis</h2>
                 
                 <div class="page">
-                <h3 class="page-title">Usage Disaggregation</h3>
+                </div>
+                
+                <div class="page">
+                <h3 class="page-title">Usage Disaggregation <span class="info-tooltip" data-tooltip="Baseline (lowest month) + ~15% floor + seasonality + heat-type from winter fuels + building factors → monthly HVAC% of electricity." style="display: inline-block; margin-left: 5px; width: 16px; height: 16px; background-color: #00769d; color: white; border-radius: 50%; text-align: center; line-height: 16px; font-size: 12px; cursor: help; position: relative;">i</span></h3>
                 <div id="hvac_pct_chart" style="width: 100%; height: 400px;"></div>
             </div>
             
             <div class="page">
-                <h3 class="page-title">Savings Potential</h3>
+                <h3 class="page-title">HVAC Costs & ODCV Savings % <span class="info-tooltip" data-tooltip="How we got the savings: Electricity: split into HVAC vs non-HVAC (lowest-use month baseline + ~15% ventilation floor; winter gas/steam tells us heat type). ODCV% (20–30%) = vacancy + control capacity (BMS can control heating, cooling, ventilation). Monthly $ = HVAC electricity × ODCV%, priced with your exact ConEd tariff via Genability (our rate calculator). Gas/steam: we treat 90% as HVAC heat, apply your ODCV%, then price with posted NYC gas ($/therm) and steam ($/klb) rates." style="display: inline-block; margin-left: 5px; width: 16px; height: 16px; background-color: #00769d; color: white; border-radius: 50%; text-align: center; line-height: 16px; font-size: 12px; cursor: help; position: relative;">i</span></h3>
+                <div id="hvac_cost_breakdown_chart" style="width: 100%; height: 400px;"></div>
+                <div style="text-align: center; margin-top: 15px; font-size: 14px; color: #666;">
+                    <strong>Average ODCV Savings: {odcv_percentage_of_hvac:.1f}% of HVAC costs</strong>
+                </div>
+            </div>
+            
+            <div class="page">
+                <h3 class="page-title">Cumulative ODCV Savings (Running Total) <span class="info-tooltip" data-tooltip="Cumulative savings (running total): each bar adds that month's ODCV savings to all prior months—savings to date, not just that month. How we got the savings: Electricity: split into HVAC vs non-HVAC (lowest-use month baseline + ~15% ventilation floor; winter gas/steam tells us heat type). ODCV% (20–30%) = vacancy + control capacity (BMS can control heating, cooling, ventilation). Monthly $ = HVAC electricity × ODCV%, priced with your exact ConEd tariff via Genability (our rate calculator). Gas/steam: we treat 90% as HVAC heat, apply your ODCV%, then price with posted NYC gas ($/therm) and steam ($/klb) rates." style="display: inline-block; margin-left: 5px; width: 16px; height: 16px; background-color: #00769d; color: white; border-radius: 50%; text-align: center; line-height: 16px; font-size: 12px; cursor: help; position: relative;">i</span></h3>
                 <div id="odcv_savings_chart" style="width: 100%; height: 400px;"></div>
             </div>
             </div>
         </div>
         
 {f'''        <!-- Air Quality Section -->
-        <div class="section section-gray">
+        <div class="section">
             <div class="section-content">
                 <h2 class="section-header">Air Quality</h2>
                 
                 <div class="page">
-                <h3 class="page-title">Outdoor Pollution (Business Hours - M-F 8am-6pm)</h3>
+                <h3 class="page-title">Outdoor Pollution (M-F 8am-6pm)</h3>
             
             <div class="iaq-summary" style="margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
                 <div class="iaq-stat-grid" style="display: grid; grid-template-columns: repeat({3 if avg_pm25 > 12 else 2}, 1fr); gap: {40 if avg_pm25 > 12 else 80}px; text-align: center; max-width: {600 if avg_pm25 > 12 else 500}px; margin: 0 auto;">
@@ -1862,8 +1981,11 @@ for i, row in scoring.iterrows():
         }}
     }}
     
+    // Global variables
     let carouselIndex = {{}};
     let hiddenSlides = {{}};
+    let interactiveIndex = 0;
+    let tenantSortDir = {{}};
     
     // Handle missing images by hiding slides
     function handleImageError(img, bbl, imageType) {{
@@ -2042,7 +2164,6 @@ for i, row in scoring.iterrows():
     }}
     
     // Enhanced Interactive carousel with smooth transitions
-    let interactiveIndex = 0;
     
     function moveInteractiveCarousel(bbl, direction) {{
         const carousel = document.getElementById('interactive-carousel-' + bbl);
@@ -2112,67 +2233,111 @@ for i, row in scoring.iterrows():
         moveInteractiveCarousel(bbl, 0);
     }}
     
-    // Enhanced fullscreen functionality
-    function toggleFullscreen(button) {{
-        const container = button.closest('.carousel-slide, .carousel-container');
-        const iframe = container.querySelector('iframe, video');
+    // Tenant table sorting
+    function sortTenantTable(col) {{
+        // Find the tenant table (there should only be one per page)
+        const table = document.querySelector('[id^="tenantTable-"]');
+        if (!table) return;
         
-        if (!document.fullscreenElement) {{
-            if (iframe && iframe.requestFullscreen) {{
-                iframe.requestFullscreen();
-            }} else if (container.requestFullscreen) {{
-                container.requestFullscreen();
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        
+        // Toggle sort direction
+        tenantSortDir[col] = !tenantSortDir[col];
+        
+        rows.sort((a, b) => {{
+            let aVal, bVal;
+            
+            if (col === 3) {{
+                // SF Occupied - parse number from formatted string
+                aVal = parseInt(a.cells[col].textContent.replace(/,/g, '') || '0');
+                bVal = parseInt(b.cells[col].textContent.replace(/,/g, '') || '0');
+            }} else if (col === 4 || col === 5) {{
+                // Dates - convert to sortable format
+                aVal = a.cells[col].textContent.trim();
+                bVal = b.cells[col].textContent.trim();
+                // Handle N/A values
+                if (aVal === 'N/A') aVal = '';
+                if (bVal === 'N/A') bVal = '';
+                // Convert Mon-YY to YYYY-MM for sorting
+                if (aVal && aVal !== 'N/A') {{
+                    const [month, year] = aVal.split('-');
+                    const monthNum = new Date(month + ' 1, 2000').getMonth() + 1;
+                    aVal = `20${{year}}-${{monthNum.toString().padStart(2, '0')}}`;
+                }}
+                if (bVal && bVal !== 'N/A') {{
+                    const [month, year] = bVal.split('-');
+                    const monthNum = new Date(month + ' 1, 2000').getMonth() + 1;
+                    bVal = `20${{year}}-${{monthNum.toString().padStart(2, '0')}}`;
+                }}
+            }} else {{
+                // Text columns (Tenant, Industry, Floor)
+                aVal = a.cells[col].textContent.toLowerCase().trim();
+                bVal = b.cells[col].textContent.toLowerCase().trim();
             }}
-            button.textContent = '⛷';
-        }} else {{
-            if (document.exitFullscreen) {{
-                document.exitFullscreen();
-                button.textContent = '⛶';
+            
+            if (tenantSortDir[col]) {{
+                return aVal > bVal ? 1 : -1;
+            }} else {{
+                return aVal < bVal ? 1 : -1;
             }}
-        }}
+        }});
+        
+        // Clear and rebuild tbody
+        tbody.innerHTML = '';
+        rows.forEach(row => tbody.appendChild(row));
+        
+        // Update sort indicators
+        const headers = table.querySelectorAll('th');
+        headers.forEach((th, idx) => {{
+            const indicator = th.querySelector('.sort-indicator');
+            if (indicator) {{
+                indicator.textContent = idx === col ? (tenantSortDir[col] ? '↑' : '↓') : '↕';
+            }}
+        }});
     }}
     
     // Energy chart
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const elecData = {{
         x: months,
-        y: {elec_usage},
+        y: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in elec_usage])},
         name: 'Elec',
         type: 'scatter',
         mode: 'lines+markers',
         line: {{color: '#0066cc', width: 3}},
         marker: {{size: 8}},
         hovertemplate: '%{{x}}<br>Elec: %{{y:,.0f}} kBtu<br>(%{{customdata:,.0f}} kWh)<extra></extra>',
-        customdata: {elec_usage}.map(v => kBtuToKwh(v))
+        customdata: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in elec_usage])}.map(v => kBtuToKwh(v))
     }};
     
     const gasData = {{
         x: months,
-        y: {gas_usage},
+        y: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in gas_usage])},
         name: 'Gas',
         type: 'scatter',
         mode: 'lines+markers',
         line: {{color: '#ff6600', width: 3}},
         marker: {{size: 8}},
         hovertemplate: '%{{x}}<br>Gas: %{{y:,.0f}} kBtu<br>(%{{customdata:,.0f}} Therms)<extra></extra>',
-        customdata: {gas_usage}.map(v => kBtuToTherms(v))
+        customdata: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in gas_usage])}.map(v => kBtuToTherms(v))
     }};
     
     const steamData = {{
         x: months,
-        y: {steam_usage},
+        y: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in steam_usage])},
         name: 'Steam',
         type: 'scatter',
         mode: 'lines+markers',
         line: {{color: '#ffc107', width: 3}},
         marker: {{size: 8}},
         hovertemplate: '%{{x}}<br>Steam: %{{y:,.0f}} kBtu<br>(%{{customdata:,.0f}} lbs)<extra></extra>',
-        customdata: {steam_usage}.map(v => kBtuToLbs(v))
+        customdata: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in steam_usage])}.map(v => kBtuToLbs(v))
     }};
     
     const layout = {{
         title: {{
-            text: 'Monthly Usage (2023)',
+            text: "Monthly Usage (2023)",
             font: {{size: 20}}
         }},
         yaxis: {{
@@ -2195,7 +2360,7 @@ for i, row in scoring.iterrows():
     if ({steam_usage}.some(v => v > 0)) buildingUsageData.push(steamData);
     
     Plotly.newPlot('energy_chart', buildingUsageData, layout, {{
-        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
         displaylogo: false,
         displayModeBar: true
     }});
@@ -2203,7 +2368,7 @@ for i, row in scoring.iterrows():
     // Office Energy Chart
     const officeElecData = {{
         x: months,
-        y: {office_elec_usage},
+        y: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in office_elec_usage])},
         name: 'Elec',
         type: 'bar',
         marker: {{color: '#0066cc'}}
@@ -2211,7 +2376,7 @@ for i, row in scoring.iterrows():
     
     const officeGasData = {{
         x: months,
-        y: {office_gas_usage},
+        y: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in office_gas_usage])},
         name: 'Gas',
         type: 'bar',
         marker: {{color: '#ff6600'}}
@@ -2219,7 +2384,7 @@ for i, row in scoring.iterrows():
     
     const officeSteamData = {{
         x: months,
-        y: {office_steam_usage},
+        y: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in office_steam_usage])},
         name: 'Steam',
         type: 'bar',
         marker: {{color: '#ffc107'}}
@@ -2227,7 +2392,7 @@ for i, row in scoring.iterrows():
     
     const officeLayout = {{
         title: {{
-            text: 'Monthly Office Usage (2023)',
+            text: "Monthly Office Usage (2023)",
             font: {{size: 20}}
         }},
         yaxis: {{
@@ -2253,7 +2418,7 @@ for i, row in scoring.iterrows():
     if ({office_steam_usage}.some(v => v > 0)) officeUsageData.push(officeSteamData);
     
     Plotly.newPlot('office_energy_chart', officeUsageData, officeLayout, {{
-        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
         displaylogo: false,
         displayModeBar: true
     }});
@@ -2261,7 +2426,7 @@ for i, row in scoring.iterrows():
     // Energy Cost Chart
     const elecCost = {{
         x: months, 
-        y: {elec_cost}, 
+        y: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in elec_cost])}, 
         name: 'Elec', 
         type: 'scatter', 
         mode: 'lines+markers', 
@@ -2271,7 +2436,7 @@ for i, row in scoring.iterrows():
     
     const gasCost = {{
         x: months, 
-        y: {gas_cost}, 
+        y: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in gas_cost])}, 
         name: 'Gas', 
         type: 'scatter', 
         mode: 'lines+markers', 
@@ -2281,7 +2446,7 @@ for i, row in scoring.iterrows():
     
     const steamCostData = {{
         x: months, 
-        y: {steam_cost}, 
+        y: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in steam_cost])}, 
         name: 'Steam', 
         type: 'scatter', 
         mode: 'lines+markers', 
@@ -2291,7 +2456,7 @@ for i, row in scoring.iterrows():
     
     const costLayout = {{
         title: {{
-            text: 'Monthly Cost (2023)',
+            text: "Monthly Cost (2023)",
             font: {{size: 20}}
         }},
         yaxis: {{
@@ -2315,7 +2480,7 @@ for i, row in scoring.iterrows():
     if ({steam_cost}.some(v => v > 0)) buildingCostData.push(steamCostData);
     
     Plotly.newPlot('energy_cost_chart', buildingCostData, costLayout, {{
-        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
         displaylogo: false,
         displayModeBar: true
     }});
@@ -2328,7 +2493,7 @@ for i, row in scoring.iterrows():
     // Office Cost Chart
     const officeElecCost = {{
         x: months, 
-        y: {office_elec_cost}, 
+        y: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in office_elec_cost])}, 
         name: 'Elec', 
         type: 'bar', 
         marker: {{color: '#0066cc'}}
@@ -2336,7 +2501,7 @@ for i, row in scoring.iterrows():
     
     const officeGasCost = {{
         x: months, 
-        y: {office_gas_cost}, 
+        y: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in office_gas_cost])}, 
         name: 'Gas', 
         type: 'bar', 
         marker: {{color: '#ff6600'}}
@@ -2344,7 +2509,7 @@ for i, row in scoring.iterrows():
     
     const officeSteamCostData = {{
         x: months, 
-        y: {office_steam_cost}, 
+        y: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in office_steam_cost])}, 
         name: 'Steam', 
         type: 'bar', 
         marker: {{color: '#ffc107'}}
@@ -2352,7 +2517,7 @@ for i, row in scoring.iterrows():
     
     const officeCostLayout = {{
         title: {{
-            text: 'Office Space Monthly Cost (2023)',
+            text: "Office Space Monthly Cost (2023)",
             font: {{size: 20}}
         }},
         yaxis: {{
@@ -2379,7 +2544,7 @@ for i, row in scoring.iterrows():
     if ({office_steam_cost}.some(v => v > 0)) officeCostData.push(officeSteamCostData);
     
     Plotly.newPlot('office_cost_chart', officeCostData, officeCostLayout, {{
-        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
         displaylogo: false,
         displayModeBar: true
     }});
@@ -2390,7 +2555,7 @@ for i, row in scoring.iterrows():
     );
     
     // HVAC Percentage Chart with seasonal colors
-    const hvacValues = {hvac_pct};
+    const hvacValues = {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in hvac_pct])};
     
     // Create separate traces for each season with filled area only below the curve
     const hvacTraces = [];
@@ -2460,7 +2625,7 @@ for i, row in scoring.iterrows():
     
     const hvacLayout = {{
         title: {{
-            text: 'HVAC as % of Total Electricity Usage',
+            text: "HVAC as % of Total Electricity Usage",
             font: {{size: 20}}
         }},
         yaxis: {{
@@ -2522,33 +2687,181 @@ for i, row in scoring.iterrows():
     }};
     
     Plotly.newPlot('hvac_pct_chart', hvacTraces, hvacLayout, {{
-        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
         displaylogo: false,
         displayModeBar: true
     }});
     
+    // HVAC Cost Breakdown with ODCV Savings Overlay
+    const hvacElecCost = {{
+        x: months,
+        y: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in monthly_hvac_elec_cost])},
+        name: 'HVAC Elec Cost',
+        type: 'bar',
+        marker: {{color: '#0066cc'}},
+        hovertemplate: 'HVAC Elec: $%{{y:,.0f}}<extra></extra>'
+    }};
+
+    const hvacGasCost = {{
+        x: months,
+        y: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in monthly_hvac_gas_cost])},
+        name: 'HVAC Gas Cost',
+        type: 'bar',
+        marker: {{color: '#ff6600'}},
+        hovertemplate: 'HVAC Gas: $%{{y:,.0f}}<extra></extra>'
+    }};
+
+    const hvacSteamCost = {{
+        x: months,
+        y: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in monthly_hvac_steam_cost])},
+        name: 'HVAC Steam Cost',
+        type: 'bar',
+        marker: {{color: '#ffc107'}},
+        hovertemplate: 'HVAC Steam: $%{{y:,.0f}}<extra></extra>'
+    }};
+
+    const odcvSavingsLine = {{
+        x: months,
+        y: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in odcv_savings])},
+        name: 'ODCV Savings',
+        type: 'scatter',
+        mode: 'lines+markers',
+        line: {{color: '#38a169', width: 3, dash: 'dash'}},
+        marker: {{size: 10, color: '#38a169'}},
+        yaxis: 'y',
+        hovertemplate: 'ODCV Saves: $%{{y:,.0f}} (%{{customdata:.1f}}% of HVAC)<extra></extra>',
+        customdata: {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in monthly_odcv_percentages])}
+    }};
+
+    Plotly.newPlot('hvac_cost_breakdown_chart', 
+        [hvacElecCost, hvacGasCost, hvacSteamCost, odcvSavingsLine], 
+        {{
+            title: {{
+                text: "Monthly HVAC Costs with ODCV Savings Potential",
+                font: {{size: 20}}
+            }},
+            yaxis: {{
+                title: 'Cost ($)',
+                tickformat: '$,.0f',
+                showgrid: false
+            }},
+            xaxis: {{
+                showgrid: false
+            }},
+            barmode: 'stack',
+            legend: {{
+                orientation: 'h',
+                y: -0.15
+            }},
+            font: {{family: 'Arial, sans-serif'}},
+            plot_bgcolor: '#ffffff',
+            paper_bgcolor: 'white',
+            hovermode: 'x unified'
+        }}, {{
+            modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d'],
+            displaylogo: false
+        }}
+    );
+    
     // ODCV Savings Chart
-    const odcvElecSave = {{x: months, y: {odcv_elec_savings}, name: 'Elec', type: 'bar', marker: {{color: '#0066cc'}}}};
-    const odcvGasSave = {{x: months, y: {odcv_gas_savings}, name: 'Gas', type: 'bar', marker: {{color: '#ff6600'}}}};
-    const odcvSteamSave = {{x: months, y: {odcv_steam_savings}, name: 'Steam', type: 'bar', marker: {{color: '#ffc107'}}}};
+    // Store original monthly values for hover
+    const monthlyElecSavings = {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in odcv_elec_savings])};
+    const monthlyGasSavings = {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in odcv_gas_savings])};
+    const monthlySteamSavings = {json.dumps([float(x) if x and not pd.isna(x) else 0 for x in odcv_steam_savings])};
+    
+    // Calculate cumulative values for display
+    const cumulativeElecSavings = [];
+    const cumulativeGasSavings = [];
+    const cumulativeSteamSavings = [];
+    
+    for (let i = 0; i < 12; i++) {{
+        cumulativeElecSavings[i] = (i === 0) ? monthlyElecSavings[0] : cumulativeElecSavings[i-1] + monthlyElecSavings[i];
+        cumulativeGasSavings[i] = (i === 0) ? monthlyGasSavings[0] : cumulativeGasSavings[i-1] + monthlyGasSavings[i];
+        cumulativeSteamSavings[i] = (i === 0) ? monthlySteamSavings[0] : cumulativeSteamSavings[i-1] + monthlySteamSavings[i];
+    }}
+    
+    // Create customdata array with all monthly values for unified hover
+    const monthlyTotals = months.map((m, i) => 
+        monthlyElecSavings[i] + monthlyGasSavings[i] + monthlySteamSavings[i]
+    );
+    
+    const odcvElecSave = {{
+        x: months, 
+        y: cumulativeElecSavings, 
+        name: 'Elec', 
+        type: 'bar', 
+        marker: {{color: '#0066cc'}},
+        customdata: months.map((m, i) => ({{
+            elec: monthlyElecSavings[i],
+            gas: monthlyGasSavings[i],
+            steam: monthlySteamSavings[i],
+            total: monthlyTotals[i]
+        }})),
+        hovertemplate: 'Elec: $%{{customdata.elec:,.0f}}<extra></extra>'
+    }};
+    
+    const odcvGasSave = {{
+        x: months, 
+        y: cumulativeGasSavings, 
+        name: 'Gas', 
+        type: 'bar', 
+        marker: {{color: '#ff6600'}},
+        customdata: months.map((m, i) => ({{
+            elec: monthlyElecSavings[i],
+            gas: monthlyGasSavings[i],
+            steam: monthlySteamSavings[i],
+            total: monthlyTotals[i]
+        }})),
+        hovertemplate: 'Gas: $%{{customdata.gas:,.0f}}<extra></extra>'
+    }};
+    
+    const odcvSteamSave = {{
+        x: months, 
+        y: cumulativeSteamSavings, 
+        name: 'Steam', 
+        type: 'bar', 
+        marker: {{color: '#ffc107'}},
+        customdata: months.map((m, i) => ({{
+            elec: monthlyElecSavings[i],
+            gas: monthlyGasSavings[i],
+            steam: monthlySteamSavings[i],
+            total: monthlyTotals[i]
+        }})),
+        hovertemplate: 'Steam: $%{{customdata.steam:,.0f}}<extra></extra>'
+    }};
     
     const totalSavings = {total_odcv_savings};
     
+    // Add invisible trace for monthly total in hover
+    const monthlyTotalTrace = {{
+        x: months,
+        y: months.map(() => 0), // Invisible trace
+        name: 'Monthly Total',
+        type: 'scatter',
+        mode: 'markers',
+        marker: {{size: 0, color: 'rgba(0,0,0,0)'}},
+        showlegend: false,
+        customdata: monthlyTotals,
+        hovertemplate: '<b>Monthly Total: $%{{customdata:,.0f}}</b><extra></extra>'
+    }};
+    
     // ODCV savings chart - only show fuels with savings
     const odcvSavingsData = [];
-    if ({odcv_elec_savings}.some(v => v > 0)) odcvSavingsData.push(odcvElecSave);
-    if ({odcv_gas_savings}.some(v => v > 0)) odcvSavingsData.push(odcvGasSave);
-    if ({odcv_steam_savings}.some(v => v > 0)) odcvSavingsData.push(odcvSteamSave);
+    if (monthlyElecSavings.some(v => v > 0)) odcvSavingsData.push(odcvElecSave);
+    if (monthlyGasSavings.some(v => v > 0)) odcvSavingsData.push(odcvGasSave);
+    if (monthlySteamSavings.some(v => v > 0)) odcvSavingsData.push(odcvSteamSave);
+    odcvSavingsData.push(monthlyTotalTrace); // Always add the total trace for hover
     
     Plotly.newPlot('odcv_savings_chart', odcvSavingsData, {{
         title: {{
-            text: 'Monthly ODCV Savings',
+            text: "Monthly ODCV Savings",
             font: {{size: 20}}
         }},
         yaxis: {{
             title: '',
             tickformat: '$,.0f',
-            showgrid: false
+            showgrid: false,
+            range: [0, Math.max(600000, totalSavings * 1.1)]  // Ensure full cumulative range visible
         }},
         xaxis: {{
             showgrid: false
@@ -2557,26 +2870,42 @@ for i, row in scoring.iterrows():
         font: {{family: 'Arial, sans-serif'}},
         plot_bgcolor: '#ffffff',
         paper_bgcolor: 'white',
-        hovermode: 'x unified'
+        hovermode: 'x unified',
+        margin: {{
+            l: 60,
+            r: 50,
+            t: 50,
+            b: 80  // Extra bottom margin for annotation
+        }},
+        annotations: [{{
+            text: 'Annual Savings: $' + totalSavings.toFixed(0).replace(/\\B(?=(\\d{{3}})+(?!\\d))/g, ','),
+            xref: 'paper',
+            yref: 'paper',
+            x: 0.5,
+            y: -0.08,  // Position inside the chart canvas
+            xanchor: 'center',
+            yanchor: 'top',
+            showarrow: false,
+            font: {{
+                size: 16,
+                color: '#666'
+            }}
+        }}]
     }}, {{
-        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
         displaylogo: false,
         displayModeBar: true
     }});
-
-    // Add annual savings caption below the chart
-    document.getElementById('odcv_savings_chart').insertAdjacentHTML('afterend', 
-        '<div style="text-align: center; margin-top: 10px; font-size: 16px; color: #666;">Annual Savings: $' + totalSavings.toFixed(0).replace(/\\B(?=(\\d{{3}})+(?!\\d))/g, ',') + '</div>'
-    );
     
     // EPA Good threshold line
     const goodThreshold = {{
         x: {json.dumps(list(range(len(chart_dates))))},
         y: Array({len(chart_dates)}).fill(12),
         mode: 'lines',
-        line: {{color: '#00e400', dash: 'dash', width: 2}},
+        line: {{color: '#00b300', dash: 'dash', width: 4}},  // Darker green, thicker line
         name: 'Good AQ Threshold (EPA)',
-        hoverinfo: 'skip'
+        hoverinfo: 'skip',
+        opacity: 1  // Ensure full opacity
     }};
 
     // Create fill traces for areas above and below threshold
@@ -2586,79 +2915,21 @@ for i, row in scoring.iterrows():
     const goodThresholdValue = 12;  // EPA Good threshold
     const badThreshold = 35.4;  // EPA Unhealthy for Sensitive Groups threshold
     
-    // Create blue fill to zero (base layer)
-    const blueFill = {{
-        x: dates.concat([...dates].reverse()),
-        y: values.concat(Array(dates.length).fill(0)),
-        fill: 'toself',
-        fillcolor: 'rgba(0, 102, 204, 0.1)',  // Very light blue
-        line: {{width: 0}},
-        showlegend: false,
-        hoverinfo: 'skip',
-        type: 'scatter'
-    }};
-    
-    // Create PM2.5 line (no fill, just the line)
+    // Create PM2.5 line with fill to zero for blue area
     const pm25Line = {{
         x: dates,
         y: values,
         type: 'scatter',
         mode: 'lines',
         line: {{color: '#0066cc', width: 3}},
+        fill: 'tozeroy',
+        fillcolor: 'rgba(0, 102, 204, 0.1)',  // Very light blue
         name: 'Daily Business Hours PM2.5',
         hovertemplate: 'Day %{{x}}<br>PM2.5: %{{y:.1f}} μg/m³<br>(M-F 8am-6pm)<extra></extra>'
     }};
     
-    // Create very light yellow fill for areas between good and bad thresholds (but only where line is above good)
-    const moderateFill = {{
-        x: dates.concat([...dates].reverse()),
-        y: values.map(v => {{
-            if (v <= goodThresholdValue) return goodThresholdValue;  // Don't fill below good threshold
-            if (v >= badThreshold) return badThreshold;     // Cap at bad threshold
-            return v;  // Fill between good and line value
-        }}).concat(Array(dates.length).fill(goodThresholdValue)),
-        fill: 'toself',
-        fillcolor: 'rgba(255, 243, 59, 0.2)',  // Light yellow (visible)
-        line: {{width: 0}},
-        showlegend: false,
-        hoverinfo: 'skip',
-        type: 'scatter'
-    }};
-    
-    // Create red fill only for the area between bad threshold and the line (when line is above bad)
-    // This needs to create a shape that follows the line when above bad threshold, and the threshold line otherwise
-    const badFillY = [];
-    const badFillX = [];
-    
-    // Forward pass - follow the line when it's above bad threshold
-    for (let i = 0; i < dates.length; i++) {{
-        badFillX.push(dates[i]);
-        if (values[i] > badThreshold) {{
-            badFillY.push(values[i]);  // Follow the line when above bad threshold
-        }} else {{
-            badFillY.push(badThreshold);  // Stay at threshold when line is below
-        }}
-    }}
-    
-    // Backward pass - always follow the bad threshold line
-    for (let i = dates.length - 1; i >= 0; i--) {{
-        badFillX.push(dates[i]);
-        badFillY.push(badThreshold);  // Always at threshold for the bottom edge
-    }}
-    
-    const badFill = {{
-        x: badFillX,
-        y: badFillY,
-        fill: 'toself',
-        fillcolor: 'rgba(255, 0, 0, 0.25)',  // Red (visible)
-        line: {{width: 0}},
-        showlegend: false,
-        hoverinfo: 'skip',
-        type: 'scatter'
-    }};
-
-    // Order is important: fills first (back to front), then lines on top
-    Plotly.newPlot('pm25_chart', [blueFill, moderateFill, badFill, pm25Line, goodThreshold], {{
+    // Order is important: data line and threshold
+    Plotly.newPlot('pm25_chart', [pm25Line, goodThreshold], {{
         title: {{
             text: '{neighborhood} Air Quality (12 Months)',
             y: 0.95
@@ -2694,11 +2965,12 @@ for i, row in scoring.iterrows():
         font: {{family: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'}},
         hovermode: 'x unified'
     }}, {{
-        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        modeBarButtonsToRemove: ['zoom2d', 'pan2d', 'select2d', 'lasso2d', 'zoomIn2d', 'zoomOut2d', 'hoverClosestCartesian', 'hoverCompareCartesian'],
         displaylogo: false,
         displayModeBar: true
     }});
     
+    // Initialize 360° panorama with Manhattan grid logic
     // Initialize 360° panorama with Manhattan grid logic
     document.addEventListener('DOMContentLoaded', () => {{
         // Manhattan grid even/odd logic for yaw
@@ -2735,7 +3007,7 @@ for i, row in scoring.iterrows():
         }}
         
         // Function to initialize panorama
-        function initPanorama() {{
+        window.initPanorama = function() {{
             const viewerEl = document.getElementById('viewer-{bbl}');
             if (!viewerEl || viewerEl._pannellumInitialized) return;
             
@@ -2782,8 +3054,11 @@ for i, row in scoring.iterrows():
             }}
         }}
         
-        // If no video, initialize panorama immediately since it's the only view
-        {f'initPanorama();' if not has_video else ''}
+        // Initialize based on whether video exists
+        const hasVideo = {str(has_video).lower()};
+        if (!hasVideo) {{
+            setTimeout(window.initPanorama, 500);
+        }}
         
         // Don't initialize immediately if video exists - wait for user to navigate to panorama slide
         
@@ -2793,7 +3068,7 @@ for i, row in scoring.iterrows():
             if (originalMoveCarousel) originalMoveCarousel(bbl, direction);
             if (interactiveIndex === 1) {{
                 setTimeout(() => {{
-                    initPanorama();
+                    window.initPanorama();
                     // Ensure rotation starts after panorama loads
                     setTimeout(() => {{
                         const viewerEl = document.getElementById('viewer-{bbl}');
@@ -2806,70 +3081,7 @@ for i, row in scoring.iterrows():
         }};
     }});
     
-    // Tenant table sorting
-    let tenantSortDir = {{}};
-    function sortTenantTable(col) {{
-        // Find the tenant table (there should only be one per page)
-        const table = document.querySelector('[id^="tenantTable-"]');
-        if (!table) return;
-        
-        const tbody = table.querySelector('tbody');
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-        
-        // Toggle sort direction
-        tenantSortDir[col] = !tenantSortDir[col];
-        
-        rows.sort((a, b) => {{
-            let aVal, bVal;
-            
-            if (col === 3) {{
-                // SF Occupied - parse number from formatted string
-                aVal = parseInt(a.cells[col].textContent.replace(/,/g, '') || '0');
-                bVal = parseInt(b.cells[col].textContent.replace(/,/g, '') || '0');
-            }} else if (col === 4 || col === 5) {{
-                // Dates - convert to sortable format
-                aVal = a.cells[col].textContent.trim();
-                bVal = b.cells[col].textContent.trim();
-                // Handle N/A values
-                if (aVal === 'N/A') aVal = '';
-                if (bVal === 'N/A') bVal = '';
-                // Convert Mon-YY to YYYY-MM for sorting
-                if (aVal && aVal !== 'N/A') {{
-                    const [month, year] = aVal.split('-');
-                    const monthNum = new Date(month + ' 1, 2000').getMonth() + 1;
-                    aVal = `20${{year}}-${{monthNum.toString().padStart(2, '0')}}`;
-                }}
-                if (bVal && bVal !== 'N/A') {{
-                    const [month, year] = bVal.split('-');
-                    const monthNum = new Date(month + ' 1, 2000').getMonth() + 1;
-                    bVal = `20${{year}}-${{monthNum.toString().padStart(2, '0')}}`;
-                }}
-            }} else {{
-                // Text columns (Tenant, Industry, Floor)
-                aVal = a.cells[col].textContent.toLowerCase().trim();
-                bVal = b.cells[col].textContent.toLowerCase().trim();
-            }}
-            
-            if (tenantSortDir[col]) {{
-                return aVal > bVal ? 1 : -1;
-            }} else {{
-                return aVal < bVal ? 1 : -1;
-            }}
-        }});
-        
-        // Clear and rebuild tbody
-        tbody.innerHTML = '';
-        rows.forEach(row => tbody.appendChild(row));
-        
-        // Update sort indicators
-        const headers = table.querySelectorAll('th');
-        headers.forEach((th, idx) => {{
-            const indicator = th.querySelector('.sort-indicator');
-            if (indicator) {{
-                indicator.textContent = idx === col ? (tenantSortDir[col] ? '↑' : '↓') : '↕';
-            }}
-        }});
-    }}
+    // sortTenantTable already defined in first script block
     
     </script>
     
@@ -2887,8 +3099,8 @@ for i, row in scoring.iterrows():
 </html>
 """
     
-            # Save it to Building reports folder
-            output_path = f"/Users/forrestmiller/Desktop/New/Building reports/{bbl}.html"
+            # Save it to root directory (matching GitHub structure)
+            output_path = f"/Users/forrestmiller/Desktop/New/{bbl}.html"
             with open(output_path, 'w') as f:
                 f.write(html)
             
@@ -2917,3 +3129,86 @@ if api_calls_saved > 0:
     print(f"   • API calls made: {api_calls_made}")
     print(f"   • API calls saved by proximity caching: {api_calls_saved}")
     print(f"   • Savings: {(api_calls_saved/total_buildings*100):.1f}%")
+
+# Generate portfolio summary data
+portfolio_data = []
+for i, row in scoring.iterrows():
+    bbl = row['bbl']
+    address = row['address']
+    
+    # Get the pre-calculated data
+    hvac_data = hvac[hvac['bbl'] == bbl]
+    office_data = office[office['bbl'] == bbl]
+    
+    if not hvac_data.empty and not office_data.empty:
+        # Calculate total office HVAC cost
+        total_hvac_cost = 0
+        for m in months:
+            elec_cost = float(office_data[f'Office_Elec_Cost_Current_{m}_USD'].iloc[0]) if f'Office_Elec_Cost_Current_{m}_USD' in office_data.columns and not office_data[f'Office_Elec_Cost_Current_{m}_USD'].isna().all() else 0
+            gas_cost = float(office_data[f'Office_Gas_Cost_Current_{m}_USD'].iloc[0]) if f'Office_Gas_Cost_Current_{m}_USD' in office_data.columns and not office_data[f'Office_Gas_Cost_Current_{m}_USD'].isna().all() else 0
+            steam_cost = float(office_data[f'Office_Steam_Cost_Current_{m}_USD'].iloc[0]) if f'Office_Steam_Cost_Current_{m}_USD' in office_data.columns and not office_data[f'Office_Steam_Cost_Current_{m}_USD'].isna().all() else 0
+            hvac_pct_val = float(hvac_data[f'Elec_HVAC_{m}_2023_Pct'].iloc[0]) if f'Elec_HVAC_{m}_2023_Pct' in hvac_data.columns and not hvac_data[f'Elec_HVAC_{m}_2023_Pct'].isna().all() else 0
+            
+            total_hvac_cost += elec_cost * hvac_pct_val + gas_cost * 0.9 + steam_cost * 0.9
+        
+        odcv_savings = float(row['Total_ODCV_Savings_Annual_USD'])
+        percentage = (odcv_savings / total_hvac_cost * 100) if total_hvac_cost > 0 else 0
+        
+        portfolio_data.append({
+            'bbl': bbl,
+            'address': address.split(',')[0],  # Just street address
+            'percentage': percentage,
+            'savings': odcv_savings,
+            'hvac_cost': total_hvac_cost
+        })
+
+# Sort by percentage descending
+portfolio_data.sort(key=lambda x: x['percentage'], reverse=True)
+
+# Save to CSV for reference
+import csv
+with open('portfolio_odcv_percentages.csv', 'w', newline='') as f:
+    writer = csv.DictWriter(f, fieldnames=['bbl', 'address', 'percentage', 'savings', 'hvac_cost'])
+    writer.writeheader()
+    writer.writerows(portfolio_data)
+
+print(f"✓ Portfolio analysis saved: Top building saves {portfolio_data[0]['percentage']:.1f}% of HVAC costs")
+
+# Generate portfolio visualization HTML
+portfolio_html = f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>Portfolio ODCV Savings Analysis</title>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body>
+    <h1>ODCV Savings as % of HVAC Costs - Portfolio View</h1>
+    <div id="portfolio_chart" style="width: 100%; height: 600px;"></div>
+    <script>
+        const data = {json.dumps(portfolio_data[:20])};  // Top 20 buildings
+        
+        const trace = {{
+            x: data.map(d => d.address),
+            y: data.map(d => d.percentage),
+            type: 'bar',
+            marker: {{
+                color: data.map(d => d.percentage > 15 ? '#38a169' : d.percentage > 10 ? '#ffc107' : '#0066cc')
+            }},
+            text: data.map(d => d.percentage.toFixed(1) + '%'),
+            textposition: 'outside',
+            hovertemplate: '%{{x}}<br>Saves %{{y:.1f}}% of HVAC costs<br>$%{{customdata:,.0f}} annual savings<extra></extra>',
+            customdata: data.map(d => d.savings)
+        }};
+        
+        Plotly.newPlot('portfolio_chart', [trace], {{
+            title: 'Top 20 Buildings by ODCV Savings Percentage',
+            yaxis: {{title: '% of HVAC Costs Saved', range: [0, Math.max(...data.map(d => d.percentage)) * 1.2]}},
+            xaxis: {{tickangle: -45}},
+            margin: {{b: 150}}
+        }});
+    </script>
+</body>
+</html>"""
+
+with open('portfolio_odcv_analysis.html', 'w') as f:
+    f.write(portfolio_html)
