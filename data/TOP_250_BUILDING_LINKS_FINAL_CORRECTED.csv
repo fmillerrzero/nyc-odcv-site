@@ -75,7 +75,6 @@ rank,bbl,address,owner,url,source
 74,1010150029,"1493 Broadway, New York, NY 10036",Paramount Group,https://en.wikipedia.org/wiki/Paramount_Building,Wikipedia
 75,1012700071,"1350 Ave Of The Americas, New York, NY 10019",SL Green Realty,https://newyorkbefore.com/place.php?building=mgm_building,architecture
 76,1013000001,"230 Park Ave, New York, NY 10017",RXR Realty,https://en.wikipedia.org/wiki/Helmsley_Building,Wikipedia
-77,1013070001,"375 Park Ave, New York, NY 10152",RFR Realty,https://en.wikipedia.org/wiki/Seagram_Building,Wikipedia
 78,1006720001,"601 W 26th St, New York, NY 10001",Blackstone,https://en.wikipedia.org/wiki/Starrett-Lehigh_Building,OpenAI Web Search
 79,1000660001,"19 Liberty St, New York, NY 10038",Fosun International,https://en.wikipedia.org/wiki/Federal_Reserve_Bank_of_New_York,OpenAI Web Search
 80,1009970029,"1155 Ave Of The Americas, New York, NY 10036",Durst Organization,https://www.durst.org/properties/1155-avenue-of-the-americas,OpenAI Web Search
@@ -95,286 +94,257 @@ rank,bbl,address,owner,url,source
 94,1008230024,"19 W 21st St, New York, NY 10010",Mehra Properties,https://en.wikipedia.org/wiki/Spero_Building,Wikipedia
 95,1012880007,10 E 53 St,SL Green Realty,https://slgreen.com/properties/10-east-53rd-street/,
 96,1008690034,90 Park Ave,Vornado Realty Trust,https://www.vno.com/office/property/90-park-avenue/3311681/landing,
-97,1012880007,10 E 53 St,SL Green Realty,https://slgreen.com/properties/10-east-53rd-street/,
-98,1008690034,90 Park Ave,Vornado Realty Trust,https://www.vno.com/office/property/90-park-avenue/3311681/landing,
 99,1009990029,1185 Ave Of The Americas,SL Green Realty,https://slgreen.com/properties/1185-avenue-of-the-americas/,
 100,1012770014,330 Madison Ave,Vornado Realty Trust,https://330madison.com/,
 101,1012750027,100 Park Ave,SL Green Realty,https://slgreen.com/properties/100-park-avenue/,
 102,1012850021,437 Madison Ave,Kaufman Organization,https://sagerealty.com/properties/437-madison-avenue/,
 103,1013120041,150 E 58 St,Vornado Realty Trust,https://www.vno.com/office/property/150-east-58th-street/3311669/landing,
 104,1001270018,255 Greenwich St,Jack Resnick & Sons,https://resnicknyc.com/commercial_building/255-greenwich-street/,
-105,1008550037,35 Madison Ave,Rudin,,
+105,1008550037,35 Madison Ave,Rudin,https://www.rudin.com/commercial-properties/41-madison-avenue,WebSearch
 106,1005970012,78 Vandam St,Jack Resnick & Sons,,
 107,1008080040,100 W 33 St,Vornado Realty Trust,https://www.vno.com/office/property/manhattan-mall/100-west-33rd-street/3311652/landing,
 108,1007570054,330 W 34 St,Vornado Realty Trust,https://www.vno.com/office/property/330-west-34th-street/3311660/landing,
 109,1007860051,498 7 Ave,Vornado Realty Trust,https://www.gcomfort.com/portfolio-items/498-seventh-avenue/,
 110,1008430045,79 5 Ave,Vornado Realty Trust,https://79fifth.com/,
 111,1000240001,60 Broad St,Piedmont Realty Trust,https://www.piedmontreit.com/markets/new-york-metropolitan-area/60-broad-street/,
-112,1013250001,845 3 Ave,Rudin,https://www.rudin.com/,
+112,1013250001,845 3 Ave,Rudin,,
 113,1012950033,622 3 Ave,Cohen Brothers,https://www.cohenbrothersrealty.com/office/grand-central-plaza,
-114,1008870095,471 Park Ave S,Williams Equities,https://williamsequities.com/,
+114,1008870095,471 Park Ave S,Williams Equities,,
 115,1005810063,225 Varick St,Hines,https://www.hines.com/properties/hudson-square-portfolio-new-york,
 116,1013050013,560 Lexington Ave,Rudin,,
-117,1008360026,7 W 34 St,Vornado Realty Trust,,
-118,1013090023,641 Lexington Ave,Rudin,,
+117,1008360026,7 W 34 St,Vornado Realty Trust,https://www.vno.com/office/property/7-west-34th-street/3311656/landing,crawl10
+118,1013090023,641 Lexington Ave,Rudin,https://www.rudin.com/commercial-properties/641-lexington-avenue,Updated
 119,1005990064,375 Hudson St,Trinity Church Wall Street,https://www.hines.com/properties/hudson-square-portfolio-new-york,
 120,1008510041,304 Park Ave S,SL Green Realty,https://slgreen.com/properties/304-park-avenue-south/,
 121,1013160001,675 3 Ave,Durst Organization,https://www.durst.org/properties/675-third-avenue,
 122,1013320001,979 3 Ave,Cohen Brothers,https://ddbuilding.com/,
 123,1005780047,250 Hudson St,Jack Resnick & Sons,https://resnicknyc.com/commercial_building/250-hudson-street/,
 124,1010240015,1675 Broadway,Rudin,https://www.rudin.com/commercial-properties/1675-broadway,
-125,1013010033,750 3 Ave,SL Green Realty,,
-126,1007830070,250 W 34 St,Vornado Realty Trust,,
-127,1012780069,529 5 Ave,Empire State Realty Trust,,
-128,1001680032,"75 Centre St, New York, NY 10013",City of New York,,
-129,1007130001,"75 9 Ave, New York, NY 10011",Google,,
-130,1008070001,"393 7 Ave, New York, NY 10001",Vornado Realty Trust,,
-131,1001550001,"2 Lafayette St, New York, NY 10007",City of New York,,
-132,1000090029,"24 State St, New York, NY 10004",Rudin,,
-133,1021240043,"3940 Broadway, New York, NY 10032",City of New York,,
-134,1012750023,"285 Madison Ave, New York, NY 10017",SL Green Realty,,
-135,1008330011,"1240 Broadway, New York, NY 10001",Vornado Realty Trust,,
-136,1008680016,"260 Madison Ave, New York, NY 10016",Sapir Organization,,
-137,1012600024,"19 W 44th St, New York, NY 10036",SL Green Realty,,
-138,1008150046,"1430 Broadway, New York, NY 10018",Steinberg,,
+125,1013010033,750 3 Ave,SL Green Realty,https://757-third.com/,
+127,1012780069,529 5 Ave,Empire State Realty Trust,https://www.silversteinproperties.com/commercial-office-space-nyc/529-fifth-avenue?utm_source=spi&utm_medium=website&utm_campaign=costar-529,Updated
+128,1001680032,"75 Centre St, New York, NY 10013",City of New York,https://www.nyc.gov/site/dcas/about/manhattan-municipal-building.page,WebSearch
+129,1007130001,"75 9 Ave, New York, NY 10011",Google,https://www.durst.org/properties/114-west-47th-street,
+133,1021240043,"3940 Broadway, New York, NY 10032",City of New York,https://www.nycedc.com/project/audubon-business-technology-center,WebSearch
+134,1012750023,"285 Madison Ave, New York, NY 10017",SL Green Realty,https://slgreen.com/properties/285-madison-avenue/,WebSearch
+135,1008330011,"1240 Broadway, New York, NY 10001",Vornado Realty Trust,https://www.vno.com/office/property/penn-station/1240-broadway/1240-broadway/3311687/landing,WebSearch
+136,1008680016,"260 Madison Ave, New York, NY 10016",Sapir Organization,https://200madison.com/,
+137,1012600024,"19 W 44th St, New York, NY 10036",SL Green Realty,http://19w44.com/,
+138,1008150046,"1430 Broadway, New York, NY 10018",Steinberg,https://steinbergpokoik.com/1430-broadway/,crawl9
 139,1001530024,"23 Chambers St, New York, NY 10007",City of New York,,
 140,1001220001,"52 Chambers St, New York, NY 10007",City of New York,,
 141,1000390012,"110 Maiden Lane, New York, NY 10005",Rudin,,
-142,1010290053,"1784 Broadway, New York, NY 10019",Vornado Realty Trust,,
-143,1005590016,"124 E 14th St, New York, NY 10003",City of New York,,
+142,1010290053,"1784 Broadway, New York, NY 10019",Vornado Realty Trust,https://www.vno.com/office/property/the-annex-1-penn-plaza/1784-broadway/3311679/landing,WebSearch
 144,1005450015,"726 Broadway, New York, NY 10003",NYU,,
-145,1008340049,"4 W 33rd St, New York, NY 10001",Adams & Company,,
-146,1000330001,"77 Water St, New York, NY 10005",Kaufman Organization,,
-147,1008150001,"1411 Broadway, New York, NY 10018",La Caisse,,
-148,1013220001,"777 3 Ave, New York, NY 10017",Kaufman Organization,,
-149,1012780001,"521 5 Ave, New York, NY 10018",Savanna Real Estate Fund,,
-150,1013000033,"730 3 Ave, New York, NY 10017",TIAA-CREF,,
+145,1008340049,"4 W 33rd St, New York, NY 10001",Adams & Company,https://www.adamsre.com/collections/midtown-1/products/10-west-33rd-street,crawl
+146,1000330001,"77 Water St, New York, NY 10005",Kaufman Organization,http://527madisonave.com/,
+147,1008150001,"1411 Broadway, New York, NY 10018",La Caisse,https://steinbergpokoik.com/575-madison-avenue/,
+148,1013220001,"777 3 Ave, New York, NY 10017",Kaufman Organization,,WebSearch
+149,1012780001,"521 5 Ave, New York, NY 10018",Savanna Real Estate Fund,http://www.521fifthavenue.com/,crawl
+150,1013000033,"730 3 Ave, New York, NY 10017",TIAA-CREF,https://730third.com/,WebSearch
 151,1013230047,"805 3 Ave, New York, NY 10022",Cohen Brothers,,
-152,1011050036,"600 W 58th St, New York, NY 10019",Durst Organization,,
-153,1000290070,"75 Broad St, New York, NY 10004",JEMB,,
+152,1011050036,"600 W 58th St, New York, NY 10019",Durst Organization,https://www.frank57west.com/,crawl
 154,1012840007,"7 E 48th St, New York, NY 10017",Sioni Group,,
-155,1012910001,"711 5 Ave, New York, NY 10022",Bilgili Holding,,
-156,1006020068,"435 Hudson St, New York, NY 10014",Hines,,
+155,1012910001,"711 5 Ave, New York, NY 10022",Bilgili Holding,https://www.shvo.com/711-fifth-avenue/#,Updated
+156,1006020068,"435 Hudson St, New York, NY 10014",Hines,https://hudsonsquareproperties.com/buildings/435-hudson-street/,crawl5
 157,1010030005,"135 W 50th St, New York, NY 10020",DMLG Builders,,
-158,1013170001,"685 3 Ave, New York, NY 10017",BGO,,
-159,1008680025,"261 Madison Ave, New York, NY 10016",Sapir Organization,,
-160,1008040001,"319 7 Ave, New York, NY 10001",Vornado Realty Trust,,
-161,1012690001,"1330 Ave Of The Americas, New York, NY 10019",1330 CE26,,
+158,1013170001,"685 3 Ave, New York, NY 10017",BGO,https://www.bgo.ca/,WebSearch
+159,1008680025,"261 Madison Ave, New York, NY 10016",Sapir Organization,https://www.sapir.com/261-madison,crawl
+160,1008040001,"319 7 Ave, New York, NY 10001",Vornado Realty Trust,https://www.vno.com/office/property/319-seventh-avenue/3311715/landing,WebSearch
+161,1012690001,"1330 Ave Of The Americas, New York, NY 10019",1330 CE26,https://1330aofa.com/,crawl
 162,1007580082,"440 9 Ave, New York, NY 10001",SL Green Realty,,
-163,1008010001,"275 7 Ave, New York, NY 10001",Vornado Realty Trust,,
-164,1012880001,"655 5 Ave, New York, NY 10022",Vornado Realty Trust,,
-165,1013050060,"566 Lexington Ave, New York, NY 10022",Feil Organization,,
+163,1008010001,"275 7 Ave, New York, NY 10001",Vornado Realty Trust,https://www.vno.com/office/property/penn-2/3311682/landing,WebSearch
+164,1012880001,"655 5 Ave, New York, NY 10022",Vornado Realty Trust,https://www.vno.com/street-retail/property/655-fifth-avenue/3311694/landing,Updated
+165,1013050060,"566 Lexington Ave, New York, NY 10022",Feil Organization,https://feil.com/properties/tower-570-i-570-lexington-ave/,crawl2
 166,1013130005,"111 E 58th St, New York, NY 10022",Jack Resnick & Sons,,
-167,1000200016,"55 Broadway, New York, NY 10006",Vornado Realty Trust,,
-168,1013200046,"747 3 Ave, New York, NY 10017",Kaufman Organization,,
-169,1012750014,"284 Madison Ave, New York, NY 10017",APF Properties,,
+168,1013200046,"747 3 Ave, New York, NY 10017",Kaufman Organization,http://www.747thirdave.com/,Updated
+169,1012750014,"284 Madison Ave, New York, NY 10017",APF Properties,http://apfproperties.com/portfolio/286-madison-avenue/,Updated
 170,1008610015,"134 Madison Ave, New York, NY 10016",Williams Equities,,
-171,1008240028,"40 W 23rd St, New York, NY 10010",Williams Equities,,
-172,1012610021,"25 W 45th St, New York, NY 10036",APF Properties,,
+171,1008240028,"40 W 23rd St, New York, NY 10010",Williams Equities,,WebSearch2
+172,1012610021,"25 W 45th St, New York, NY 10036",APF Properties,https://apfproperties.com/apf/properties/25-west-45th-street/,Updated
 173,1007590045,"519 8 Ave, New York, NY 10018",Kaufman Organization,,
 174,1012810069,"553 5 Ave, New York, NY 10017",SL Green Realty,,
 175,1012910038,"430 Park Ave, New York, NY 10022",Komohil,,
-176,1004980011,"549 Broadway, New York, NY 10012",Vornado Realty Trust,,
-177,1008470040,"230 Park Ave South, New York, NY 10003",TF Cornerstone,,
-178,1000770008,"110 William St, New York, NY 10038","Pacific Oak Capital Advisors, Invesco",,
-179,1007800036,"370 7 Ave, New York, NY 10001",Brookfield,,
-180,1009930022,"115 W 40th St, New York, NY 10018",Adams & Company,,
-181,1008720013,"35 Irving Pl, New York, NY 10003",GFP Real Estate,,
+176,1004980011,"549 Broadway, New York, NY 10012",Vornado Realty Trust,https://www.vno.com/office/property/770-broadway/3311693/landing,WebSearch
+177,1008470040,"230 Park Ave South, New York, NY 10003",TF Cornerstone,https://resnicknyc.com/commercial_building/485-madison-avenue/,WebSearch2
+178,1000770008,"110 William St, New York, NY 10038","Pacific Oak Capital Advisors, Invesco",http://www.4987th.com/,
+179,1007800036,"370 7 Ave, New York, NY 10001",Brookfield,https://www.80maidenlane.com/,
+180,1009930022,"115 W 40th St, New York, NY 10018",Adams & Company,https://110west40.com/,crawl
+181,1008720013,"35 Irving Pl, New York, NY 10003",GFP Real Estate,https://www.gfpre.com/properties/33-irving-place,crawl14
 182,1008410054,"8 W 40th St, New York, NY 10018",Jack Resnick & Sons,,
 183,1013740060,"10 E 60th St, New York, NY 10022",Findim Investments S.A.,,
 184,1007870040,"500 7 Ave, New York, NY 10018",Moinian Group,,
 185,1013090032,"900 3 Ave, New York, NY 10022",Paramount Group,,
-186,1012670034,"640 5 Ave, New York, NY 10019",Vornado Realty Trust,,
+186,1012670034,"640 5 Ave, New York, NY 10019",Vornado Realty Trust,http://www.vno.com/office/property/11-penn-plaza/3311683/landing,
 187,1013750021,"653 Madison Ave, New York, NY 10065",Adler Group,,
-188,1012930059,"600 Madison Ave, New York, NY 10022",Ruben Companies,,
+188,1012930059,"600 Madison Ave, New York, NY 10022",Ruben Companies,https://340madisonave.com/,
 189,1012710071,"1370 Ave Of The Americas, New York, NY 10019",Barings,,
-190,1007780036,"322-326 7Th Ave, New York, NY 10001",GFP Real Estate,,
 191,1011130051,"16 W 61st St, New York, NY 10023",Williams Equities,,
 192,1008290036,"236 5 Ave, New York, NY 10001",Kaufman Organization,,
-193,1012720066,"48 W 57th St, New York, NY 10019",Vornado Realty Trust,,
+193,1012720066,"48 W 57th St, New York, NY 10019",Vornado Realty Trust,https://www.vno.com/street-retail/property/50-west-57th-street/3311756/landing,Updated
 194,1000100023,"1 Whitehall St, New York, NY 10004",Chetrit Group,,
 195,1007850037,"462 7 Ave, New York, NY 10018",Kaufman Organization,,
 196,1013260001,"875 3 Ave, New York, NY 10022",Global Holdings Management,,
-197,1012780014,"340 Madison Ave, New York, NY 10173",Barings,,
-198,1005050036,"161 Ave Of The Americas, New York, NY 10013",Imperium,,
+197,1012780014,"340 Madison Ave, New York, NY 10173",Barings,http://apfproperties.com/portfolio/club-row-building/,
+198,1005050036,"161 Ave Of The Americas, New York, NY 10013",Imperium,http://400madison.com/,
 199,1008110051,"132 W 36th St, New York, NY 10018",Kaufman Organization,,
-200,1007600032,"307 W 36th St, New York, NY 10018",GFP Real Estate,,
-201,1012870052,"485 Madison Ave, New York, NY 10022",Jack Resnick & Sons,,
-202,1000220020,"42 Broadway, New York, NY 10004",Vornado Realty Trust,,
-203,1008110031,"1350 Broadway, New York, NY 10018",Empire State Realty Trust,,
-204,1000290073,"44 Beaver St, New York, NY 10004",City of New York,,
-205,1008160037,"84 5 Ave, New York, NY 10011",Vornado Realty Trust,,
+200,1007600032,"307 W 36th St, New York, NY 10018",GFP Real Estate,https://www.sapir.com/260-madison,
+201,1012870052,"485 Madison Ave, New York, NY 10022",Jack Resnick & Sons,http://www.410parkave.com/,
+202,1000220020,"42 Broadway, New York, NY 10004",Vornado Realty Trust,https://cammebys.com/42-broadway-new-york-ny-1004/,WebSearch
+203,1008110031,"1350 Broadway, New York, NY 10018",Empire State Realty Trust,https://www.empirestaterealtytrust.com/properties/office/1350-broadway1/,crawl
+204,1000290073,"44 Beaver St, New York, NY 10004",City of New York,https://feil.com/properties/gramercy-park-building-i-257-park-ave-south/,
+205,1008160037,"84 5 Ave, New York, NY 10011",Vornado Realty Trust,https://www.315pas.com/,
 206,1007950028,"111 W 19th St, New York, NY 10011",Kaufman Organization,,
-207,1017750033,"2322 3 Ave, New York, NY 10035",Jack Resnick & Sons,,
+207,1017750033,"2322 3 Ave, New York, NY 10035",Jack Resnick & Sons,http://www.resnick.nyc/commercial/property/2322-third-avenue/1491200/overview,Updated
 208,1008290016,"31 W 27th St, New York, NY 10001",Savanna Real Estate Fund,,
-209,1012730012,"37 W 57th St, New York, NY 10019",Sedesco,,
-210,1000200004,"39 Broadway, New York, NY 10006",Cammeby's,,
-211,1008380076,"48 W 37th St, New York, NY 10018",Adams & Company,,
-212,1012950023,"355 Lexington Ave, New York, NY 10017",Rudin,,
-213,1008790081,"315 Park Ave South, New York, NY 10010",Columbia University,,
+209,1012730012,"37 W 57th St, New York, NY 10019",Sedesco,"http://www.gcomfort.com/default.aspx?tabid=1027&idcbldid=6&hitlist=10,1,2,3,4,8,9,54,77,6,,,,89,80,62,63",crawl2
+211,1008380076,"48 W 37th St, New York, NY 10018",Adams & Company,http://57west57th.com/,
+212,1012950023,"355 Lexington Ave, New York, NY 10017",Rudin,http://silversteinproperties.com/inspire/529-fifth-avenue,Updated
+213,1008790081,"315 Park Ave South, New York, NY 10010",Columbia University,https://slgreen.com/properties/711-third-avenue?list_view=false,WebSearch
 214,1008210014,"39 W 19th St, New York, NY 10011",Abner Properties,,
 215,1013740014,"650 Madison Ave, New York, NY 10022",Vornado Realty Trust,,
-216,1001540023,"14 Reade St, New York, NY 10007",City of New York,,
+216,1001540023,"14 Reade St, New York, NY 10007",City of New York,http://www.nycedc.com/opportunity/civic-center-building-sales-rfp-0,crawl3
 217,1007870044,"512 7 Ave, New York, NY 10018",Moinian Group,,
 218,1008260026,"19 W 24th St, New York, NY 10010",Kaufman Organization,,
-219,1000100014,"33 Whitehall St, New York, NY 10004",Broad Financial Center,,
-220,1012870021,"477 Madison Ave, New York, NY 10022",RFR Realty,,
+220,1012870021,"477 Madison Ave, New York, NY 10022",RFR Realty,http://477mad.com/,Updated
 221,1012790057,"352 Madison Ave, New York, NY 10017",RFR Realty,,
-222,1012900037,"410 Park Ave, New York, NY 10022",Global Holdings Management,,
-223,1005110001,"568 Broadway, New York, NY 10012",Aurora Capital Associates,,
-224,1007880049,"530 7 Ave, New York, NY 10018",Savitt Partners,,
+222,1012900037,"410 Park Ave, New York, NY 10022",Global Holdings Management,http://www.410parkave.com/,
 225,1012990022,"437 Lexington Ave, New York, NY 10017",Gordon Property Group,,
-226,1000750030,"111 John St, New York, NY 10038",KF Braun,,
-227,1008630027,"169 Madison Ave, New York, NY 10016",GFP Real Estate,,
-228,1005220001,"610 Broadway, New York, NY 10012",Macklowe Management,,
+226,1000750030,"111 John St, New York, NY 10038",KF Braun,http://www.braunmgmt.com/building-29,crawl3
+227,1008630027,"169 Madison Ave, New York, NY 10016",GFP Real Estate,https://www.gfpre.com/properties/171-madison-avenue,crawl
+228,1005220001,"610 Broadway, New York, NY 10012",Macklowe Management,http://610broadway.com/,crawl4
 229,1008250012,"49 W 23rd St, New York, NY 10010",Jack Resnick & Sons,,
-230,1000430001,"44 Wall St, New York, NY 10005",EQ Office,,
-231,1013070014,"600 Lexington Ave, New York, NY 10022",Lex NY Equities,,
-232,1013210047,"767 3 Ave, New York, NY 10017","Quantum Pacific Group, Metro Loft Management",,
-233,1005970062,"323 Hudson St, New York, NY 10013",Divco West Services,,
+230,1000430001,"44 Wall St, New York, NY 10005",EQ Office,https://www.thenew44wall.com/,crawl3
+231,1013070014,"600 Lexington Ave, New York, NY 10022",Lex NY Equities,https://pgp.us.com/properties/600-lexington-ave/,Updated
+232,1013210047,"767 3 Ave, New York, NY 10017","Quantum Pacific Group, Metro Loft Management",http://767thirdave.com/,Updated
+233,1005970062,"323 Hudson St, New York, NY 10013",Divco West Services,https://www.325hudson.com/,crawl5
 234,1008490016,"902 Broadway, New York, NY 10010",Rosen Equities,,
 235,1008290011,"45 W 27th St, New York, NY 10001",Kaufman Organization,,
-236,1013120015,"135 E 57th St, New York, NY 10022",Cohen Brothers,,
+236,1013120015,"135 E 57th St, New York, NY 10022",Cohen Brothers,,WebSearch2
 237,1008610022,"135 Madison Ave, New York, NY 10016",Rosen Equities,,
-238,1008150014,"1412 Broadway, New York, NY 10018",ABS Partners,,
-239,1013080033,"880 3 Ave, New York, NY 10022",Jack Resnick & Sons,,
+238,1008150014,"1412 Broadway, New York, NY 10018",ABS Partners,,WebSearch
+239,1013080033,"880 3 Ave, New York, NY 10022",Jack Resnick & Sons,https://resnicknyc.com/commercial_building/880-third-avenue/,Updated
 240,1001480010,"71 Thomas St, New York, NY 10013",GFP Real Estate,,
-241,1009970041,"120 W 45th St, New York, NY 10036",Kamber Management,,
-242,1008190039,"122 5Th Ave, New York, NY 10011",Bromley Companies,,
+241,1009970041,"120 W 45th St, New York, NY 10036",Kamber Management,http://www.kamberllc.com/properties/tower-45,crawl
+242,1008190039,"122 5Th Ave, New York, NY 10011",Bromley Companies,https://122fifthave.com/,crawl9
 243,1012950017,"354 Lexington Ave, New York, NY 10017",Hilson Management,,
-244,1013940013,"750 Lexington Ave, New York, NY 10022",Cohen Brothers,,
+244,1013940013,"750 Lexington Ave, New York, NY 10022",Cohen Brothers,,crawl3
 245,1007950037,"635 Ave Of The Americas, New York, NY 10011",Spear Street,,
-246,1008760006,257 PARK AVENUE SOUTH,Feil Organization,,
+246,1008760006,257 PARK AVENUE SOUTH,Feil Organization,https://feil.com/properties/gramercy-park-building-i-257-park-ave-south/,
 247,1013950017,"770 Lexington Ave, New York, NY 10065",Swig Equities,,
-248,1013210001,"757 3 Ave, New York, NY 10017",MEPT Fund,,
+248,1013210001,"757 3 Ave, New York, NY 10017",MEPT Fund,http://19w44.com/,
 249,1006450029,"416 W 13th St, New York, NY 10014",Greenway Mews Realty,,
 250,1008560058,"60 Madison Ave, New York, NY 10010",Moinian Group,,
-251,1013130014,"722 Lexington Ave, New York, NY 10022",Vornado Realty Trust,,
-252,1008110021,1333 BROADWAY,Empire State Realty Trust,,
-253,1008130055,"1385 Broadway, New York, NY 10018",Columbia University,,
+251,1013130014,"722 Lexington Ave, New York, NY 10022",Vornado Realty Trust,https://www.gfpre.com/properties/307-west-36th-street,
+252,1008110021,1333 BROADWAY,Empire State Realty Trust,https://www.empirestaterealtytrust.com/properties/office/1333-broadway1/,crawl
+253,1008130055,"1385 Broadway, New York, NY 10018",Columbia University,https://www.vno.com/office/property/330-west-34th-street/3311660/landing,WebSearch
 254,1008620045,"30 E 33rd St, New York, NY 10016",Samco Properties,,
-255,1007890036,"550 7 Ave, New York, NY 10018",Adler Group,,
+255,1007890036,"550 7 Ave, New York, NY 10018",Adler Group,http://www.550seventhave.com/,crawl8
 256,1005630001,"83 University Pl, New York, NY 10003",CIM Group,,
-257,1012620001,"1180 Ave Of The Americas, New York, NY 10036",Northwood Investors,,
+257,1012620001,"1180 Ave Of The Americas, New York, NY 10036",Northwood Investors,https://northwoodinvestors.com/investment/1180-avenue-of-the-americas-2/,Updated
 258,1012930035,"460 Park Ave, New York, NY 10022",Hahn Kook Center,,
 259,1013170021,"815 2 Ave, New York, NY 10017",Episcopal Church,,
-260,1007850041,"470 7 Ave, New York, NY 10018",Kaufman Organization,,
-261,1005480009,"13 University Pl, New York, NY 10003",NYU,,
+261,1005480009,"13 University Pl, New York, NY 10003",NYU,http://feil.com/properties/7-penn-plaza/,
 262,1008710003,"32 Union Square, New York, NY 10003",GFP Real Estate,,
 263,1012980023,"425 Lexington Ave, New York, NY 10017",Vanbarton Group,,
-264,1012860043,"34 E 51st St, New York, NY 10022",Sedesco,,
+264,1012860043,"34 E 51st St, New York, NY 10022",Sedesco,http://www.34east51.com/,Updated
 265,1008570062,"72 Madison Ave, New York, NY 10016",Moinian Group,,
 266,1008290032,"13 W 27th St, New York, NY 10001",Kaufman Organization,,
 267,1007620050,"318 W 39th St, New York, NY 10018",GFP Real Estate,,
 268,1012830069,"589 5 Ave, New York, NY 10017",Mactaggart Family,,
-269,1012930069,"745 5 Ave, New York, NY 10022",Paramount Group,,
+269,1012930069,"745 5 Ave, New York, NY 10022",Paramount Group,,WebSearch
 270,1008260065,"40 W 25th St, New York, NY 10010",Kaufman Organization,,
-271,1008600001,"285 5 Ave, New York, NY 10118",Brause Realty,,
+271,1008600001,"285 5 Ave, New York, NY 10118",Brause Realty,http://www.brauserealty.com/office/320-fifth-ave,crawl
 272,1008560009,"11 E 26th St, New York, NY 10010",Adams & Company,,
-273,1004990007,"104 Greene St, New York, NY 10012",SL Green Realty,,
-274,1008210041,"148 5 Ave, New York, NY 10011",Sovereign Partners,,
-275,1004970001,"530 Broadway, New York, NY 10012",Wharton Properties,,
-276,1006460019,"860 Washington St, New York, NY 10014",Meadow Partners,,
-277,1008260046,"1115 Broadway, New York, NY 10010",Adams & Company,,
-278,1005650015,"849 Broadway, New York, NY 10003",Feil Organization,,
+274,1008210041,"148 5 Ave, New York, NY 10011",Sovereign Partners,http://www.100-104fifth.com/,crawl
+275,1004970001,"530 Broadway, New York, NY 10012",Wharton Properties,https://www.shvo.com/portfolio/530-broadway/,crawl4
+277,1008260046,"1115 Broadway, New York, NY 10010",Adams & Company,,WebSearch2
 279,1008000025,"119 W 24th St, New York, NY 10011",China Orient Asset Management Corporation,,
 280,1008660076,"397 5 Ave, New York, NY 10016",Hilson Management,,
 281,1008630067,"178 Madison Ave, New York, NY 10016",Prudential,,
 282,1000680011,"75 Maiden Lane, New York, NY 10038",AM Property Holding,,
-283,1008830001,"387 Park Ave South, New York, NY 10016",TF Cornerstone,,
-284,1013180033,"228 E 45th St, New York, NY 10017",Steinberg,,
-285,1013050040,"830 3 Ave, New York, NY 10022",Empire State Realty Trust,,
+283,1008830001,"387 Park Ave South, New York, NY 10016",TF Cornerstone,http://www.387pas.com/,crawl_last
+284,1013180033,"228 E 45th St, New York, NY 10017",Steinberg,https://hsprealestategroup.com/property/228-east-45th-street/,Updated
+285,1013050040,"830 3 Ave, New York, NY 10022",Empire State Realty Trust,,WebSearch2
 286,1008410031,"1 W 39th St, New York, NY 10018",Triangle Assets,,
 287,1008820076,"116 E 27th St, New York, NY 10016",Samco Properties,,
 288,1008610049,"38 E 32nd St, New York, NY 10016",Williams Equities,,
-289,1008500001,"149 5 Ave, New York, NY 10010",Brookfield,,
-290,1008400042,"424 5 Ave, New York, NY 10018",Amazon,,
+289,1008500001,"149 5 Ave, New York, NY 10010",Brookfield,https://www.brookfieldproperties.com/en/our-portfolio/manhattan-west.html,WebSearch
+290,1008400042,"424 5 Ave, New York, NY 10018",Amazon,https://www.vno.com/office/property/640-fifth-avenue/3311673/landing,
 291,1008590064,"105 Madison Ave, New York, NY 10016",Vornado Realty Trust,,
 292,1000200009,"45 Broadway, New York, NY 10006",Cammeby's,,
 293,1007790041,"352 7 Ave, New York, NY 10001",AM Property Holding,,
-294,1013040033,"800 3 Ave, New York, NY 10022",SL Green Realty,,
-295,1008040044,"104 W 29th St, New York, NY 10001",Samco Properties,,
-296,1008600045,"450 Park Ave South, New York, NY 10016",Moinian Group,,
-297,1012900003,"693 5 Ave, New York, NY 10022",Fimalac,,
-298,1007780020,"239 W 28th St, New York, NY 10001",Lexin,,
-299,1000640015,"160 Broadway, New York, NY 10038",KF Braun,,
-300,1010260032,"848 7 Ave, New York, NY 10019",Vornado Realty Trust,,
+294,1013040033,"800 3 Ave, New York, NY 10022",SL Green Realty,https://slgreen.com/properties/800-third-avenue/,WebSearch
+296,1008600045,"450 Park Ave South, New York, NY 10016",Moinian Group,https://www.moinian.com/,WebSearch2
+297,1012900003,"693 5 Ave, New York, NY 10022",Fimalac,http://www.693fifth.com/,
+300,1010260032,"848 7 Ave, New York, NY 10019",Vornado Realty Trust,http://www.825seventhave.com/,crawl
 301,1000220024,"50 Broadway, New York, NY 10004",50 Broadway Realty,,
-302,1000460001,"2 Wall St, New York, NY 10005",Fieldstone Capital,,
+302,1000460001,"2 Wall St, New York, NY 10005",Fieldstone Capital,,crawl3
 303,1008380012,"53 W 36th St, New York, NY 10018",Fatollah Hematian,,
-304,1005760046,"60 5 Ave, New York, NY 10011",NYU,,
-305,1008320017,"1241 Broadway, New York, NY 10001",Corem Property Group,,
+304,1005760046,"60 5 Ave, New York, NY 10011",NYU,http://www.ddbuilding.com/,
+305,1008320017,"1241 Broadway, New York, NY 10001",Corem Property Group,https://1245broadway.com/,crawl
 306,1012610034,"546 5 Ave, New York, NY 10036",Safra National Bank,,
-307,1008380015,"43 W 36th St, New York, NY 10018",Samco Properties,,
-308,1012890052,"527 Madison Ave, New York, NY 10022",Mitsui Fudosan America,,
-309,1012590019,"23 W 43rd St, New York, NY 10036",APF Properties,,
-310,1008060058,"128 W 31st St, New York, NY 10001",Vanbarton Group,,
-311,1012810059,"18 E 46th St, New York, NY 10017",Klosed Properties,,
+307,1008380015,"43 W 36th St, New York, NY 10018",Samco Properties,https://www.moinian.com/500-512-seventh-avenue,
+308,1012890052,"527 Madison Ave, New York, NY 10022",Mitsui Fudosan America,http://527madisonave.com/,
+309,1012590019,"23 W 43rd St, New York, NY 10036",APF Properties,https://625madison.com/,
+311,1012810059,"18 E 46th St, New York, NY 10017",Klosed Properties,https://www.namdarrealtygroup.com/?page=detail&pid=2546,Updated
 312,1008660001,"389 5 Ave, New York, NY 10016",Rosen Equities,,
 313,1012630038,"590 5 Ave, New York, NY 10036",Fatollah Hematian,,
 314,1008800084,"104 E 25th St, New York, NY 10010",Williams Equities,,
 315,1007120029,"47 9 Ave, New York, NY 10011","Tavros Capital Partners, Arel",,
-316,1008120006,"491 7 Ave, New York, NY 10018",Block Buildings,,
-317,1008760001,"251 Park Ave South, New York, NY 10010",Feil Organization,,
-318,1000880001,"217 Broadway, New York, NY 10007",Columbus Properties,,
+316,1008120006,"491 7 Ave, New York, NY 10018",Block Buildings,https://www.savittpartners.com/portfolio/2015/8/12/499-7th-avenue,crawl9
+317,1008760001,"251 Park Ave South, New York, NY 10010",Feil Organization,https://feil.com/properties/park-avenue-south-building/,WebSearch
 319,1008190056,"18 W 18th St, New York, NY 10011",C.A. White,,
-320,1007630049,"314 W 40th St, New York, NY 10018",City of New York,,
-321,1008400071,"42 W 39th St, New York, NY 10018",Adams & Company,,
-322,1012970023,"395 Lexington Ave, New York, NY 10174",Cooper Union,,
-323,1009400012,"321 E 34th St, New York, NY 10016",Adams & Company,,
+320,1007630049,"314 W 40th St, New York, NY 10018",City of New York,https://www.princetonprop.com/portfolio_posts/104-west-40th-street/,crawl
+321,1008400071,"42 W 39th St, New York, NY 10018",Adams & Company,,WebSearch2
+322,1012970023,"395 Lexington Ave, New York, NY 10174",Cooper Union,https://www.chryslerbuilding.com/,WebSearch
+323,1009400012,"321 E 34th St, New York, NY 10016",Adams & Company,,WebSearch2
 324,1008010024,"119 W 25th St, New York, NY 10001",AFIAA,,
 325,1006090007,"154 W 14th St, New York, NY 10011",Abner Properties,,
-326,1007620033,"575 8 Ave, New York, NY 10018",Olmstead Properties,,
 327,1013030033,"776 3 Ave, New York, NY 10017",TIAA-CREF,,
 328,1000420031,"80 Maiden Lane, New York, NY 10038",Cannon Hill Capital Partners,,
 329,1007860023,"229 W 36th St, New York, NY 10018",Empire State Realty Trust,,
 330,1007800071,"254 W 31st St, New York, NY 10001",Winoker Realty,,
 331,1007850067,"242 W 36th St, New York, NY 10018",Kaufman Organization,,
-332,1000880010,"30 Vesey St, New York, NY 10007",Greystone,,
 333,1013750016,"652 Madison Ave, New York, NY 10065",Extell Development,,
-334,1009930055,"1441 Broadway, New York, NY 10018",L.H. Charney Associates,,
-335,1010080037,"106 W 56th St, New York, NY 10019",Savanna Real Estate Fund,,
-336,1019980017,"615 W 131st St, New York, NY 10027",Columbia University,,
-337,1007280060,"442 W 31st St, New York, NY 10001",450 West 31st Ownrscp,,
+334,1009930055,"1441 Broadway, New York, NY 10018",L.H. Charney Associates,https://feil.com/properties/251-park-avenue-south/,
+335,1010080037,"106 W 56th St, New York, NY 10019",Savanna Real Estate Fund,https://thesix56.com/,crawl
+336,1019980017,"615 W 131st St, New York, NY 10027",Columbia University,https://facilities.columbia.edu/,WebSearch
 338,1007760059,"236 W 27th St, New York, NY 10001",Rosen Equities,,
 339,1002210030,"200 Hudson St, New York, NY 10013",Hines,,
-340,1012950058,"364 Lexington Ave, New York, NY 10017",Triangle Assets,,
-341,1005450006,"708 Broadway, New York, NY 10003",NYU,,
+340,1012950058,"364 Lexington Ave, New York, NY 10017",Triangle Assets,http://www.jaysuites.com/,crawl2
 342,1008050003,"345 7 Ave, New York, NY 10001",Katan Realty Group,,
-343,1008120069,"148 W 37th St, New York, NY 10018",Adams & Company,,
+343,1008120069,"148 W 37th St, New York, NY 10018",Adams & Company,https://www.adamsre.com/products/148-west-37th,WebSearch2
 344,1012720034,"720 5 Ave, New York, NY 10019",Promenade Real Estate,,
 345,1008260057,"24 W 25th St, New York, NY 10010",Savanna Real Estate Fund,,
 346,1008710060,"30 Irving Pl, New York, NY 10003",Samco Properties,,
 347,1008590052,"44 E 30th St, New York, NY 10016",Brookfield,,
 348,1013940001,"505 Park Ave, New York, NY 10022",G.S. 505 Park,,
-349,1007800010,"251 W 30th St, New York, NY 10001",Justin Towers,,
+349,1007800010,"251 W 30th St, New York, NY 10001",Justin Towers,http://chelseasq.com/,crawl
 350,1008360043,"366 5 Ave, New York, NY 10001",Joseph P. Day,,
 351,1004740030,"483 Broadway, New York, NY 10013",Vornado Realty Trust,,
 352,1012920052,"575 Madison Ave, New York, NY 10022",Steinberg,,
-353,1008300062,"1195 Broadway, New York, NY 10001",Williams Equities,,
+353,1008300062,"1195 Broadway, New York, NY 10001",Williams Equities,https://1201broadway.com/,crawl9
 354,1008220031,"154 5 Ave, New York, NY 10118",Hines,,
-355,1009990003,"1560 Broadway, New York, NY 10036",Paramount Group,,
+355,1009990003,"1560 Broadway, New York, NY 10036",Paramount Group,https://www.paramount-group.com/portfolio/1633-broadway,WebSearch
 356,1008020008,"151 W 26th St, New York, NY 10001",Abner Properties,,
 357,1006980001,"244 11 Ave, New York, NY 10001",Vornado Realty Trust,,
 358,1008400031,"15 W 38th St, New York, NY 10018",Abner Properties,,
 359,1012700049,"20 W 55th St, New York, NY 10019",Passaic Investors,,
 360,1000220017,"32 Broadway, New York, NY 10004",Vornado Realty Trust,,
-361,1000640012,"150 Broadway, New York, NY 10038",JEMB,,
 362,1007860013,"255 W 36th St, New York, NY 10018",Triangle Assets,,
 363,1008210032,"11 W 19th St, New York, NY 10011",Block Buildings,,
 364,1007890052,"218 W 40th St, New York, NY 10018",Block Buildings,,
-365,1005110008,"584 Broadway, New York, NY 10012",Vornado Realty Trust,,
+365,1005110008,"584 Broadway, New York, NY 10012",Vornado Realty Trust,,crawl4
 366,1012600042,"2 W 45th St, New York, NY 10036",Joseph P. Day,,
 367,1008810001,"351 Park Ave South, New York, NY 10010",M.D. Carlisle Construction,,
-368,1005100038,"298 Lafayette St, New York, NY 10012",Kushner Companies,,
 369,1007790017,"231 W 29th St, New York, NY 10001",Kaufman Organization,,
-370,1005970055,"333 Hudson St, New York, NY 10013",Trinity Church Wall Street,,
+370,1005970055,"333 Hudson St, New York, NY 10013",Trinity Church Wall Street,https://www.333hudsonst.com/,crawl5
 371,1022150824,"4116 9 Ave, New York, NY 10034",City of New York,,
 372,1004960036,"71 Spring St, New York, NY 10012",United American Land Company,,
 373,1007790013,"241 W 29th St, New York, NY 10001",Rosen Equities,,
 374,1008590015,"102 Madison Ave, New York, NY 10016",A. Ruth,,
-375,1006010047,"120 Leroy St, New York, NY 10014",Centaur Properties,,
-376,1008200038,"130 5 Ave, New York, NY 10011",Hampton Management Co,,
+375,1006010047,"120 Leroy St, New York, NY 10014",Centaur Properties,https://slgreen.com/properties/110-greene-street,
+376,1008200038,"130 5 Ave, New York, NY 10011",Hampton Management Co,https://www.olnick.com/projects/office/130-fifth-avenue,crawl9
 377,1008680008,"5 E 38th St, New York, NY 10016",Winter Organization,,
 378,1012620048,"16 W 47th St, New York, NY 10036",Elo Realty,,
 379,1008330038,"302 5 Ave, New York, NY 10016",Meadow Partners,,
@@ -382,9 +352,9 @@ rank,bbl,address,owner,url,source
 381,1008370058,"20 W 36th St, New York, NY 10018",Rosen Equities,,
 382,1008280009,"37 W 26th St, New York, NY 10010",Windsor Management,,
 383,1013090066,"110 E 55th St, New York, NY 10022",Parkoff Organization,,
-384,1007940030,"615 Ave Of The Americas, New York, NY 10011",RXR Realty,,
+384,1007940030,"615 Ave Of The Americas, New York, NY 10011",RXR Realty,https://tfc.com/office-space-for-lease-in-nyc/230-park-avenue-south,
 385,1004960040,"75 Spring St, New York, NY 10012",Greystone,,
-386,1000920024,"116 Nassau St, New York, NY 10038",Columbia University,,
+386,1000920024,"116 Nassau St, New York, NY 10038",Columbia University,https://slgreen.com/properties/304-park-avenue-south?list_view=false,WebSearch2
 387,1008620013,"15 E 32nd St, New York, NY 10016",Rian Holding,,
 388,1005310020,"383 Lafayette St, New York, NY 10003",NYU,,
 389,1012630007,"55 W 47th St, New York, NY 10036",Kaufman Organization,,
@@ -392,115 +362,106 @@ rank,bbl,address,owner,url,source
 391,1008610064,"148 Madison Ave, New York, NY 10016",Winoker Realty,,
 392,1005100001,"63 Prince St, New York, NY 10012",Bromley Companies,,
 393,1001940042,"60 Walker St, New York, NY 10013",Vornado Realty Trust,,
-394,1007990012,"155 W 23rd St, New York, NY 10011",MC Real Estate Partners,,
+394,1007990012,"155 W 23rd St, New York, NY 10011",MC Real Estate Partners,https://www.155west23rd.com/,crawl9
 395,1018840001,"2880 Broadway, New York, NY 10025",Columbia University,,
 396,1012770069,"511 5 Ave, New York, NY 10017",Aurora Capital Associates,,
 397,1007940017,"135 W 18th St, New York, NY 10011",P.J. Mechanical,,
-398,1012900044,"66 E 55th St, New York, NY 10022",Tak Development,,
+398,1012900044,"66 E 55th St, New York, NY 10022",Tak Development,http://www.herontowerny.com/,crawl
 399,1008190010,"47 W 17th St, New York, NY 10011",Argo Real Estate,,
 400,1012900006,"3 E 54th St, New York, NY 10022",Cohen Brothers,,
-401,1007840060,"224 W 35th St, New York, NY 10101",Gatsby,,
 402,1008440042,"91 5 Ave, New York, NY 10003",HRC,,
-403,1019860065,"3280 Broadway, New York, NY 10027",Columbia University,,
+403,1019860065,"3280 Broadway, New York, NY 10027",Columbia University,,WebSearch
 404,1008380048,"402 5 Ave, New York, NY 10018",NYU,,
-405,1006460027,"428 W 14th St, New York, NY 10014",Rockpoint,,
 406,1008610047,"44 E 32nd St, New York, NY 10016",Windsor Management,,
 407,1008440003,"87 5 Ave, New York, NY 10003",Dezer Properties,,
-408,1005450053,"400 Lafayette St, New York, NY 10003",NYU,,
-409,1008830088,"401 Park Ave South, New York, NY 10016",Himmel + Meringoff,,
+408,1005450053,"400 Lafayette St, New York, NY 10003",NYU,http://www.400lafayette.com/,crawl5
+409,1008830088,"401 Park Ave South, New York, NY 10016",Himmel + Meringoff,http://www.401parkavenuesouth.com/,crawl_last
 410,1012790069,"545 5 Ave, New York, NY 10017",Moinian Group,,
-411,1007890021,"231 W 39th St, New York, NY 10018",Schur Management Company,,
-412,1008800014,"121 E 24th St, New York, NY 10010",Adams & Company,,
-413,1008120019,"135 W 36th St, New York, NY 10018",Waitex International,,
+411,1007890021,"231 W 39th St, New York, NY 10018",Schur Management Company,,manual_search
+412,1008800014,"121 E 24th St, New York, NY 10010",Adams & Company,https://www.adamsre.com/products/121-east-24th-street,crawl
 414,1005970001,"515 Greenwich St, New York, NY 10013",Trinity Church Wall Street,,
 415,1012610030,"7 W 45th St, New York, NY 10036",Durst Organization,,
 416,1017740056,"132 E 126th St, New York, NY 10035",Blumenfeld Development,,
 417,1012600064,"56 W 45th St, New York, NY 10036",Gatsby,,
 418,1019670045,"461 W 126th St, New York, NY 10027",Janus Property,,
 419,1007990028,"119 W 23rd St, New York, NY 10011",Stellar Management,,
-420,1008400023,"29 W 38th St, New York, NY 10018",ABS Partners,,
+420,1008400023,"29 W 38th St, New York, NY 10018",ABS Partners,https://absre.com/investments/29-west-38th-street/,crawl10
 421,1008220015,"27 W 20th St, New York, NY 10011",Dezer Properties,,
-422,1005630046,"57 E 11th St, New York, NY 10003",Winter Organization,,
-423,1005460026,"21 W 4th St, New York, NY 10012",NYU,,
-424,1008490063,"912 Broadway, New York, NY 10010",ABS Partners,,
+423,1005460026,"21 W 4th St, New York, NY 10012",NYU,http://apfproperties.com/portfolio/club-row-building/,crawl
+424,1008490063,"912 Broadway, New York, NY 10010",ABS Partners,https://absre.com/portfolio/915-broadway/,crawl11
 425,1006970056,"536 W 26th St, New York, NY 10001",Ramrock Real Estate,,
 426,1007890062,"240 W 40th St, New York, NY 10018",Sioni Group,,
 427,1008010055,"122 W 26th St, New York, NY 10001",Dezer Properties,,
 428,1012610036,"550 5 Ave, New York, NY 10036",Safra National Bank,,
 429,1008420042,"71 5 Ave, New York, NY 10003",Madison International Realty,,
 430,1012620024,"21 W 46th St, New York, NY 10036",Elo Realty,,
-431,1008580022,"79 Madison Ave, New York, NY 10016",Williams Equities,,
+431,1008580022,"79 Madison Ave, New York, NY 10016",Williams Equities,https://79madisonave.com/,crawl11
 432,1008020056,"122 W 27th St, New York, NY 10001",Rosen Equities,,
-433,1008630060,"183 Madison Ave, New York, NY 10016",APF Properties,,
-434,1008320001,"856 Ave Of The Americas, New York, NY 10001",Durst Organization,,
-435,1008210055,"18 W 20th St, New York, NY 10011",Dezer Properties,,
+433,1008630060,"183 Madison Ave, New York, NY 10016",APF Properties,https://apfproperties.com/apf/properties/183-madison-avenue/,crawl
+434,1008320001,"856 Ave Of The Americas, New York, NY 10001",Durst Organization,http://www.855avenueoftheamericas.com/,crawl9
+435,1008210055,"18 W 20th St, New York, NY 10011",Dezer Properties,,WebSearch2
 436,1005120015,"591 Broadway, New York, NY 10012",GFP Real Estate,,
 437,1010100021,"119 W 57th St, New York, NY 10019",Zar Property NY,,
-438,1007840064,"240 W 35th St, New York, NY 10001",MetLife,,
+438,1007840064,"240 W 35th St, New York, NY 10001",MetLife,https://www.240w35.com/,crawl7
 439,1008260069,"48 W 25th St, New York, NY 10010",Savanna Real Estate Fund,,
-440,1007780043,"330 7 Ave, New York, NY 10001",GFP Real Estate,,
-441,1008590024,"99 Madison Ave, New York, NY 10016",Windsor Management,,
+441,1008590024,"99 Madison Ave, New York, NY 10016",Windsor Management,http://www.99madisonavenue.com/,crawl
 442,1008680072,"437 5 Ave, New York, NY 10016",Joseph P. Day,,
-443,1008780065,"120 E 23rd St, New York, NY 10010",Williams Equities,,
+443,1008780065,"120 E 23rd St, New York, NY 10010",Williams Equities,https://www.120east23rd.com/,crawl_last
 444,1005770034,"8 W 14th St, New York, NY 10011",Soloviev Group,,
 445,1009980024,"115 W 45th St, New York, NY 10036",Kiamie Industries,,
 446,1008190037,"118 5 Ave, New York, NY 10011",Century Link,,
-447,1005110006,"580 Broadway, New York, NY 10012",A.R.I Investors,,
-448,1008410001,"1040 Ave Of The Americas, New York, NY 10018",Garden Homes,,
+447,1005110006,"580 Broadway, New York, NY 10012",A.R.I Investors,http://www.575broadway.com/,crawl4
+448,1008410001,"1040 Ave Of The Americas, New York, NY 10018",Garden Homes,https://skylinedevelopers.com/commercial/1040-avenue-of-the-americas,crawl10
 449,1007850018,"237 W 35th St, New York, NY 10001",Somerset Management,,
 450,1012730001,"1400 Ave Of The Americas, New York, NY 10019",Empire State Realty Trust,,
 451,1008390070,"42 W 38th St, New York, NY 10018",Elo Realty,,
 452,1008220070,"54 W 21st St, New York, NY 10010",Olmstead Properties,,
 453,1007890014,"251 W 39th St, New York, NY 10018",Miriam Ungar,,
-454,1011020018,"619 W 54th St, New York, NY 10019",Silverstein Properties,,
-455,1004730001,"462 Broadway, New York, NY 10013",Vornado Realty Trust,,
-456,1012610016,"45 W 45th St, New York, NY 10036",AFIAA,,
+454,1011020018,"619 W 54th St, New York, NY 10019",Silverstein Properties,http://www.619w54.com/,crawl
+455,1004730001,"462 Broadway, New York, NY 10013",Vornado Realty Trust,https://hmprop.com/portfolio/462-broadway/,crawl3
+456,1012610016,"45 W 45th St, New York, NY 10036",AFIAA,,WebSearch2
 457,1000510007,"76 Trinity Pl, New York, NY 10006",Trinity Church Wall Street,,
 458,1007790075,"400 8 Ave, New York, NY 10001",Himmel + Meringoff,,
 459,1008490031,"45 E 20th St, New York, NY 10003",Abner Properties,,
-460,1005110012,"592 Broadway, New York, NY 10012",Vornado Realty Trust,,
+460,1005110012,"592 Broadway, New York, NY 10012",Vornado Realty Trust,https://www.vno.com/office/property/606-broadway/3311674/landing,WebSearch
 461,1008500025,"33 E 21st St, New York, NY 10010",Centaur Properties,,
-462,1007890075,"264 W 40th St, New York, NY 10018",Renaissance Properties,,
+462,1007890075,"264 W 40th St, New York, NY 10018",Renaissance Properties,https://renaissancepropertiesny.com/property/264-west-40-street/,crawl8
 463,1009990009,"151 W 46th St, New York, NY 10036",Elo Realty,,
-464,1008370056,"16 W 36th St, New York, NY 10018",Kiamie Industries,,
-465,1012930026,"597 Madison Ave, New York, NY 10022",Fuller Madison,,
+464,1008370056,"16 W 36th St, New York, NY 10018",Kiamie Industries,https://www.vno.com/office/property/manhattan-mall/100-west-33rd-street/3311652/landing,
+465,1012930026,"597 Madison Ave, New York, NY 10022",Fuller Madison,https://www.vno.com/office/property/595-madison-avenue/3311671/landing,WebSearch
 466,1008860001,"443 Park Ave South, New York, NY 10016",443 Park Avenue South,,
-467,1007890030,"205 W 39th St, New York, NY 10018",Resolution Real Estate,,
+467,1007890030,"205 W 39th St, New York, NY 10018",Resolution Real Estate,,manual_search
 468,1012600071,"1156 Ave Of The Americas, New York, NY 10036",APF Properties,,
 469,1001960005,"408 Broadway, New York, NY 10013",United American Land Company,,
 470,1008580006,"3 E 28th St, New York, NY 10016",Winter Organization,,
 471,1008230029,"15 W 21st St, New York, NY 10010",Himmel + Meringoff,,
-472,1012950020,"363 Lexington Ave, New York, NY 10017",AmTrust Realty,,
+472,1012950020,"363 Lexington Ave, New York, NY 10017",AmTrust Realty,http://360lexingtonave.com/,crawl2
 473,1007660061,"230 W 17th St, New York, NY 10011",Carnegie Hill Properties,,
-474,1007610033,"545 8 Ave, New York, NY 10018",Global Holdings Management,,
-475,1008590048,"434 Park Ave South, New York, NY 10016",Samco Properties,,
+475,1008590048,"434 Park Ave South, New York, NY 10016",Samco Properties,https://www.samcoproperties.net/,WebSearch2
 476,1005300001,"670 Broadway, New York, NY 10012",Wings Group,,
 477,1008110056,"142 W 36th St, New York, NY 10018",ADAM Asset Management,,
-478,1008030067,"150 W 28th St, New York, NY 10001",Dezer Properties,,
 479,1008440001,"85 5 Ave, New York, NY 10003",Winoker Realty,,
 480,1008140046,"108 W 39th St, New York, NY 10018",Joseph P. Day,,
-481,1005230046,"625 Broadway, New York, NY 10012",Lincoln Property,,
+481,1005230046,"625 Broadway, New York, NY 10012",Lincoln Property,https://625broadwaynyc.com/,crawl4
 482,1008400058,"16 W 39th St, New York, NY 10018",Behrooz Hedvat,,
-483,1008200026,"23 W 18th St, New York, NY 10011",Kaufman Organization,,
+483,1008200026,"23 W 18th St, New York, NY 10011",Kaufman Organization,https://www.tabletnyc.com/,crawl
 484,1008220052,"18 W 21st St, New York, NY 10010",Kaufman Organization,,
-485,1013120024,"145 E 57th St, New York, NY 10022",ABS Partners,,
+485,1013120024,"145 E 57th St, New York, NY 10022",ABS Partners,https://145e57.com/,crawl2
 486,1013910014,"974 Madison Ave, New York, NY 10075",Bloomberg,,
 487,1008630006,"1 E 33rd St, New York, NY 10016",Williams Real Estate,,
 488,1012610019,"35 W 45th St, New York, NY 10036",Stahl Organization,,
 489,1008620016,"152 Madison Ave, New York, NY 10016",Safavieh,,
 490,1009980012,"145 W 45th St, New York, NY 10036",Fatollah Hematian,,
 491,1008600049,"36 E 31st St, New York, NY 10016",Williams Real Estate,,
-492,1005630031,"817 Broadway, New York, NY 10003",Squire Investments,,
+492,1005630031,"817 Broadway, New York, NY 10003",Squire Investments,https://817broadway.com/,crawl
 493,1007800013,"247 W 30th St, New York, NY 10001",SYU Properties,,
-494,1014350044,"306 E 61st St, New York, NY 10065",Acram Group,,
+494,1014350044,"306 E 61st St, New York, NY 10065",Acram Group,https://www.interiorartsbuilding.com/,crawl2
 495,1008390019,"35 W 37th St, New York, NY 10018",Abner Properties,,
 496,1008410027,"15 W 39th St, New York, NY 10018",Northern Star,,
-497,1008410027,"15 W 39th St, New York, NY 10018",Northern Star,,
-498,1012750012,"15 E 40th St, New York, NY 10016",Ya Zhou Wen Hua,,
+498,1012750012,"15 E 40th St, New York, NY 10016",Ya Zhou Wen Hua,https://www.vno.com/office/property/608-fifth-avenue/3311689/landing,
 499,1011130008,"27 W 60th St, New York, NY 10023",Bonafide Estates,,
-500,1008070039,"875 Ave Of The Americas, New York, NY 10001",Kaufman Organization,,
 501,1007590031,"315 W 35th St, New York, NY 10001",Salva,,
-502,1008610072,"6 E 32nd St, New York, NY 10016",Himmel + Meringoff,,
+502,1008610072,"6 E 32nd St, New York, NY 10016",Himmel + Meringoff,https://hmprop.com/portfolio/6-east-32nd-street/,crawl
 503,1008230073,"56 W 22nd St, New York, NY 10010",Williams Real Estate,,
 504,1012750059,"292 Madison Ave, New York, NY 10017",American Exchange Group,,
 505,1013100041,"160 E 56th St, New York, NY 10022",Shokrollah Rehanian,,
@@ -513,49 +474,41 @@ rank,bbl,address,owner,url,source
 512,1008240032,"3 W 22nd St, New York, NY 10010",Greystone,,
 513,1008620026,"31 E 32nd St, New York, NY 10016",Kiamie Industries,,
 514,1008610003,"307 5 Ave, New York, NY 10016",Elijah Equities,,
-515,1008730067,"215 Park Ave South, New York, NY 10003",SL Green Realty,,
+515,1008730067,"215 Park Ave South, New York, NY 10003",SL Green Realty,https://slgreen.com/properties/215-park-avenue-south?list_view=true,crawl14
 516,1008690020,"271 Madison Ave, New York, NY 10016",J.C. Dwight Management,,
-517,1001240004,"11 Park Pl, New York, NY 10128",Stahl Organization,,
-518,1008370023,"29 W 35th St, New York, NY 10001",LNR Partners,,
-519,1004820016,"72 Spring St, New York, NY 10012",Heller Properties,,
-520,1008390009,"49 W 37th St, New York, NY 10018",Samco Properties,,
-521,1012630071,"1212 Ave Of The Americas, New York, NY 10036",Stawski Partners,,
+517,1001240004,"11 Park Pl, New York, NY 10128",Stahl Organization,https://www.11parkplace.com/,crawl
+518,1008370023,"29 W 35th St, New York, NY 10001",LNR Partners,http://www.29w35.com/,crawl10
+520,1008390009,"49 W 37th St, New York, NY 10018",Samco Properties,http://www.90fifthnyc.com/,
+521,1012630071,"1212 Ave Of The Americas, New York, NY 10036",Stawski Partners,https://1212avenueoftheamericas.com/,crawl
 522,1008340019,"39 W 32nd St, New York, NY 10001",Adams & Company,,
 523,1010540041,"420 W 45th St, New York, NY 10036",GFP Real Estate,,
 524,1008360033,"1 W 34th St, New York, NY 10001",BLDG Management Co.,,
 525,1008590072,"112 Madison Ave, New York, NY 10016",Samco Properties,,
 526,1007840051,"212 W 35th St, New York, NY 10001",Kaufman Organization,,
-527,1008280033,"1140 Broadway, New York, NY 10001",Williams Equities,,
+527,1008280033,"1140 Broadway, New York, NY 10001",Williams Equities,,WebSearch2
 528,1012840056,"424 Madison Ave, New York, NY 10017",BLDG Management Co.,,
-529,1008220058,"30 W 21st St, New York, NY 10010",Skyway Development Group,,
+529,1008220058,"30 W 21st St, New York, NY 10010",Skyway Development Group,http://skywaydev.com/30w21/,crawl9
 530,1008120016,"141 W 36th St, New York, NY 10018",Tishman Speyer,,
 531,1008290068,"44 W 28th St, New York, NY 10001",Stellar Management,,
-532,1012910021,"551 Madison Ave, New York, NY 10022",Lexin,,
-533,1001550003,"52 Duane St, New York, NY 10007",Benjamin Partners,,
+532,1012910021,"551 Madison Ave, New York, NY 10022",Lexin,http://551madisonavenue.com/,crawl2
 534,1008810029,"137 E 25th St, New York, NY 10010",Republic Investment,,
-535,1008070028,"119 W 31st St, New York, NY 10001",Clarion Partners,,
-536,1008070028,"119 W 31st St, New York, NY 10001",Clarion Partners,,
-537,1008050019,"135 W 29th St, New York, NY 10001",Kaufman Organization,,
-538,1008030021,"121 W 27th St, New York, NY 10001",Mehra Properties,,
+535,1008070028,"119 W 31st St, New York, NY 10001",Clarion Partners,http://www1.nyc.gov/,
 539,1008330057,"22 W 32nd St, New York, NY 10001",Montague-Lee,,
-540,1007880073,"250 W 39th St, New York, NY 10018",Lincoln Property,,
 541,1008060009,"145 W 30th St, New York, NY 10001",Feil Organization,,
-542,1005460021,"19 W 4Th St, New York, NY 10012",NYU,,
+542,1005460021,"19 W 4Th St, New York, NY 10012",NYU,,WebSearch2
 543,1008380062,"20 W 37th St, New York, NY 10018",Northern Estates,,
-544,1007870072,"256 W 38th St, New York, NY 10018",Empire State Realty Trust,,
+544,1007870072,"256 W 38th St, New York, NY 10018",Empire State Realty Trust,,WebSearch2
 545,1005770019,"34 W 14th St, New York, NY 10011",New School,,
 546,1012630051,"22 W 48th St, New York, NY 10036",Sioni Group,,
 547,1008680012,"9 E 38th St, New York, NY 10016",ClearRock Properties,,
 548,1007600055,"320 W 37th St, New York, NY 10018",Sioni Group,,
 549,1008380008,"63 W 36th St, New York, NY 10018",Sioni Group,,
-550,1008460026,"860 Broadway, New York, NY 10003",Vornado Realty Trust,,
+550,1008460026,"860 Broadway, New York, NY 10003",Vornado Realty Trust,https://www.vno.com/office/property/860-broadway/3311678/landing,WebSearch
 551,1007860068,"240 W 37th St, New York, NY 10018",Sioni Group,,
-552,1008020075,"158 W 27th St, New York, NY 10001",AFIAA,,
 553,1007880004,"580 8 Ave, New York, NY 10018",Miriam Ungar,,
 554,1012630059,"42 W 48th St, New York, NY 10036",Elo Realty,,
-555,1005640007,"113 University Pl, New York, NY 10003",Amalgamated Lithographers of America,,
-556,1005440008,"409 Lafayette St, New York, NY 10003",Himmel + Meringoff,,
-557,1008380072,"40 W 37th St, New York, NY 10018",Park Ridge International,,
+556,1005440008,"409 Lafayette St, New York, NY 10003",Himmel + Meringoff,http://www.411lafayettestreet.com/,crawl5
+557,1008380072,"40 W 37th St, New York, NY 10018",Park Ridge International,http://www.40w37.com/,crawl
 558,1008630029,"33 E 33rd St, New York, NY 10016",Elk Investors,,
 559,1008220062,"38 W 21st St, New York, NY 10010",Jack Vogel Associates,,
 560,1002320001,"434 Broadway, New York, NY 10013",MC Real Estate Partners,,
@@ -563,24 +516,66 @@ rank,bbl,address,owner,url,source
 562,1008360035,"358 5 Ave, New York, NY 10001",Crown Acquisitions,,
 563,1008040011,"145 W 28th St, New York, NY 10001",Dezer Properties,,
 564,1005320015,"661 Broadway, New York, NY 10012",Continental East,,
-565,1008220049,"12 W 21st St, New York, NY 10010",Himmel + Meringoff,,
+565,1008220049,"12 W 21st St, New York, NY 10010",Himmel + Meringoff,http://www.thenomadportfolio.com/portfolio-12w-21st.html,crawl9
 566,1008330006,"1255 Broadway, New York, NY 10001",Olmstead Properties,,
-567,1005010015,"130 Prince St, New York, NY 10012",Englewood Partners,,
+567,1005010015,"130 Prince St, New York, NY 10012",Englewood Partners,http://130princestreetnyc.com/,crawl4
 568,1008710070,"116 E 16th St, New York, NY 10003",Samco Properties,,
-569,1010120023,"215 W 40th St, New York, NY 10018",Heskel's Asset Management,,
+569,1010120023,"215 W 40th St, New York, NY 10018",Heskel's Asset Management,http://chelseamarket.com/,
 570,1009030047,"220 E 23rd St, New York, NY 10010",A. Shalom Realty,,
 571,1007630024,"315 W 39th St, New York, NY 10018",Handler Real Estate Services,,
 572,1008400013,"49 W 38th St, New York, NY 10018",Heskel's Asset Management,,
 573,1012920048,"32 E 57th St, New York, NY 10022",Joseph P. Day,,
 574,1008370036,"3 W 35th St, New York, NY 10018",R F S C,,
-575,1008000065,"150 W 25th St, New York, NY 10001",Dezer Properties,,
+575,1008000065,"150 W 25th St, New York, NY 10001",Dezer Properties,https://dezerproperties.com/150-west-25th-street/,manual_search
 576,1009930001,"561 7 Ave, New York, NY 10018",Handler Real Estate Services,,
 577,1007790057,"224 W 30th St, New York, NY 10001",Starpointe Management,,
 578,1002310035,"451 Broadway, New York, NY 10013",Crale Realty,,
 579,1007750058,"226 W 26th St, New York, NY 10001",Rocco Tomassetti,,
 580,1007870020,"241 W 37th St, New York, NY 10018",Chetrit Group,,
-581,1004860011,"84 Wooster St, New York, NY 10012",Stellar Management,,
-582,1008400028,"21 W 38th St, New York, NY 10018",Brause Realty,,
+581,1004860011,"84 Wooster St, New York, NY 10012",Stellar Management,https://980madisonavenue.com/,
+582,1008400028,"21 W 38th St, New York, NY 10018",Brause Realty,http://www.brauserealty.com/,WebSearch2
+592,1000090029,"24 State St, New York, NY 10004",Rudin,https://www.rudin.com/commercial-properties/one-battery-park-plaza,Rudin
+593,1000100014,"33 Whitehall St, New York, NY 10004",Broad Financial Center,http://www.stawskipartners.com/buildings/broad-financial-center/,Updated
+594,1000200004,"39 Broadway, New York, NY 10006",Cammeby's,https://tlgrealty.com/new-york/manhattan/39-broadway/,Updated
+595,1000200016,"55 Broadway, New York, NY 10006",Vornado Realty Trust,http://www.bsdre.com/Properties/Details/55Broadway,Broad Street Development
+596,1000290070,"75 Broad St, New York, NY 10004",JEMB,https://www.jembrealty.com/project/75-broad-street-new-york-ny/,JEMB
+597,1000640012,"150 Broadway, New York, NY 10038",JEMB,https://www.jembrealty.com/project/150-broadway-new-york-ny/,JEMB
+598,1000640015,"160 Broadway, New York, NY 10038",KF Braun,https://braunmgmt.com/building/160-broadway/,KF Braun Management
+599,1000880001,"217 Broadway, New York, NY 10007",Columbus Properties,https://www.columbuspropertiesinc.com/new-york,Columbus Properties
+600,1000880010,"30 Vesey St, New York, NY 10007",Greystone,https://www.commercialcafe.com/commercial-property/us/ny/new-york/underwood-building/,CommercialCafe
+601,1001550001,"2 Lafayette St, New York, NY 10007",City of New York,https://www.nyc.gov/site/dcas/business/dcasmanagedbuildings/court-square-building.page,NYC DCAS
+602,1001550003,"52 Duane St, New York, NY 10007",Benjamin Partners,https://www.metro-manhattan.com/buildings/52-duane-street-office-space-for-lease/,Metro Manhattan
+603,1004820016,"72 Spring St, New York, NY 10012",Heller Properties,https://www.metro-manhattan.com/buildings/72-spring-street-office-space-for-lease/,Metro Manhattan
+604,1004990007,"104 Greene St, New York, NY 10012",SL Green Realty,https://slgreen.com/properties/110-greene-street/,SL Green
+605,1005100038,"298 Lafayette St, New York, NY 10012",Kushner Companies,https://kushner.com/project/puck/,Kushner
+606,1005110001,"568 Broadway, New York, NY 10012",Aurora Capital Associates,https://www.metro-manhattan.com/buildings/568-578-broadway-prince-building/,Updated
+607,1005450006,"708 Broadway, New York, NY 10003",NYU,https://publichealth.nyu.edu/about/contact-us,NYU
+608,1005590016,"124 E 14th St, New York, NY 10003",City of New York,,Zero Irving
+609,1005630046,"57 E 11th St, New York, NY 10003",Winter Organization,http://www.57east11.com/,Winter Properties
+610,1005640007,"113 University Pl, New York, NY 10003",Amalgamated Lithographers of America,https://www.villagepreservation.org/113-university-place/,Village Preservation
+611,1005650015,"849 Broadway, New York, NY 10003",Feil Organization,https://feil.com/properties/853-broadway/,Feil Organization
+612,1006460019,"860 Washington St, New York, NY 10014",Meadow Partners,http://860washington.com/vision,Property Group Partners
+613,1006460027,"428 W 14th St, New York, NY 10014",Rockpoint,https://www.412w15.com/,Rockpoint
+614,1007280060,"442 W 31st St, New York, NY 10001",450 West 31st Ownrscp,https://rudderpg.com/properties/450-west-31st-street/,Rudder Property Group
+615,1007610033,"545 8 Ave, New York, NY 10018",Global Holdings Management,https://www.globalholdings-mgmt.com/property/545-8th-ave/,Global Holdings
+616,1007620033,"575 8 Ave, New York, NY 10018",Olmstead Properties,,Olmstead Properties
+617,1007780020,"239 W 28th St, New York, NY 10001",Lexin,http://www.229nyc.com/,Lexin Capital
+618,1007780036,"322-326 7th Ave, New York, NY 10001",GFP Real Estate,,GFP Real Estate
+619,1007780043,"330 7 Ave, New York, NY 10001",GFP Real Estate,https://www.gfpre.com/properties/330-seventh-avenue,GFP Real Estate
+620,1007830070,"250 W 34 St, New York, NY 10001",Vornado Realty Trust,https://www.vno.com/office/property/one-penn-plaza/3311658/landing,Vornado
+621,1007840060,"224 W 35th St, New York, NY 10101",Gatsby,https://www.gatsbyent.com/224-west-35th-street-vacancy,Gatsby Realty
+622,1007850041,"470 7 Ave, New York, NY 10018",Kaufman Organization,https://www.kfmn.space/listings/4707ave,Kaufman Organization
+623,1007880049,"530 7 Ave, New York, NY 10018",Savitt Partners,https://www.530seventh.com/about,Savitt Partners
+624,1007880073,"250 W 39th St, New York, NY 10018",Lincoln Property,http://www.250west39th.com/,250 West 39th Street
+625,1008020075,"158 W 27th St, New York, NY 10001",AFIAA,https://www.afiaa.com/en/products/afiaa-global/direct-investments/usa/new-york/158-west-27th-street.html,AFIAA
+626,1008030021,"121 W 27th St, New York, NY 10001",Mehra Properties,https://www.121w27.com/,121 West 27th Street
+627,1008030067,"150 W 28th St, New York, NY 10001",Dezer Properties,https://dezerproperties.com/150-west-28th-street/,Dezer Properties
+628,1008040044,"104 W 29th St, New York, NY 10001",Samco Properties,https://www.samcoproperties.net/,Samco Properties
+629,1008050019,"135 W 29th St, New York, NY 10001",Kaufman Organization,https://haymarketbuilding.com/,Haymarket Building
+630,1008060058,"128 W 31st St, New York, NY 10001",Vanbarton Group,https://www.31pennplaza.com/,31 Penn Plaza
+631,1008070001,"393 7 Ave, New York, NY 10001",Vornado Realty Trust,https://www.vno.com/office/property/penn-11/3311683/landing,Vornado
+632,1008070039,"875 Ave Of The Americas, New York, NY 10001",Kaufman Organization,https://www.kfmn.space/listings/onenomad,Kaufman Organization
+633,1008120019,"135 W 36th St, New York, NY 10018",Waitex International,https://www.135w36.com/,Fashion Tower
 583,1008110062,"152 W 36th St, New York, NY 10018",Frangene,,
 584,1012620054,"30 W 47th St, New York, NY 10036",Elo Realty,,
 585,1008580049,"38 E 29th St, New York, NY 10016",East 29 Associates,,
