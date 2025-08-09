@@ -5,6 +5,10 @@
 
 set -e  # Exit on any error
 
+# Always change to the script's directory first
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+
 echo "🚀 NYC ODCV Site Deployment"
 echo "==========================="
 echo ""
@@ -39,7 +43,7 @@ case $site_choice in
         # MAIN SITE
         echo ""
         echo "🏢 Deploying to MAIN SITE..."
-        cd /Users/forrestmiller/Desktop/New
+        cd "$PROJECT_DIR"
         
         echo ""
         echo "Select deployment option:"
@@ -54,16 +58,16 @@ case $site_choice in
         case $deploy_choice in
             1)
                 echo "📝 Generating homepage only..."
-                (cd Scripts && python3 homepage.py)
+                python3 Scripts/homepage.py
                 git add index.html
                 ;;
                 
             2)
                 echo "📝 Generating homepage..."
-                (cd Scripts && python3 homepage.py)
+                python3 Scripts/homepage.py
                 
                 echo "📋 Generating building reports (this may take a few minutes)..."
-                (cd Scripts && python3 building.py)
+                python3 Scripts/building.py
                 
                 # Copy reports from Building reports folder
                 cp "Building reports/"*.html .
@@ -74,7 +78,7 @@ case $site_choice in
                 
             3)
                 echo "📋 Generating building reports only..."
-                (cd Scripts && python3 building.py)
+                python3 Scripts/building.py
                 
                 # Copy reports from Building reports folder
                 cp "Building reports/"*.html .

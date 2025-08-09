@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Portfolio ODCV Savings Analysis</title>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body>
+    <h1>ODCV Savings as % of HVAC Costs - Portfolio View</h1>
+    <div id="portfolio_chart" style="width: 100%; height: 600px;"></div>
+    <script>
+        const data = [{"bbl": 1013230047, "address": "805 3 Ave", "percentage": 39.75382847692873, "savings": 303173.74, "hvac_cost": 762627.7810600001}, {"bbl": 1007940017, "address": "135 W 18th St", "percentage": 39.44318446732298, "savings": 19203.35, "hvac_cost": 48686.10448}, {"bbl": 1010320048, "address": "330 W 42nd St", "percentage": 37.87210441284141, "savings": 45505.53, "hvac_cost": 120155.79991}, {"bbl": 1000460009, "address": "14 Wall St", "percentage": 37.26596063075679, "savings": 704333.7499999999, "hvac_cost": 1890019.0363500002}, {"bbl": 1000430001, "address": "44 Wall St", "percentage": 37.04107704079687, "savings": 138197.42, "hvac_cost": 373092.33705}, {"bbl": 1007120029, "address": "47 9 Ave", "percentage": 36.925311420831534, "savings": 14686.679999999997, "hvac_cost": 39774.01797}, {"bbl": 1008040001, "address": "319 7 Ave", "percentage": 36.8494602520654, "savings": 74504.02, "hvac_cost": 202184.83389}, {"bbl": 1006720001, "address": "601 W 26th St", "percentage": 36.21254156128197, "savings": 559952.1000000001, "hvac_cost": 1546293.2891699998}, {"bbl": 1008690066, "address": "10 E 40th St", "percentage": 36.07224824416705, "savings": 327729.00999999995, "hvac_cost": 908535.0261000001}, {"bbl": 1005970001, "address": "515 Greenwich St", "percentage": 36.0131268772445, "savings": 11265.570000000002, "hvac_cost": 31281.84353}, {"bbl": 1013000001, "address": "230 Park Ave", "percentage": 35.940202801076296, "savings": 671269.05, "hvac_cost": 1867738.6260600002}, {"bbl": 1000750030, "address": "111 John St", "percentage": 35.78828354432641, "savings": 130659.83, "hvac_cost": 365091.07747}, {"bbl": 1013180001, "address": "711 3 Ave", "percentage": 35.74505555494863, "savings": 289325.75999999995, "hvac_cost": 809414.7722200002}, {"bbl": 1008650014, "address": "200 Madison Ave", "percentage": 35.67153731094776, "savings": 252927.84, "hvac_cost": 709046.64914}, {"bbl": 1012840007, "address": "7 E 48th St", "percentage": 35.650570591909926, "savings": 329174.0400000001, "hvac_cost": 923334.5624899999}, {"bbl": 1005110001, "address": "568 Broadway", "percentage": 35.63093015066195, "savings": 71428.35999999999, "hvac_cost": 200467.28979}, {"bbl": 1010400029, "address": "825 8 Ave", "percentage": 35.58988051192279, "savings": 643629.4700000001, "hvac_cost": 1808462.0143199998}, {"bbl": 1006450029, "address": "416 W 13th St", "percentage": 35.580715623034855, "savings": 43582.96, "hvac_cost": 122490.39750000002}, {"bbl": 1008400058, "address": "16 W 39th St", "percentage": 35.38750637970185, "savings": 14610.1, "hvac_cost": 41286.03989}, {"bbl": 1012700071, "address": "1350 Ave Of The Americas", "percentage": 35.36189595186, "savings": 270018.74, "hvac_cost": 763586.7159600001}];  // Top 20 buildings
+        
+        const trace = {
+            x: data.map(d => d.address),
+            y: data.map(d => d.percentage),
+            type: 'bar',
+            marker: {
+                color: data.map(d => d.percentage > 15 ? '#38a169' : d.percentage > 10 ? '#ffc107' : '#0066cc')
+            },
+            text: data.map(d => d.percentage.toFixed(1) + '%'),
+            textposition: 'outside',
+            hovertemplate: '%{x}<br>Saves %{y:.1f}% of HVAC costs<br>$%{customdata:,.0f} annual savings<extra></extra>',
+            customdata: data.map(d => d.savings)
+        };
+        
+        Plotly.newPlot('portfolio_chart', [trace], {
+            title: 'Top 20 Buildings by ODCV Savings Percentage',
+            yaxis: {title: '% of HVAC Costs Saved', range: [0, Math.max(...data.map(d => d.percentage)) * 1.2]},
+            xaxis: {tickangle: -45},
+            margin: {b: 150}
+        });
+    </script>
+</body>
+</html>
